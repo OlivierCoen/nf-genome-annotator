@@ -1,11 +1,21 @@
 {
-    "name": "EGCE/genome_annotator",
-    "homePage": "https://github.com/EGCE/genome_annotator",
+    "name": "genome_annotator",
+    "homePage": "https://github.com/OlivierCoen/genome_annotator",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
                     "multiqc": {
+                        "branch": "master",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "installed_by": ["modules"]
+                    },
+                    "repeatmodeler/builddatabase": {
+                        "branch": "master",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "installed_by": ["modules"]
+                    },
+                    "repeatmodeler/repeatmodeler": {
                         "branch": "master",
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
                         "installed_by": ["modules"]

@@ -1,6 +1,8 @@
 //
-// Subworkflow with functionality specific to the EGCE/genome_annotator pipeline
+// Subworkflow with functionality specific to the genome_annotator pipeline
 //
+
+import org.yaml.snakeyaml.Yaml
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,22 +69,6 @@ workflow PIPELINE_INITIALISATION {
 
     Channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
         .set { ch_samplesheet }
 
     emit:
@@ -126,6 +112,7 @@ workflow PIPELINE_COMPLETION {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+/*
 //
 // Validate channels from input samplesheet
 //
@@ -140,6 +127,8 @@ def validateInputSamplesheet(input) {
 
     return [ metas[0], fastqs ]
 }
+*/
+
 //
 // Generate methods description for MultiQC
 //
@@ -203,3 +192,59 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
+
+
+
+//
+// Get channel of software versions used in pipeline in YAML format
+// temporary replacements of the native softwareVersionsToYAML
+//
+def formatVersionsToYAML( ch_versions ) {
+    return ch_versions
+            .unique()
+            .map {
+                name, tool, version -> [ name.tokenize(':').last(), [ tool, version ] ]
+            }
+            .groupTuple()
+            .map {
+                processName, toolInfo ->
+                    def toolVersions = toolInfo.collect { tool, version -> "    ${tool}: ${version}" }.join('\n')
+                    "${processName}:\n${toolVersions}\n"
+            }
+            .unique()
+}
+
+
+
+//
+// Get software versions for pipeline
+// temporary replacements of the native processVersionsFromYAML
+//
+def customProcessVersionsFromYAML(yaml_file) {
+    Yaml yaml = new Yaml()
+    versions = yaml.load(yaml_file)
+    return yaml.dumpAsMap(versions).trim()
+}
+
+//
+// Get channel of software versions used in pipeline in YAML format
+// temporary replacements of the native softwareVersionsToYAML
+//
+def customSoftwareVersionsToYAML(versions) {
+    return Channel.of(workflowVersionToYAML())
+            .concat(
+                versions
+                .unique()
+                .map {
+                    name, tool, version -> [ name.tokenize(':').last(), [ tool, version ] ]
+                }
+                .groupTuple()
+                .map {
+                    processName, toolInfo ->
+                        def toolVersions = toolInfo.collect { tool, version -> "    ${tool}: ${version}" }.join('\n')
+                        "${processName}:\n${toolVersions}\n"
+                }
+                .map { customProcessVersionsFromYAML(it) }
+            )
+}
+

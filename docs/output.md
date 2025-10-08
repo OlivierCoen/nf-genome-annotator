@@ -1,4 +1,4 @@
-# EGCE/genome_annotator: Output
+# genome_annotator: Output
 
 ## Introduction
 

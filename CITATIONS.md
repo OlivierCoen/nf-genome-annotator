@@ -1,4 +1,4 @@
-# EGCE/genome_annotator: Citations
+# genome_annotator: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 
