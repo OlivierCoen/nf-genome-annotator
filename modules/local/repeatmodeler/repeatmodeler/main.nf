@@ -11,10 +11,10 @@ process REPEATMODELER_REPEATMODELER {
     tuple val(meta), path(db)
 
     output:
-    tuple val(meta), path("*.fa") , emit: fasta
-    tuple val(meta), path("*.stk"), emit: stk
-    tuple val(meta), path("*.log"), emit: log
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("*.fa"),                                                                                          emit: fasta, optional: true
+    tuple val(meta), path("*.stk"),                                                                                         emit: stk, optional: true
+    tuple val(meta), path("*.log"),                                                                                         emit: log, optional: true
+    tuple val("${task.process}"), val('repeatmodeler'), eval("RepeatModeler --version | sed 's/RepeatModeler version //'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,14 +29,9 @@ process REPEATMODELER_REPEATMODELER {
         $args \\
         -threads $task.cpus
 
-    mv ${db_name}-families.fa   ${prefix}.fa
-    mv ${db_name}-families.stk  ${prefix}.stk
-    mv ${db_name}-rmod.log      ${prefix}.log
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        repeatmodeler: \$(RepeatModeler --version | sed 's/RepeatModeler version //')
-    END_VERSIONS
+    mv ${db_name}-families.fa   ${prefix}.fa || echo "Could not find families fasta file"
+    mv ${db_name}-families.stk  ${prefix}.stk || echo "Could not find stk file"
+    mv ${db_name}-rmod.log      ${prefix}.log || echo "Could not find log file"
     """
 
     stub:
@@ -45,10 +40,5 @@ process REPEATMODELER_REPEATMODELER {
     touch ${prefix}.fa
     touch ${prefix}.stk
     touch ${prefix}.log
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        repeatmodeler: \$(RepeatModeler --version | sed 's/RepeatModeler version //')
-    END_VERSIONS
     """
 }

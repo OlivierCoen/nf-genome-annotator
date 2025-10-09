@@ -19,6 +19,30 @@
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f[ast|n]a?\\.gz$",
                 "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa.gz', 'fna.gz' or '.fasta.gz'"
+            },
+            "gtf": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.gtf$",
+                "errorMessage": "GTF file cannot contain spaces and must have extension '.gtf'",
+                "meta": ["gtf"]
+            },
+            "hintsfile": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.hintsfile.gff$",
+                "errorMessage": "Hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'",
+                "meta": ["hintsfile"]
+            },
+            "ref_gff": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gff|gtf)$",
+                "errorMessage": "Current reference annotation file cannot contain spaces and must have extension '.gff' or '.gtf'",
+                "meta": ["ref_gff"]
             }
         },
         "required": ["sample", "genome"]

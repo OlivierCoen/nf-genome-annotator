@@ -83,6 +83,6 @@ workflow MULTIQC_WORKFLOW {
 
 
     emit:
-    multiqc_report = MULTIQC.out.report
+    report = MULTIQC.out.report
 }
 

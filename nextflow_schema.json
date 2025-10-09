@@ -33,8 +33,28 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
+                },
+                "skip_masking": {
+                    "type": "boolean",
+                    "description": "Skip genome masking",
+                    "fa_icon": "fas fa-hand-scissors"
                 }
             }
+        },
+        "dev_options": {
+          "title": "Dev purposes options",
+          "type": "object",
+          "fa_icon": "fas fa-terminal",
+          "description": "Options for dev purposes only",
+          "properties": {
+             "codon_usage_id": {
+                  "type": "integer",
+                  "default": 1,
+                  "description": "ID of the codon usage table to use (as defined in perl's Bio::Tools::CodonTable).",
+                  "fa_icon": "fas fa-hand-scissors",
+                  "help_text": "For invertebrates / vertebrates / fungi, you should skip this parameter. It is important for mitochondrial genomes. For an extensive list of codon usage IDs, see https://forge.inrae.fr/genotoul-bioinfo/ngspipelines/-/blob/e628625ae2e44845ecbf3deb19637fcb1369b3f9/core/lib/Bio/Tools/CodonTable.pm"
+              }
+          }
         },
         "generic_options": {
             "title": "Generic options",
@@ -116,6 +136,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/dev_options"
         },
         {
             "$ref": "#/$defs/generic_options"
