@@ -13,7 +13,8 @@ process AGAT_SPKEEPLONGESTISOFORM {
 
     output:
     tuple val(meta), path("${output}"), emit: gff
-    path "versions.yml"               , emit: versions
+    tuple val(meta), path("agat.log"), emit: log
+    tuple val("${task.process}"), val('agat'), eval("agat_sp_keep_longest_isoform.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,12 +29,8 @@ process AGAT_SPKEEPLONGESTISOFORM {
         --gff ${gxf} \\
         ${config_param} \\
         --out ${output} \\
-        ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        agat: \$(agat --version)
-    END_VERSIONS
+        ${args} \\
+        > agat.log 2>&1
     """
 
     stub:
@@ -42,10 +39,5 @@ process AGAT_SPKEEPLONGESTISOFORM {
     """
     touch ${output}
     touch ${gxf}.agat.log
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        agat: \$(agat --version)
-    END_VERSIONS
     """
 }

@@ -13,6 +13,7 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
 
     output:
     tuple val(meta), path("*_incomplete_gene_models_fixed.gff"), emit: gff
+    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_filter_incomplete_gene_coding_models.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -26,7 +27,8 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
         --add_flag \\
         ${config_param} \\
        ${args} \\
-        --output ${prefix}_incomplete_gene_models_fixed.gff
+        --output ${prefix}_incomplete_gene_models_fixed.gff \\
+        > agat.log 2>&1
     """
 
     stub:

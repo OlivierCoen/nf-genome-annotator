@@ -13,6 +13,7 @@ process AGAT_SPCOMPLEMENTANNOTATIONS {
 
     output:
     tuple val(meta), path("*_complemented.gff"), emit: gff
+    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("sp_complement_annotations.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -25,7 +26,8 @@ process AGAT_SPCOMPLEMENTANNOTATIONS {
         --add $other_gff \\
         ${config_param} \\
        ${args} \\
-        --output ${prefix}_complemented.gff
+        --output ${prefix}_complemented.gff \\
+        > agat.log 2>&1
     """
 
     stub:

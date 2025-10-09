@@ -10,6 +10,7 @@ include { AGAT_SPEXTRACTSEQUENCES as GET_PROTEOME                       } from '
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
+include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { MULTIQC_WORKFLOW                                              } from '../subworkflows/local/multiqc'
 
 /*
@@ -60,32 +61,43 @@ workflow GENOME_ANNOTATOR {
 
     ch_branched_gtf.leave_me_alone
         .mix( COMPLEMENT_ANNOTATIONS.out.gff )
-        .set { ch_all_gtfs }
+        .set { ch_gtf }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     CLEAN_ANNOTATIONS (
-        ch_all_gtfs,
+        ch_gtf,
         ch_genome
      )
+     CLEAN_ANNOTATIONS.out.gtf.set { ch_gtf }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GET_PROTEOME (
-        CLEAN_ANNOTATIONS.out.gtf.join ( ch_genome ),
-         params.codon_usage_id,
-         []
+        ch_gtf.join( ch_genome ),
+        params.codon_usage_id,
+        []
+    )
+    GET_PROTEOME.out.fasta.set { ch_proteome }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // QUALITY CONTROLS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    QUALITY_CONTROLS (
+        ch_genome,
+        ch_gtf,
+        ch_proteome
     )
 
 
     ch_versions
         .mix ( GENOME_MASKING.out.versions )
         .mix ( STRUCTURAL_ANNOTATION.out.versions )
-        .mix ( CLEAN_ANNOTATIONS.out.versions )
         .set { ch_versions }
 
     MULTIQC_WORKFLOW( ch_versions )

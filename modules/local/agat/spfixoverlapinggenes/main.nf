@@ -13,6 +13,7 @@ process AGAT_SPFIXOVERLAPINGGENES {
 
     output:
     tuple val(meta), path("*_overlaps_fixed.gff"), emit: gff
+    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_fix_overlaping_genes.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -24,7 +25,8 @@ process AGAT_SPFIXOVERLAPINGGENES {
         --gff $gff \\
         ${config_param} \\
        ${args} \\
-        --output ${prefix}_overlaps_fixed.gff
+        --output ${prefix}_overlaps_fixed.gff \\
+        > agat.log 2>&1
     """
 
     stub:

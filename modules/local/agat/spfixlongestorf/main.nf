@@ -13,6 +13,7 @@ process AGAT_SPFIXLONGESTORF {
 
     output:
     tuple val(meta), path("*_longest_orfs_fixed.gff"), emit: gff
+    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_fix_longest_ORF.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -26,7 +27,8 @@ process AGAT_SPFIXLONGESTORF {
         --model 1,2,3,4,6 \\
         ${config_param} \\
        ${args} \\
-        --output ${prefix}_longest_orfs_fixed.gff
+        --output ${prefix}_longest_orfs_fixed.gff \\
+        > agat.log 2>&1
     """
 
     stub:

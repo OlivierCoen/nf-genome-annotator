@@ -1,4 +1,4 @@
-id: "EGCE-genome_annotator-methods-description"
+id: "genome_annotator-methods-description"
 description: "Suggested text and references to use when describing pipeline usage within the methods section of a publication."
 section_name: "genome_annotator Methods Description"
 section_href: "https://github.com/OlivierCoen/genome_annotator"

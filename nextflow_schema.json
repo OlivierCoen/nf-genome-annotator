@@ -38,6 +38,12 @@
                     "type": "boolean",
                     "description": "Skip genome masking",
                     "fa_icon": "fas fa-hand-scissors"
+                },
+                "busco_lineage": {
+                    "type": "string",
+                    "description": "Busco lineage to use.",
+                    "default": "auto",
+                    "help": "Example: arthropoda_odb10. See list of lineages at https://busco.ezlab.org/list_of_lineages.html. Otherwise, choose auto / auto_prok / auto_euk to et Busco automatically detect which lineage to use."
                 }
             }
         },

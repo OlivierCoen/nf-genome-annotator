@@ -14,6 +14,7 @@ process AGAT_SPEXTRACTSEQUENCES {
 
     output:
     tuple val(meta), path("*.fasta"), emit: fasta
+    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -29,7 +30,8 @@ process AGAT_SPEXTRACTSEQUENCES {
         --protein \\
         --codon $codon_usage_id \\
         ${config_arg} \\
-        --output ${prefix}.fasta
+        --output ${prefix}.fasta \\
+        > agat.log 2>&1
     """
 
     stub:

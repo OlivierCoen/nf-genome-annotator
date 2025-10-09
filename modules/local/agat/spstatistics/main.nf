@@ -12,7 +12,9 @@ process AGAT_SPSTATISTICS {
 
     output:
     tuple val(meta), path("*.txt"), emit: stats_txt
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("*.yaml"), emit: stats_yaml
+    tuple val(meta), path("agat.log"), emit: log
+    tuple val("${task.process}"), val('agat'), eval("agat_sp_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,22 +26,15 @@ process AGAT_SPSTATISTICS {
     agat_sp_statistics.pl \\
         --gff ${gff} \\
         --output ${prefix}.stats.txt \\
-        ${args}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        agat: \$(agat_sp_statistics.pl --help | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p')
-    END_VERSIONS
+        --yaml \\
+        ${args} \\
+        > agat.log 2>&1
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}.stats.txt
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        agat: \$(agat_sp_statistics.pl --help | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p')
-    END_VERSIONS
+    touch ${prefix}.stats.yaml
     """
 }
