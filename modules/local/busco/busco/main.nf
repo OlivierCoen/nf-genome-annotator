@@ -23,23 +23,11 @@ process BUSCO_BUSCO {
 
     output:
     tuple val(meta), path("*-busco.batch_summary.txt"), emit: batch_summary
-    tuple val(meta), path("short_summary.*.txt"), emit: short_summaries_txt, optional: true
-    tuple val(meta), path("short_summary.*.json"), emit: short_summaries_json, optional: true
+    tuple val(meta), path("short_summaries/*.txt"), emit: short_summaries_txt
     tuple val(meta), path("*-busco.log"), emit: log, optional: true
-    tuple val(meta), path("*-busco/*/run_*/full_table.tsv"), emit: full_table, optional: true
-    tuple val(meta), path("*-busco/*/run_*/missing_busco_list.tsv"), emit: missing_busco_list, optional: true
-    tuple val(meta), path("*-busco/*/run_*/single_copy_proteins.faa"), emit: single_copy_proteins, optional: true
-    tuple val(meta), path("*-busco/*/run_*/busco_sequences"), emit: seq_dir, optional: true
-    tuple val(meta), path("*-busco/*/translated_proteins"), emit: translated_dir, optional: true
-    tuple val(meta), path("*-busco"), emit: busco_dir
-    tuple val(meta), path("busco_downloads/lineages/*"), emit: downloaded_lineages, optional: true
-    tuple val(meta), path("*-busco/*/run_*/busco_sequences/single_copy_busco_sequences/*.faa"), emit: single_copy_faa, optional: true
-    tuple val(meta), path("*-busco/*/run_*/busco_sequences/single_copy_busco_sequences/*.fna"), emit: single_copy_fna, optional: true
 
-    path "versions.yml", emit: versions
+    tuple val("${task.process}"), val('busco'), eval('busco --version | sed "s/^BUSCO //"'),    topic: versions
 
-    when:
-    task.ext.when == null || task.ext.when
 
     script:
     if (mode !in ['genome', 'proteins', 'transcriptome']) {
@@ -107,7 +95,10 @@ process BUSCO_BUSCO {
 
     # Move files to avoid staging/publishing issues
     mv ${prefix}-busco/batch_summary.txt ${prefix}-busco.batch_summary.txt
-    mv ${prefix}-busco/*/short_summary.*.{json,txt} . || echo "Short summaries were not available: No genes were found."
+
+    mkdir short_summaries
+    mv ${prefix}-busco/*/short_summary.*.txt short_summaries/${prefix}.busco.txt
+
     mv ${prefix}-busco/logs/busco.log ${prefix}-busco.log
 
     if grep 'Run failed; check logs' ${prefix}-busco.batch_summary.txt > /dev/null
@@ -115,11 +106,6 @@ process BUSCO_BUSCO {
         echo "Busco run failed"
         exit 1
     fi
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        busco: \$( busco --version 2> /dev/null | sed 's/BUSCO //g' )
-    END_VERSIONS
     """
 
     stub:
@@ -128,10 +114,5 @@ process BUSCO_BUSCO {
     """
     touch ${prefix}-busco.batch_summary.txt
     mkdir -p ${prefix}-busco/${fasta_name}/run_${lineage}/busco_sequences
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        busco: \$( busco --version 2> /dev/null | sed 's/BUSCO //g' )
-    END_VERSIONS
     """
 }

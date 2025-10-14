@@ -17,11 +17,10 @@ include { methodsDescriptionText                                  } from '../uti
 workflow MULTIQC_WORKFLOW {
 
     take:
+    ch_multiqc_files
     ch_versions
 
     main:
-
-    ch_multiqc_files = Channel.empty()
 
     // ------------------------------------------------------------------------------------
     // VERSIONS
@@ -70,7 +69,6 @@ workflow MULTIQC_WORKFLOW {
     // ------------------------------------------------------------------------------------
     // LAUNCH MULTIQC
     // ------------------------------------------------------------------------------------
-
 
     MULTIQC (
         ch_multiqc_files.collect(),
