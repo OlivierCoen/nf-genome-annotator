@@ -10,6 +10,7 @@ include { AGAT_SPEXTRACTSEQUENCES as GET_PROTEOME                       } from '
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
+include { FUNCTIONAL_ANNOTATION                                         } from '../subworkflows/local/functional_annotation'
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { MULTIQC_WORKFLOW                                              } from '../subworkflows/local/multiqc'
 
@@ -27,6 +28,7 @@ workflow GENOME_ANNOTATOR {
     main:
 
     ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME MASKING
@@ -85,6 +87,14 @@ workflow GENOME_ANNOTATOR {
     GET_PROTEOME.out.fasta.set { ch_proteome }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // FUNCTIONAL ANNOTATION
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if ( !params.skip_functional_annotation ) {
+        FUNCTIONAL_ANNOTATION ( ch_proteome )
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // QUALITY CONTROLS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -94,13 +104,26 @@ workflow GENOME_ANNOTATOR {
         ch_proteome
     )
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // MULTIQC
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ch_multiqc_files
+        .mix ( QUALITY_CONTROLS.out.busco_short_summaries )
+        .mix ( QUALITY_CONTROLS.out.gtf_stats )
+        .map { meta, file -> file }
+        .set { ch_multiqc_files }
 
     ch_versions
         .mix ( GENOME_MASKING.out.versions )
         .mix ( STRUCTURAL_ANNOTATION.out.versions )
+        .mix ( QUALITY_CONTROLS.out.versions )
         .set { ch_versions }
 
-    MULTIQC_WORKFLOW( ch_versions )
+    MULTIQC_WORKFLOW(
+        ch_multiqc_files,
+        ch_versions
+    )
 
 
     emit:

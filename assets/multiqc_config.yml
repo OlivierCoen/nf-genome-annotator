@@ -16,3 +16,12 @@ disable_version_detection: true
 run_modules:
   - busco
 
+sample_names_replace_regex: True
+sample_names_replace:
+  "SAMPLE(\\d)_([PS]E)_(\\d)": "XXX_\\1_\\2_\\3"
+
+sp:
+  busco:
+    fn: "*busco.txt"
+  gtf_stats:
+    fn: "gtf_stats.txt.yaml"

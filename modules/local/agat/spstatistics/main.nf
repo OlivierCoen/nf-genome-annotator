@@ -25,7 +25,7 @@ process AGAT_SPSTATISTICS {
     """
     agat_sp_statistics.pl \\
         --gff ${gff} \\
-        --output ${prefix}.stats.txt \\
+        --output ${prefix}.gtf_stats.txt \\
         --yaml \\
         ${args} \\
         > agat.log 2>&1
