@@ -73,14 +73,14 @@ workflow GENOME_ANNOTATOR {
         ch_gtf,
         ch_genome
      )
-     CLEAN_ANNOTATIONS.out.gtf.set { ch_gtf }
+     CLEAN_ANNOTATIONS.out.gff.set { ch_gff }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GET_PROTEOME (
-        ch_gtf.join( ch_genome ),
+        ch_gff.join( ch_genome ),
         params.codon_usage_id,
         []
     )
@@ -100,7 +100,7 @@ workflow GENOME_ANNOTATOR {
 
     QUALITY_CONTROLS (
         ch_genome,
-        ch_gtf,
+        ch_gff,
         ch_proteome
     )
 
