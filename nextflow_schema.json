@@ -52,7 +52,37 @@
                   "type": "boolean",
                   "description": "Skip genome masking",
                   "fa_icon": "fas fa-hand-scissors"
-              },
+             },
+             "skip_gff_remove_redundant_entries": {
+                  "type": "boolean",
+                  "description": "Skip removal of redundant entries in GFF",
+                  "fa_icon": "fas fa-hand-scissors"
+             },
+             "skip_gff_keep_longest_isoform": {
+                  "type": "boolean",
+                  "description": "Skip processing of GFF to only keep longest isoforms",
+                  "fa_icon": "fas fa-hand-scissors"
+             },
+             "skip_gff_fix_overlapping_genes": {
+                  "type": "boolean",
+                  "description": "Skip processing of GFF to fix overlapping genes",
+                  "fa_icon": "fas fa-hand-scissors"
+             },
+             "skip_gff_filter_incomplete_gene_models": {
+                  "type": "boolean",
+                  "description": "Skip processing of GFF to filter incomplete gene models",
+                  "fa_icon": "fas fa-hand-scissors"
+             },
+             "skip_gff_fix_cds_phases": {
+                  "type": "boolean",
+                  "description": "Skip processing of GFF to fix CDS phases",
+                  "fa_icon": "fas fa-hand-scissors"
+             },
+             "skip_gff_fix_ids": {
+                  "type": "boolean",
+                  "description": "Skip processing of GFF to fix IDs",
+                  "fa_icon": "fas fa-hand-scissors"
+             },
              "skip_functional_annotation": {
                   "type": "boolean",
                   "description": "Skip functional annotation",

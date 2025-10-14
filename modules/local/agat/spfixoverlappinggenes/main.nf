@@ -1,4 +1,4 @@
-process AGAT_SPFIXOVERLAPINGGENES {
+process AGAT_SPFIXOVERLAPPINGGENES {
     tag "$meta.id"
     label 'process_single'
 
