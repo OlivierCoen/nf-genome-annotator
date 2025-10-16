@@ -1,5 +1,5 @@
-process INTERPROSCAN {
-    debug true
+process INTERPROSCAN_INTERPROSCAN {
+
     tag "$meta.id"
     label 'process_low'
     label 'process_long'
@@ -29,7 +29,6 @@ process INTERPROSCAN {
     def fasta_name = fasta.name.replace(".gz", "")
     """
      if [ -d 'data' ]; then
-        echo "ok"
         # Find interproscan.properties to link data/ from work directory
         INTERPROSCAN_DIR="\$( dirname "\$( dirname "\$( which interproscan.sh )" )" )"
         echo \$INTERPROSCAN_DIR
@@ -45,10 +44,17 @@ process INTERPROSCAN {
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
+    if grep -q '\\*' ${fasta_name}; then
+      echo "Found * — removing trailing stop codons..."
+      sed -i '/^>/! s/\\*\$//' ${fasta_name}
+    fi
+
     interproscan.sh \\
         --cpu ${task.cpus} \\
         --input ${fasta_name} \\
         ${args} \\
         --output-file-base ${prefix}
+
+    rm -rf data
     """
 }

@@ -28,6 +28,7 @@ process AGAT_SPMANAGEIDS {
         ${args} \\
         --output ${prefix}_ids_fixed.gff \\
         > agat.log 2>&1
+
     """
 
     stub:

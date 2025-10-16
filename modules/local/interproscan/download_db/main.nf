@@ -1,9 +1,9 @@
-process PREPARE_INTERPROSCAN_DB {
+process INTERPROSCAN_DOWNLOADDB {
 
     label 'process_single'
     tag "${meta.id}"
 
-    storeDir "${workflow.projectDir}/.nextflow/cache"
+    storeDir "${workflow.projectDir}/.nextflow/cache/interproscan"
 
     errorStrategy = {
         if (task.exitStatus == 100) {
@@ -17,7 +17,7 @@ process PREPARE_INTERPROSCAN_DB {
 
     output:
     path("*/data"),            emit: db
-    path "versions.yml",        emit: versions
+    path "versions.yml",       emit: versions
 
     script:
     def filename = db_url.tokenize("/")[-1]

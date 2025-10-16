@@ -22,7 +22,7 @@ process AGAT_SPMERGEANNOTATIONS {
     def config_param = config ? "--config ${config}" : ''
     """
     agat_sp_merge_annotations.pl \\
-        --gff $ref_gff \\
+        --gff ${gff} \\
         ${config_param} \\
         --output ${prefix}_prepared.gff \\
         > agat.log 2>&1
