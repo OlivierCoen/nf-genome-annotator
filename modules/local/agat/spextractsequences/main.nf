@@ -28,6 +28,7 @@ process AGAT_SPEXTRACTSEQUENCES {
         --gff ${gxf} \\
         --fasta ${fasta} \\
         --protein \\
+        --clean_final_stop \\
         --codon $codon_usage_id \\
         ${config_arg} \\
         --output ${prefix}.fasta \\

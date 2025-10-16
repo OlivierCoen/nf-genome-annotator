@@ -53,11 +53,6 @@
                   "description": "Skip genome masking",
                   "fa_icon": "fas fa-hand-scissors"
              },
-             "skip_gff_remove_redundant_entries": {
-                  "type": "boolean",
-                  "description": "Skip removal of redundant entries in GFF",
-                  "fa_icon": "fas fa-hand-scissors"
-             },
              "skip_gff_keep_longest_isoform": {
                   "type": "boolean",
                   "description": "Skip processing of GFF to only keep longest isoforms",
@@ -96,6 +91,12 @@
           "fa_icon": "fas fa-terminal",
           "description": "Options for functional annotation",
           "properties": {
+             "functional_annotator": {
+                  "type": "string",
+                  "description": "Tool to use for functional annotation",
+                  "enum": ["eggnogmapper", "interproscan"],
+                  "default": "eggnogmapper"
+              },
              "interproscan_db_url": {
                   "type": "string",
                   "default": "http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.75-106.0/alt/interproscan-data-5.75-106.0.tar.gz",

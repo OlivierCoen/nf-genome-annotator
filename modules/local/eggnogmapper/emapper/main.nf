@@ -8,7 +8,7 @@ process EGGNOGMAPPER_EMAPPER {
         'biocontainers/eggnog-mapper:2.1.12--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta), path(fasta)
+    tuple val(meta), path(fasta), path(gff)
     path(eggnog_data_dir)
 
     output:
@@ -36,6 +36,7 @@ process EGGNOGMAPPER_EMAPPER {
         --data_dir ${eggnog_data_dir} \\
         -m diamond \\
         --report_orthologs \\
+        --decorate_gff ${gff} \\
         --output ${prefix} \\
         ${dbmem} \\
         $args

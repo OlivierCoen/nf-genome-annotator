@@ -63,14 +63,14 @@ workflow GENOME_ANNOTATOR {
 
     ch_branched_gtf.leave_me_alone
         .mix( COMPLEMENT_ANNOTATIONS.out.gff )
-        .set { ch_gtf }
+        .set { ch_annotation }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     CLEAN_ANNOTATIONS (
-        ch_gtf,
+        ch_annotation,
         ch_genome
      )
      CLEAN_ANNOTATIONS.out.gff.set { ch_gff }
@@ -91,7 +91,10 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if ( !params.skip_functional_annotation ) {
-        FUNCTIONAL_ANNOTATION ( ch_proteome )
+        FUNCTIONAL_ANNOTATION (
+            ch_proteome,
+            ch_gff
+        )
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
