@@ -1,2 +1,3 @@
-- sample: test
-  genome: tests/test_data/ngranulosis.fna.gz
+- sample: test_12_ctg
+  genome: tests/test_data/test/ngranulosis.ctg1_12.fna.gz
+  ref_gff: tests/test_data/test/current_annot.gtf
