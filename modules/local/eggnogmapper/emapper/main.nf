@@ -12,10 +12,11 @@ process EGGNOGMAPPER_EMAPPER {
     path(eggnog_data_dir)
 
     output:
-    tuple val(meta), path("*.emapper.annotations")   , emit: annotations
+    tuple val(meta), path("*.emapper.decorated.gff"),  emit: decorated_gff
+    tuple val(meta), path("*.emapper.annotations"),    emit: annotations
     tuple val(meta), path("*.emapper.orthologs"),      emit: orthologs
     tuple val(meta), path("*.emapper.seed_orthologs"), emit: seed_orthologs
-    tuple val(meta), path("*.emapper.hits")          , emit: hits
+    tuple val(meta), path("*.emapper.hits"),           emit: hits
     tuple val("${task.process}"), val('eggnog-mapper'), eval('emapper.py --version | grep -o "emapper-[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+" | sed "s/emapper-//"'), topic: versions
 
 

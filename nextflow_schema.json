@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["input", "outdir", "busco_lineage"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -42,91 +42,110 @@
                 }
             }
         },
-        "skip_options": {
-          "title": "Options for skipping specific steps",
-          "type": "object",
-          "fa_icon": "fas fa-terminal",
-          "description": "Options for skipping specific steps",
-          "properties": {
-             "skip_masking": {
-                  "type": "boolean",
-                  "description": "Skip genome masking",
-                  "fa_icon": "fas fa-hand-scissors"
-             },
-             "skip_gff_keep_longest_isoform": {
-                  "type": "boolean",
-                  "description": "Skip processing of GFF to only keep longest isoforms",
-                  "fa_icon": "fas fa-hand-scissors"
-             },
-             "skip_gff_fix_overlapping_genes": {
-                  "type": "boolean",
-                  "description": "Skip processing of GFF to fix overlapping genes",
-                  "fa_icon": "fas fa-hand-scissors"
-             },
-             "skip_gff_filter_incomplete_gene_models": {
-                  "type": "boolean",
-                  "description": "Skip processing of GFF to filter incomplete gene models",
-                  "fa_icon": "fas fa-hand-scissors"
-             },
-             "skip_gff_fix_cds_phases": {
-                  "type": "boolean",
-                  "description": "Skip processing of GFF to fix CDS phases",
-                  "fa_icon": "fas fa-hand-scissors"
-             },
-             "skip_gff_fix_ids": {
-                  "type": "boolean",
-                  "description": "Skip processing of GFF to fix IDs",
-                  "fa_icon": "fas fa-hand-scissors"
-             },
-             "skip_functional_annotation": {
-                  "type": "boolean",
-                  "description": "Skip functional annotation",
-                  "fa_icon": "fas fa-hand-scissors"
-              }
-          }
+        "masking_options": {
+            "title": "Options for genome masking",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for genome masking",
+            "properties": {
+                "skip_masking": {
+                    "type": "boolean",
+                    "description": "Skip genome masking",
+                    "fa_icon": "fas fa-hand-scissors"
+                }
+            }
+        },
+        "structural_annotation_options": {
+            "title": "Options for structural annotation",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for structural annotation",
+            "properties": {
+                "braker_orthodb_lineage": {
+                    "type": "string",
+                    "description": "Lineage of OrthoDB protein database to provide to Braker. If not provided, the lineage provided for BUSCO will be used here too.",
+                    "default": "null",
+                    "pattern": "^\\S+\\.(odb10|odb12)$",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "List of lineages can be found at https://busco-data.ezlab.org/v5/data/lineages/. Examples: viridiplantae_odb10 / microsporidia_odb12"
+                }
+            }
+        },
+        "cleaning_options": {
+            "title": "Options for skipping specific steps",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for skipping specific steps",
+            "properties": {
+                "skip_gff_keep_longest_isoform": {
+                    "type": "boolean",
+                    "description": "Skip processing of GFF to only keep longest isoforms",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_gff_fix_overlapping_genes": {
+                    "type": "boolean",
+                    "description": "Skip processing of GFF to fix overlapping genes",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_gff_filter_incomplete_gene_models": {
+                    "type": "boolean",
+                    "description": "Skip processing of GFF to filter incomplete gene models",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_gff_fix_cds_phases": {
+                    "type": "boolean",
+                    "description": "Skip processing of GFF to fix CDS phases",
+                    "fa_icon": "fas fa-hand-scissors"
+                }
+            }
         },
         "functional_annotation_options": {
-          "title": "Options for functional annotation",
-          "type": "object",
-          "fa_icon": "fas fa-terminal",
-          "description": "Options for functional annotation",
-          "properties": {
-             "functional_annotator": {
-                  "type": "string",
-                  "description": "Tool to use for functional annotation",
-                  "enum": ["eggnogmapper", "interproscan"],
-                  "default": "eggnogmapper"
-              },
-             "interproscan_db_url": {
-                  "type": "string",
-                  "default": "http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.75-106.0/alt/interproscan-data-5.75-106.0.tar.gz",
-                  "help_text": "This allows the user to change the InterProScan database version that the pipeline will download for you automatically. To instead use a pre-downloaded database, please supply its path to `--protein_annotation_interproscan_db`. Changing this URL allows for the use of the latest database release. By default this is set to `http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.72-103.0/interproscan-5.72-103.0-64-bit.tar.gz`. ",
-                  "description": "Change the database version used for annotation.",
-                  "fa_icon": "fas fa-database"
-              },
-               "interproscan_db": {
-                  "type": "string",
-                  "format": "file-path",
-                  "help_text": "Use this to supply the path to a pre-downloaded InterProScan database. This can be any unzipped InterProScan version.\n\nFor more details on where to find different InterProScan databases see tool [documentation](https://interproscan-docs.readthedocs.io/en/latest/UserDocs.html#obtaining-a-copy-of-interproscan).\n",
-                  "description": "Path to pre-downloaded InterProScan database.",
-                  "fa_icon": "fas fa-database"
-              }
-          }
+            "title": "Options for functional annotation",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for functional annotation",
+            "properties": {
+                "skip_functional_annotation": {
+                    "type": "boolean",
+                    "description": "Skip functional annotation",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "functional_annotator": {
+                    "type": "string",
+                    "description": "Tool to use for functional annotation",
+                    "enum": ["eggnogmapper", "interproscan"],
+                    "default": "eggnogmapper"
+                },
+                "interproscan_db_url": {
+                    "type": "string",
+                    "default": "http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.75-106.0/alt/interproscan-data-5.75-106.0.tar.gz",
+                    "help_text": "This allows the user to change the InterProScan database version that the pipeline will download for you automatically. To instead use a pre-downloaded database, please supply its path to `--protein_annotation_interproscan_db`. Changing this URL allows for the use of the latest database release. By default this is set to `http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.72-103.0/interproscan-5.72-103.0-64-bit.tar.gz`. ",
+                    "description": "Change the database version used for annotation.",
+                    "fa_icon": "fas fa-database"
+                },
+                "interproscan_db": {
+                    "type": "string",
+                    "format": "file-path",
+                    "help_text": "Use this to supply the path to a pre-downloaded InterProScan database. This can be any unzipped InterProScan version.\n\nFor more details on where to find different InterProScan databases see tool [documentation](https://interproscan-docs.readthedocs.io/en/latest/UserDocs.html#obtaining-a-copy-of-interproscan).\n",
+                    "description": "Path to pre-downloaded InterProScan database.",
+                    "fa_icon": "fas fa-database"
+                }
+            }
         },
         "dev_options": {
-          "title": "Dev purposes options",
-          "type": "object",
-          "fa_icon": "fas fa-terminal",
-          "description": "Options for dev purposes only",
-          "properties": {
-             "codon_usage_id": {
-                  "type": "integer",
-                  "default": 1,
-                  "description": "ID of the codon usage table to use (as defined in perl's Bio::Tools::CodonTable).",
-                  "fa_icon": "fas fa-hand-scissors",
-                  "help_text": "For invertebrates / vertebrates / fungi, you should skip this parameter. It is important for mitochondrial genomes. For an extensive list of codon usage IDs, see https://forge.inrae.fr/genotoul-bioinfo/ngspipelines/-/blob/e628625ae2e44845ecbf3deb19637fcb1369b3f9/core/lib/Bio/Tools/CodonTable.pm"
-              }
-          }
+            "title": "Dev purposes options",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for dev purposes only",
+            "properties": {
+                "codon_usage_id": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "ID of the codon usage table to use (as defined in perl's Bio::Tools::CodonTable).",
+                    "fa_icon": "fas fa-hand-scissors",
+                    "help_text": "For invertebrates / vertebrates / fungi, you should skip this parameter. It is important for mitochondrial genomes. For an extensive list of codon usage IDs, see https://forge.inrae.fr/genotoul-bioinfo/ngspipelines/-/blob/e628625ae2e44845ecbf3deb19637fcb1369b3f9/core/lib/Bio/Tools/CodonTable.pm"
+                }
+            }
         },
         "generic_options": {
             "title": "Generic options",
@@ -210,7 +229,13 @@
             "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/$defs/skip_options"
+            "$ref": "#/$defs/masking_options"
+        },
+        {
+            "$ref": "#/$defs/structural_annotation_options"
+        },
+        {
+            "$ref": "#/$defs/cleaning_options"
         },
         {
             "$ref": "#/$defs/functional_annotation_options"

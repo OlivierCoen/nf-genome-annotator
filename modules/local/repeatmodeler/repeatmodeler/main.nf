@@ -2,6 +2,13 @@ process REPEATMODELER_REPEATMODELER {
     tag "$meta.id"
     label 'process_medium'
 
+    errorStrategy = {
+        if (task.exitStatus == 100) {
+            log.warn("Could not find families fasta file for ${meta.id}")
+            return 'ignore'
+        }
+    }
+
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/repeatmodeler:2.0.5--pl5321hdfd78af_0':
@@ -16,9 +23,6 @@ process REPEATMODELER_REPEATMODELER {
     tuple val(meta), path("*.log"),                                                                                         emit: log, optional: true
     tuple val("${task.process}"), val('repeatmodeler'), eval("RepeatModeler --version | sed 's/RepeatModeler version //'"), topic: versions
 
-    when:
-    task.ext.when == null || task.ext.when
-
     script:
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
@@ -29,9 +33,9 @@ process REPEATMODELER_REPEATMODELER {
         $args \\
         -threads $task.cpus
 
-    mv ${db_name}-families.fa   ${prefix}.fa || echo "Could not find families fasta file"
     mv ${db_name}-families.stk  ${prefix}.stk || echo "Could not find stk file"
     mv ${db_name}-rmod.log      ${prefix}.log || echo "Could not find log file"
+    mv ${db_name}-families.fa   ${prefix}.fa || echo "Could not find families fasta file" && exit 100
     """
 
     stub:

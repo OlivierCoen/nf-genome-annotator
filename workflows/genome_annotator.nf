@@ -52,9 +52,9 @@ workflow GENOME_ANNOTATOR {
     STRUCTURAL_ANNOTATION.out.gtf
         .branch{
             meta, gtf ->
-                to_complement: meta.ref_gff != null
+                to_complement: meta.ref_gff != []
                     [ meta, meta.ref_gff, gtf ]
-                leave_me_alone: ref_gff == null
+                leave_me_alone: meta.ref_gff == []
                     [ meta, gtf ]
         }
         .set { ch_branched_gtf }
@@ -119,7 +119,6 @@ workflow GENOME_ANNOTATOR {
 
     ch_versions
         .mix ( GENOME_MASKING.out.versions )
-        .mix ( STRUCTURAL_ANNOTATION.out.versions )
         .mix ( QUALITY_CONTROLS.out.versions )
         .set { ch_versions }
 

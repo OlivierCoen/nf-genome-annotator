@@ -25,7 +25,7 @@ workflow GENOME_MASKING {
     REPEATMODELER( BUILDDATABASE.out.db )
 
     // SOMETIMES REPEAT MODELER DOES NOT FIND FAMILIES
-    // SO THE GENOME DOES NOT HAVE TO BE MASKED
+    // SO THE GENOME SHOULD NOT BE MASKED
 
     ch_genome
         .join ( REPEATMODELER.out.fasta, remainder: true )
@@ -55,4 +55,3 @@ workflow GENOME_MASKING {
     versions                = ch_versions
 
 }
-
