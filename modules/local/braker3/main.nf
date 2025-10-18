@@ -8,12 +8,8 @@ process BRAKER3 {
     container "docker.io/teambraker/braker3:v3.0.7.5"
 
     input:
-    tuple val(meta), path(fasta)
-    path bam
-    path rnaseq_sets_dirs
-    path rnaseq_sets_ids
-    path proteins
-    path hintsfile
+    tuple val(meta), path(fasta), path(bam), path(proteins)
+
 
     output:
     tuple val(meta), path("$prefix/braker.gtf")         , emit: gtf
@@ -23,18 +19,22 @@ process BRAKER3 {
     tuple val(meta), path("$prefix/hintsfile.gff")      , emit: hintsfile   , optional: true
     tuple val(meta), path("$prefix/braker.gff3")        , emit: gff3        , optional: true
     tuple val(meta), path("$prefix/what-to-cite.txt")   , emit: citations
-    path "versions.yml"             , emit: versions
+
+    tuple val("${task.process}"), val('braker3'), eval("braker.pl --version 2>/dev/null | sed 's/braker.pl version //'"),           topic: versions
+    tuple val("${task.process}"), val('augustus'), eval("augustus --version |& sed -n 's/AUGUSTUS (\\(.*\\)) is a gene .*/\\1/p'"), topic: versions
+    tuple val("${task.process}"), val('augustus-etp'), eval("gmetp.pl | sed -n 's/ETP version \\(.*\\)/\\1/p'"),                    topic: versions
+    tuple val("${task.process}"), val('prothint'), eval("prothint.py --version | sed 's/prothint.py //1'"),                         topic: versions
 
     script:
     def args        = task.ext.args             ?: ''
     prefix          = task.ext.prefix           ?: "${meta.id}"
     def is_compressed = fasta.getExtension() == "gz" ? true : false
     def fasta_name = is_compressed ? fasta.getBaseName() : fasta
-    def rna_ids     = rnaseq_sets_ids           ? "--rnaseq_sets_ids=$rnaseq_sets_ids"      : ''
-    def rna_dirs    = rnaseq_sets_dirs          ? "--rnaseq_sets_dirs=$rnaseq_sets_dirs"    : ''
+    //def rna_ids     = rnaseq_sets_ids           ? "--rnaseq_sets_ids=$rnaseq_sets_ids"      : ''
+    //def rna_dirs    = rnaseq_sets_dirs          ? "--rnaseq_sets_dirs=$rnaseq_sets_dirs"    : ''
     def bam_arg     = bam                       ? "--bam=$bam"                              : ''
     def prot_arg    = proteins                  ? "--prot_seq=$proteins"                    : ''
-    def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
+    //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
     def new_species = args.contains('--species')? ''                                        : '--species new_species'
     """
     if [ "${is_compressed}" == "true" ]; then
@@ -57,46 +57,8 @@ process BRAKER3 {
         --workingdir $prefix \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
         --threads $task.cpus \\
-        $rna_ids \\
-        $rna_dirs \\
         $bam_arg \\
         $prot_arg \\
-        $hints \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        braker3: \$(braker.pl --version 2>/dev/null | sed 's/braker.pl version //')
-        augustus: \$(augustus --version |& sed -n 's/AUGUSTUS (\\(.*\\)) is a gene .*/\\1/p')
-        genemark-etp: \$(echo "\$(gmetp.pl || echo '')" | sed -n 's/ETP version \\(.*\\)/\\1/p')
-        prothint: \$(prothint.py --version | sed 's/prothint.py //1')
-    END_VERSIONS
-    """
-
-    stub:
-    def args        = task.ext.args                         ?: ''
-    prefix          = task.ext.prefix                       ?: "${meta.id}"
-    def rna_ids     = rnaseq_sets_ids                       ? "--rnaseq_sets_ids=$rnaseq_sets_ids"      : ''
-    def hints       = hintsfile                             ? "--hints=$hintsfile"                      : ''
-    def touch_hints = (rna_ids || bam || proteins || hints) ? "touch $prefix/hintsfile.gff"             : ''
-    def touch_gff   = args.contains('--gff3')               ? "touch $prefix/braker.gff3"               : ''
-    """
-    mkdir "$prefix"
-
-    touch "$prefix/braker.gtf"
-    touch "$prefix/braker.codingseq"
-    touch "$prefix/braker.aa"
-    $touch_hints
-    touch "$prefix/braker.log"
-    touch "$prefix/what-to-cite.txt"
-    $touch_gff
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        braker3: \$(braker.pl --version 2>/dev/null | sed 's/braker.pl version //')
-        augustus: \$(augustus --version |& sed -n 's/AUGUSTUS (\\(.*\\)) is a gene .*/\\1/p')
-        genemark-etp: \$(echo "\$(gmetp.pl || echo '')" | sed -n 's/ETP version \\(.*\\)/\\1/p')
-        prothint: \$(prothint.py --version | sed 's/prothint.py //1')
-    END_VERSIONS
     """
 }

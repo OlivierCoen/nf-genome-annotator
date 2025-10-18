@@ -1,5 +1,6 @@
-include { BRAKER3                           } from '../../../modules/local/braker3'
-include { TSEBRA_TSEBRA as TSEBRA           } from '../../../modules/local/tsebra/tsebra'
+include { BUSCO_DOWNLOADPROTEINS as DOWNLOAD_ORTHODB_PROTEINS   } from '../../../modules/local/busco/download'
+include { BRAKER3                                               } from '../../../modules/local/braker3'
+include { TSEBRA_TSEBRA          as TSEBRA                      } from '../../../modules/local/tsebra/tsebra'
 
 
 /*
@@ -16,13 +17,55 @@ workflow STRUCTURAL_ANNOTATION {
 
     main:
 
-    ch_versions = Channel.empty()
+    // ----------------------------------------------------------
+    // PREPARE INPUTS
+    // ----------------------------------------------------------
+
+    ch_genome
+        .branch {
+            meta, genome ->
+                no_proteins: meta.proteins == []
+                    [ meta, genome, meta.bam ]
+                proteins: meta.proteins != []
+                    [ meta, genome, meta.bam, meta.proteins ]
+        }
+        .set { ch_prepared }
+
+    // ----------------------------------------------------------
+    // DOWNLOAD ORTHODB PROTEINS IF NECESSARY
+    // ----------------------------------------------------------
+
+    // trick to exectute the process DOWNLOAD_ORTHODB_PROTEINS
+    // only if there are elements in the channel ch_prepared.no_proteins
+    def orthodb_lineage = params.braker_orthodb_lineage ?: params.busco_lineage
+    ch_prepared.no_proteins
+        .take (1)
+        .map { orthodb_lineage }
+        | DOWNLOAD_ORTHODB_PROTEINS
+
+    // add download proteins to the items without proteins
+    ch_prepared.no_proteins
+        .combine( DOWNLOAD_ORTHODB_PROTEINS.out.proteins )
+        .map {
+            meta, genome, bam, download_proteins ->
+                [ meta, genome, bam, download_proteins ]
+        }
+        .set { ch_prepared_with_downloaded_proteins }
+
 
     // ----------------------------------------------------------
     // RUN BRAKER3
     // ----------------------------------------------------------
 
-    BRAKER3( ch_genome, [], [], [], [], [] )
+    ch_prepared.proteins
+        .mix ( ch_prepared_with_downloaded_proteins )
+        .set { ch_braker_input }
+
+    BRAKER3( ch_braker_input )
+
+    // ----------------------------------------------------------
+    // MERGE ANNOTATIONS WHEN NECESSARY
+    // ----------------------------------------------------------
 
     BRAKER3.out.gtf
         .branch {
@@ -31,10 +74,6 @@ workflow STRUCTURAL_ANNOTATION {
                 not_to_merge: meta.gtf == [] || meta.hintsfile == []
          }
          .set { ch_gtfs }
-
-    // ----------------------------------------------------------
-    // MERGE ANNOTATIONS WHEN NECESSARY
-    // ----------------------------------------------------------
 
     ch_gtfs.to_merge
         .join ( BRAKER3.out.hintsfile )
@@ -52,14 +91,7 @@ workflow STRUCTURAL_ANNOTATION {
         .set { ch_all_gtfs }
 
 
-    ch_versions
-        .mix ( BRAKER3.out.versions )
-        .set { ch_versions }
-
-
     emit:
     gtf                     = ch_all_gtfs
-    versions                = ch_versions
 
 }
-
