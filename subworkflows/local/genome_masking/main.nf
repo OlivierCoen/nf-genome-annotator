@@ -1,4 +1,4 @@
-include { REPEATMODELER_BUILDDATABASE as BUILDDATABASE              } from '../../../modules/nf-core/repeatmodeler/builddatabase'
+include { REPEATMODELER_BUILDDATABASE as BUILDDATABASE              } from '../../../modules/local/repeatmodeler/builddatabase'
 include { REPEATMODELER_REPEATMODELER as REPEATMODELER              } from '../../../modules/local/repeatmodeler/repeatmodeler'
 include { REPEATMASKER_REPEATMASKER as REPEATMASKER                 } from '../../../modules/local/repeatmasker/repeatmasker'
 
@@ -17,8 +17,6 @@ workflow GENOME_MASKING {
     ch_genome
 
     main:
-
-    ch_versions = Channel.empty()
 
     BUILDDATABASE( ch_genome )
 
@@ -44,14 +42,7 @@ workflow GENOME_MASKING {
         .mix ( REPEATMASKER.out.masked )
         .set { ch_masked_genomes }
 
-
-    ch_versions
-        .mix ( BUILDDATABASE.out.versions )
-        .set { ch_versions }
-
-
     emit:
     masked_genome           = ch_masked_genomes
-    versions                = ch_versions
 
 }

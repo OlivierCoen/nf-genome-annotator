@@ -1,6 +1,6 @@
 process INTERPROSCAN_DOWNLOADDB {
 
-    label 'process_single'
+    label 'process_high'
     tag "${meta.id}"
 
     storeDir "${workflow.projectDir}/.nextflow/cache/interproscan"
@@ -22,10 +22,17 @@ process INTERPROSCAN_DOWNLOADDB {
     script:
     def filename = db_url.tokenize("/")[-1]
     """
-    aria2c $db_url
+    aria2c \\
+        -s ${task.cpus} \\
+        -x ${task.cpus} \\
+        -c \\
+        --max-tries=10 \\
+        --retry-wait=30 \\
+        --timeout=60 \\
+        "${db_url}"
 
     echo "Checking md5"
-    curl -O ${db_url}.md5
+    aria2c -c "${db_url}.md5"
     md5sum -c --status ${filename}.md5 && echo "ok" || exit 100
 
     echo "Extracting archive"
@@ -38,7 +45,6 @@ process INTERPROSCAN_DOWNLOADDB {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         aria2: \$(aria2c -v | head -1 | sed 's/aria2 version //g')
-        curl: \$(curl -V | head -1 | cut -d' ' -f 2)
     END_VERSIONS
     """
 

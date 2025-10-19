@@ -4,8 +4,8 @@ process REPEATMASKER_REPEATMASKER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/repeatmasker:4.1.5--pl5321hdfd78af_0':
-        'biocontainers/repeatmasker:4.1.5--pl5321hdfd78af_0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/eb/eb2c806e7a34fc52eabb8809fa9f4e0e34117e397162a516cbb80454e50b2e72/data':
+        'community.wave.seqera.io/library/repeatmasker:4.2.1--94dd45a91fa85e83' }"
 
     input:
     tuple val(meta), path(fasta), path(lib)
