@@ -20,8 +20,6 @@ workflow QUALITY_CONTROLS {
 
     main:
 
-    ch_versions = Channel.empty()
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // BUSCO
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,7 +61,5 @@ workflow QUALITY_CONTROLS {
     emit:
     gtf_stats                           = GTF_STATISTICS.out.stats_yaml
     busco_short_summaries               = ch_busco_short_summaries
-    versions                = ch_versions
 
 }
-

@@ -4,18 +4,15 @@ process REPEATMODELER_BUILDDATABASE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/repeatmodeler:2.0.5--pl5321hdfd78af_0':
-        'biocontainers/repeatmodeler:2.0.5--pl5321hdfd78af_0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/6b/6b9637a9d4d72993f80c5014ece53d39161871c94845f420a5313a31a7ae5d2a/data':
+        'community.wave.seqera.io/library/repeatmodeler:2.0.7--136d59ab97ab30de' }"
 
     input:
     tuple val(meta), path(fasta)
 
     output:
     tuple val(meta), path("${prefix}.*")    , emit: db
-    path "versions.yml"                     , emit: versions
-
-    when:
-    task.ext.when == null || task.ext.when
+    tuple val("${task.process}"), val('repeatmodeler'), eval("RepeatModeler --version | sed 's/RepeatModeler version //'"), topic: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -23,11 +20,6 @@ process REPEATMODELER_BUILDDATABASE {
     BuildDatabase \\
         -name $prefix \\
         $fasta
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        repeatmodeler: \$(RepeatModeler --version | sed 's/RepeatModeler version //')
-    END_VERSIONS
     """
 
     stub:
@@ -41,10 +33,5 @@ process REPEATMODELER_BUILDDATABASE {
     touch ${prefix}.nog
     touch ${prefix}.nsq
     touch ${prefix}.translation
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        repeatmodeler: \$(RepeatModeler --version | sed 's/RepeatModeler version //')
-    END_VERSIONS
     """
 }

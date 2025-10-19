@@ -117,10 +117,6 @@ workflow GENOME_ANNOTATOR {
         .map { meta, file -> file }
         .set { ch_multiqc_files }
 
-    ch_versions
-        .mix ( GENOME_MASKING.out.versions )
-        .mix ( QUALITY_CONTROLS.out.versions )
-        .set { ch_versions }
 
     MULTIQC_WORKFLOW(
         ch_multiqc_files,
