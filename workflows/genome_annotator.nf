@@ -49,19 +49,19 @@ workflow GENOME_ANNOTATOR {
     // COMPLEMENTATION OF ANNOTATION ()WHEN NECESSARY)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    STRUCTURAL_ANNOTATION.out.gtf
+    STRUCTURAL_ANNOTATION.out.annotations
         .branch{
-            meta, gtf ->
+            meta, annotation ->
                 to_complement: meta.ref_gff != []
-                    [ meta, meta.ref_gff, gtf ]
+                    [ meta, meta.ref_gff, annotation ]
                 leave_me_alone: meta.ref_gff == []
-                    [ meta, gtf ]
+                    [ meta, annotation ]
         }
-        .set { ch_branched_gtf }
+        .set { ch_branched_annotations }
 
-    COMPLEMENT_ANNOTATIONS ( ch_branched_gtf.to_complement, [] )
+    COMPLEMENT_ANNOTATIONS ( ch_branched_annotations.to_complement, [] )
 
-    ch_branched_gtf.leave_me_alone
+    ch_branched_annotations.leave_me_alone
         .mix( COMPLEMENT_ANNOTATIONS.out.gff )
         .set { ch_annotation }
 
