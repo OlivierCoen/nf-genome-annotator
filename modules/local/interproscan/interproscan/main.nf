@@ -1,7 +1,6 @@
 process INTERPROSCAN_INTERPROSCAN {
 
     tag "$meta.id"
-    label 'process_low'
     label 'process_long'
 
     stageInMode 'copy'

@@ -1,6 +1,6 @@
 process INTERPROSCAN_DOWNLOADDB {
 
-    label 'process_high'
+    label 'process_medium'
     tag "${meta.id}"
 
     storeDir "${workflow.projectDir}/.nextflow/cache/interproscan"

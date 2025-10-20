@@ -1,5 +1,5 @@
 process EGGNOGMAPPER_DOWNLOADDB {
-    label 'process_high'
+    label 'process_medium'
 
     // storeDir "${workflow.projectDir}/.nextflow/cache/eggnogmapper"
 

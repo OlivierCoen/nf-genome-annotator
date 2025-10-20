@@ -1,6 +1,6 @@
 process EARLGREY_DOWNLOADDB {
     tag "$meta.id"
-    label 'process_high'
+    label 'process_medium'
 
     errorStrategy = {
         if (task.exitStatus == 100) {
