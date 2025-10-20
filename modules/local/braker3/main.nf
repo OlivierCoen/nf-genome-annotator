@@ -1,6 +1,7 @@
 process BRAKER3 {
     tag "${meta.id}"
     label 'process_high'
+    label 'process_long'
 
     // Re. Conda from the BRAKER team:
     // Warning: installing GeneMark-ETP for BRAKER in conda environments has lead to multiple problems reported by users (Issues!).
