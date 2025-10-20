@@ -24,15 +24,14 @@ workflow FUNCTIONAL_ANNOTATION {
     if ( params.functional_annotator == "eggnogmapper" ) {
 
         EGGNOGMAPPER_DOWNLOADDB ( )
-
-        ch_versions = ch_versions.mix( EGGNOGMAPPER_DOWNLOADDB.out.versions )
-
         EMAPPER(
             ch_proteome.join( ch_gff ),
             EGGNOGMAPPER_DOWNLOADDB.out.eggnog_data_dir
         )
 
-    } else {
+        ch_versions = ch_versions.mix( EGGNOGMAPPER_DOWNLOADDB.out.versions )
+
+    } else { // interproscan
 
         if ( params.interproscan_db != null ) {
 
@@ -46,12 +45,12 @@ workflow FUNCTIONAL_ANNOTATION {
                 params.interproscan_db_url
             ])
             INTERPROSCAN_DOWNLOADDB ( ch_db_url )
-
             interproscan_db = INTERPROSCAN_DOWNLOADDB.out.db
-            ch_versions = ch_versions.mix( INTERPROSCAN_DOWNLOADDB.out.versions )
         }
 
         INTERPROSCAN( ch_proteome, interproscan_db )
+
+        ch_versions = ch_versions.mix( INTERPROSCAN_DOWNLOADDB.out.versions )
     }
 
 
@@ -59,4 +58,3 @@ workflow FUNCTIONAL_ANNOTATION {
     versions         = ch_versions
 
 }
-
