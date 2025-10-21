@@ -32,6 +32,9 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
+    busco_lineage     //  string: BUSCO lineage
+    orthodb_lineage   //  string: OrthoDB lineage
+    mmseqs_db         //  string: MMseqs2 database
 
     main:
 
@@ -50,6 +53,13 @@ workflow PIPELINE_INITIALISATION {
     //
     // Validate parameters and generate parameter summary to stdout
     //
+
+    validateInputSamplesheet(
+        busco_lineage,
+        orthodb_lineage,
+        mmseqs_db
+    )
+
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
         validate_params,
@@ -112,22 +122,16 @@ workflow PIPELINE_COMPLETION {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-/*
 //
 // Validate channels from input samplesheet
 //
-def validateInputSamplesheet(input) {
-    def (metas, fastqs) = input[1..2]
-
-    // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
-    def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
-    if (!endedness_ok) {
-        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
+def validateInputSamplesheet(busco_lineage, orthodb_lineage, mmseqs_db) {
+    if (orthodb_lineage != null && mmseqs_db != null) {
+        error("Both OrthoDB lineage and MMseqs2 database cannot be provided at the same time")
+    } else if (orthodb_lineage == null && mmseqs_db == null) {
+        log.info("Busco lineage ${busco_lineage} will be used for structural annotation")
     }
-
-    return [ metas[0], fastqs ]
 }
-*/
 
 //
 // Generate methods description for MultiQC
@@ -247,4 +251,3 @@ def customSoftwareVersionsToYAML(versions) {
                 .map { customProcessVersionsFromYAML(it) }
             )
 }
-
