@@ -41,7 +41,10 @@ workflow {
         params.monochrome_logs,
         args,
         params.outdir,
-        params.input
+        params.input,
+        params.busco_lineage,
+        params.orthodb_lineage,
+        params.mmseqs_db
     )
 
     //
