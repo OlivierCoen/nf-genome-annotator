@@ -64,21 +64,27 @@
                 "structural_annotator": {
                     "type": "string",
                     "description": "Tool to use for structural annotation",
-                    "enum": ["braker3", "metaeuk"],
-                    "default": "braker3"
+                    "enum": ["auto", "braker3", "metaeuk"],
+                    "default": "auto"
                 },
-                "braker_orthodb_lineage": {
+                "genome_max_size_auto_metaeuk": {
+                    "type": "integer",
+                    "description": "Maximum genome size for automatically using MetaEuk.",
+                    "default": 1e7,
+                    "help": "Under a certain genome size, genome annotation may fail with Braker3. If the genome size is smaller than the specified threshold, MetaEuk will be used instead."
+                },
+                "orthodb_lineage": {
                     "type": "string",
-                    "description": "Lineage of OrthoDB protein database to provide to Braker. If not provided, the lineage provided for BUSCO will be used here too.",
-                    "default": "null",
+                    "description": "Lineage of OrthoDB protein database. If not provided, the lineage provided for BUSCO will be used here too. Incompatible with --mmseqs_db.",
+                    "default": null,
                     "pattern": "^\\S+\\.(odb10|odb12)$",
                     "fa_icon": "fas fa-database",
                     "help_text": "List of lineages can be found at https://busco-data.ezlab.org/v5/data/lineages/. Examples: viridiplantae_odb10 / microsporidia_odb12"
                 },
-                "metaeuk_mmseqs_db": {
+                "mmseqs_db": {
                     "type": "string",
-                    "default": "UniRef100",
-                    "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. Incompatible with --metaeuk_db.",
+                    "default": null,
+                    "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. If not provided, the lineage provided for BUSCO will be used here too. Incompatible with --orthodb_lineage.",
                     "help_text": "mmseqs2 lists a large number of databases, not all of which are appropriate for use with MetaEuk. MetaEuk requires protein inputs, so you should select one of the Aminoacid or Profile options."
                 }
             }
