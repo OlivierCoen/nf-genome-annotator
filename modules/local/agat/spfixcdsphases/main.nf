@@ -8,7 +8,7 @@ process AGAT_SPFIXCDSPHASES {
         'biocontainers/agat:1.4.2--pl5321hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(gff), path(genome_fasta)
+    tuple val(meta), path(gff), path(genome)
     path config
 
     output:
@@ -20,7 +20,13 @@ process AGAT_SPFIXCDSPHASES {
     def args         = task.ext.args   ?: ''
     def prefix       = task.ext.prefix ?: "${meta.id}"
     def config_param = config ? "--config ${config}" : ''
+    def is_compressed = genome.getExtension() == "gz" ? true : false
+    def genome_fasta = is_compressed ? genome.getBaseName() : genome
     """
+    if [ "${is_compressed}" == "true" ]; then
+        gzip -c -d ${genome} > ${genome_fasta}
+    fi
+
     agat_sp_fix_cds_phases.pl \\
         --gff $gff \\
         --fasta $genome_fasta \\
