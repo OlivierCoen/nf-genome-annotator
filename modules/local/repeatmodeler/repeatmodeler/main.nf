@@ -8,14 +8,14 @@ process REPEATMODELER_REPEATMODELER {
             log.warn("RepeatModeler did not find families for database ${meta.id}")
             return 'ignore'
         } else {
-            log.error("RepeatModeler failed with exit status ${task.exitStatus} for ${meta.id}")
-            if (task.ext.args.contains('-LTRStruct')) {
-                log.info("RepeatModeler on ${meta.id}: retrying without -LTRStruct argument")
-                task.ext.args = task.ext.args.replace('-LTRStruct', ' ')
-                return 'retry'
-            } else  {
-                return 'ignore'
-            }
+            log.warn("RepeatModeler failed with exit status ${task.exitStatus} for ${meta.id}")
+        }
+        if (task.ext.args.contains('-LTRStruct')) {
+            log.info("RepeatModeler on ${meta.id}: retrying without -LTRStruct argument")
+            task.ext.args = task.ext.args.replace('-LTRStruct', ' ')
+            return 'retry'
+        } else  {
+            return 'ignore'
         }
     }
 
