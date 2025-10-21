@@ -7,6 +7,7 @@
 include { AGAT_SPCOMPLEMENTANNOTATIONS as COMPLEMENT_ANNOTATIONS        } from '../modules/local/agat/spcomplementannotations'
 include { AGAT_SPEXTRACTSEQUENCES as GET_PROTEOME                       } from '../modules/local/agat/spextractsequences'
 
+include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
@@ -29,6 +30,13 @@ workflow GENOME_ANNOTATOR {
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // GENOME PREPARATION
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    GENOME_PREPARATION ( ch_genome )
+    GENOME_PREPARATION.out.prepared_genome.set { ch_genome }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME MASKING
@@ -84,7 +92,7 @@ workflow GENOME_ANNOTATOR {
         params.codon_usage_id,
         []
     )
-    GET_PROTEOME.out.fasta.set { ch_proteome }
+    GET_PROTEOME.out.proteins.set { ch_proteome }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
