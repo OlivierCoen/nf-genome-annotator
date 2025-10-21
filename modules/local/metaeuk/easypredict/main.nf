@@ -8,18 +8,14 @@ process METAEUK_EASYPREDICT {
         'biocontainers/metaeuk:6.a5d39d9--pl5321hf1761c0_2' }"
 
     input:
-    tuple val(meta), path(fasta)
-    path(database)
+    tuple val(meta), path(fasta), path(database)
 
     output:
     tuple val(meta), path("${prefix}.fas")      , emit: faa
     tuple val(meta), path("${prefix}.codon.fas"), emit: codon
     tuple val(meta), path("*.tsv")              , emit: tsv
     tuple val(meta), path("*.gff")              , emit: gff
-    path "versions.yml"                         , emit: versions
-
-    when:
-    task.ext.when == null || task.ext.when
+    tuple val("${task.process}"), val('metaeuk'), eval("metaeuk | grep 'Version' | sed 's/metaeuk Version: //'"), topic: versions
 
     script:
     def args = task.ext.args   ?: ''
@@ -40,24 +36,5 @@ process METAEUK_EASYPREDICT {
         tmp/ \\
         ${args} \\
         --threads ${task.cpus}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        metaeuk: \$(metaeuk | grep 'Version' | sed 's/metaeuk Version: //')
-    END_VERSIONS
-    """
-
-    stub:
-    prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}.fas
-    touch ${prefix}.codon.fas
-    touch ${prefix}.headersMap.tsv
-    touch ${prefix}.gff
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        metaeuk: \$(metaeuk | grep 'Version' | sed 's/metaeuk Version: //')
-    END_VERSIONS
     """
 }
