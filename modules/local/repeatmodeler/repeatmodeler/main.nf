@@ -1,7 +1,6 @@
 process REPEATMODELER_REPEATMODELER {
     tag "$meta.id"
     label 'process_high'
-    label 'process_long'
 
     errorStrategy = {
         if (task.exitStatus == 100) {
