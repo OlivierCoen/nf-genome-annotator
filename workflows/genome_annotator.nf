@@ -36,7 +36,7 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GENOME_PREPARATION ( ch_genome )
-    GENOME_PREPARATION.out.prepared_genome.set { ch_genome }
+    ch_genome = GENOME_PREPARATION.out.prepared_genome
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME MASKING
@@ -44,7 +44,7 @@ workflow GENOME_ANNOTATOR {
 
     if ( !params.skip_masking ) {
         GENOME_MASKING ( ch_genome )
-        GENOME_MASKING.out.masked_genome.set { ch_genome }
+        ch_genome = GENOME_MASKING.out.masked_genome
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,21 +57,19 @@ workflow GENOME_ANNOTATOR {
     // COMPLEMENTATION OF ANNOTATION ()WHEN NECESSARY)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    STRUCTURAL_ANNOTATION.out.annotations
-        .branch{
-            meta, annotation ->
-                to_complement: meta.ref_gff != []
-                    [ meta, meta.ref_gff, annotation ]
-                leave_me_alone: meta.ref_gff == []
-                    [ meta, annotation ]
-        }
-        .set { ch_branched_annotations }
+    ch_branched_annotations = STRUCTURAL_ANNOTATION.out.annotations
+                                .branch{
+                                    meta, annotation ->
+                                        to_complement: meta.ref_gff != []
+                                            [ meta, meta.ref_gff, annotation ]
+                                        leave_me_alone: meta.ref_gff == []
+                                            [ meta, annotation ]
+                                }
 
     COMPLEMENT_ANNOTATIONS ( ch_branched_annotations.to_complement, [] )
 
-    ch_branched_annotations.leave_me_alone
-        .mix( COMPLEMENT_ANNOTATIONS.out.gff )
-        .set { ch_annotation }
+    ch_annotation = ch_branched_annotations.leave_me_alone
+                        .mix( COMPLEMENT_ANNOTATIONS.out.gff )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
@@ -81,18 +79,27 @@ workflow GENOME_ANNOTATOR {
         ch_annotation,
         ch_genome
      )
-     CLEAN_ANNOTATIONS.out.gff.set { ch_gff }
+     ch_gff = CLEAN_ANNOTATIONS.out.gff
+                .map {
+                    meta, file ->
+                        [ meta + [main_annotation: true], file ]
+                }
+     ch_cleaned_gffs = CLEAN_ANNOTATIONS.out.cleaned_gffs
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GET_PROTEOME (
-        ch_gff.join( ch_genome ),
+        ch_cleaned_gffs.join( ch_genome ),
         params.codon_usage_id,
         []
     )
-    GET_PROTEOME.out.proteins.set { ch_proteome }
+    ch_proteome = GET_PROTEOME.out.proteins
+                    .filter {
+                        meta, file ->
+                            meta.main_annotation == true
+                    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
@@ -119,11 +126,10 @@ workflow GENOME_ANNOTATOR {
     // MULTIQC
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_multiqc_files
-        .mix ( QUALITY_CONTROLS.out.busco_short_summaries )
-        .mix ( QUALITY_CONTROLS.out.gtf_stats )
-        .map { meta, file -> file }
-        .set { ch_multiqc_files }
+    ch_multiqc_files = ch_multiqc_files
+                        .mix ( QUALITY_CONTROLS.out.busco_short_summaries )
+                        .mix ( QUALITY_CONTROLS.out.gtf_stats )
+                        .map { meta, file -> file }
 
 
     MULTIQC_WORKFLOW(

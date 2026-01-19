@@ -1,7 +1,0 @@
-- sample: braker_proteins_bam
-  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  bam: http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
-
-- sample: braker_hints
-  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  proteins: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
