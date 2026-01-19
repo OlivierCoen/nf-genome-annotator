@@ -25,22 +25,21 @@ workflow GENOME_MASKING {
     // SOMETIMES REPEAT MODELER DOES NOT FIND FAMILIES
     // SO THE GENOME SHOULD NOT BE MASKED
 
-    ch_genome
-        .join ( REPEATMODELER.out.fasta, remainder: true )
-        .branch {
-            meta, genome, lib ->
-                can_be_masked: lib != null
-                    [ meta, genome, lib ]
-                cannot_be_masked: lib == null
-                    [ meta, genome ]
-        }
-        .set { ch_genome_lib }
+    ch_genome_lib = ch_genome
+                        .join ( REPEATMODELER.out.fasta, remainder: true )
+                        .branch {
+                            meta, genome, lib ->
+                                can_be_masked: lib != null
+                                    [ meta, genome, lib ]
+                                cannot_be_masked: lib == null
+                                    [ meta, genome ]
+                        }
 
     REPEATMASKER( ch_genome_lib.can_be_masked )
 
-    ch_genome_lib.cannot_be_masked
-        .mix ( REPEATMASKER.out.masked )
-        .set { ch_masked_genomes }
+    ch_masked_genomes = ch_genome_lib.cannot_be_masked
+                            .mix ( REPEATMASKER.out.masked )
+
 
     emit:
     masked_genome           = ch_masked_genomes

@@ -2,13 +2,8 @@ process REPEATMODELER_REPEATMODELER {
     tag "$meta.id"
     label 'process_high'
 
-    errorStrategy = {
-        if (task.exitStatus == 100) {
-            log.warn("RepeatModeler did not find families for database ${meta.id}")
-            return 'ignore'
-        } else {
-            log.warn("RepeatModeler failed with exit status ${task.exitStatus} for ${meta.id}")
-        }
+    errorStrategy {
+        log.warn("RepeatModeler failed with exit status ${task.exitStatus} for ${meta.id}")
         if (task.ext.args.contains('-LTRStruct')) {
             log.info("RepeatModeler on ${meta.id}: retrying without -LTRStruct argument")
             task.ext.args = task.ext.args.replace('-LTRStruct', ' ')
@@ -36,15 +31,17 @@ process REPEATMODELER_REPEATMODELER {
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
     def db_name = file(db[0]).getBaseName()
+    def args_cli = args ? "--args ${args}" : ""
     """
-    RepeatModeler \\
-        -database $db_name \\
-        $args \\
-        -threads $task.cpus
+    run_repeatmodeler.sh \\
+        --database ${db_name} \\
+        --threads ${task.cpus} \\
+        --prefix ${prefix} \\
+        ${args_cli}
 
     mv ${db_name}-families.stk  ${prefix}.stk || echo "Could not find stk file"
     mv ${db_name}-rmod.log      ${prefix}.log || echo "Could not find log file"
-    mv ${db_name}-families.fa   ${prefix}.fa  || (echo "Could not find families fasta file" && exit 100)
+    mv ${db_name}-families.fa   ${prefix}.fa  || (echo "Could not find families fasta file" && exit 0)
     """
 
     stub:
