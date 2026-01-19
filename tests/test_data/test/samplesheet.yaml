@@ -1,3 +1,7 @@
-- sample: test_12_ctg
-  genome: tests/test_data/test/ngranulosis.ctg1_12.fna.gz
-  ref_gff: tests/test_data/test/current_annot.gtf
+- sample: braker_bam
+  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  bam: http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
+
+- sample: braker_proteins
+  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  proteins: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
