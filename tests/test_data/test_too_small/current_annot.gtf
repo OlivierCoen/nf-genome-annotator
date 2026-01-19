@@ -1,0 +1,1000 @@
+SBJO01000001.1	AUGUSTUS	gene	212	1320	.	-	.	g1
+SBJO01000001.1	AUGUSTUS	transcript	523	1320	0.27	-	.	g1.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	523	525	.	-	0	transcript_id "g1.t1"; gene_id "g1";
+SBJO01000001.1	AUGUSTUS	CDS	523	1320	0.27	-	0	transcript_id "g1.t1"; gene_id "g1";
+SBJO01000001.1	AUGUSTUS	exon	523	1320	.	-	.	transcript_id "g1.t1"; gene_id "g1";
+SBJO01000001.1	AUGUSTUS	start_codon	1318	1320	.	-	0	transcript_id "g1.t1"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	transcript	212	1320	.	-	.	g1.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	212	214	.	-	0	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	CDS	212	431	.	-	1	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	exon	212	431	.	-	1	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	mRNA	212	1320	.	-	.	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	intron	432	547	.	-	2	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	CDS	548	1320	.	-	0	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	exon	548	1320	.	-	0	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	GeneMark.hmm3	start_codon	1318	1320	.	-	0	transcript_id "g1.t2"; gene_id "g1";
+SBJO01000001.1	AUGUSTUS	gene	2807	3403	.	+	.	g2
+SBJO01000001.1	AUGUSTUS	transcript	2807	3403	1	+	.	g2.t1
+SBJO01000001.1	AUGUSTUS	start_codon	2807	2809	.	+	0	transcript_id "g2.t1"; gene_id "g2";
+SBJO01000001.1	AUGUSTUS	CDS	2807	3403	1	+	0	transcript_id "g2.t1"; gene_id "g2";
+SBJO01000001.1	AUGUSTUS	exon	2807	3403	.	+	.	transcript_id "g2.t1"; gene_id "g2";
+SBJO01000001.1	AUGUSTUS	stop_codon	3401	3403	.	+	0	transcript_id "g2.t1"; gene_id "g2";
+SBJO01000001.1	AUGUSTUS	gene	3910	6531	.	+	.	g3
+SBJO01000001.1	AUGUSTUS	transcript	3910	6531	1	+	.	g3.t1
+SBJO01000001.1	AUGUSTUS	start_codon	3910	3912	.	+	0	transcript_id "g3.t1"; gene_id "g3";
+SBJO01000001.1	AUGUSTUS	CDS	3910	6531	1	+	0	transcript_id "g3.t1"; gene_id "g3";
+SBJO01000001.1	AUGUSTUS	exon	3910	6531	.	+	.	transcript_id "g3.t1"; gene_id "g3";
+SBJO01000001.1	AUGUSTUS	stop_codon	6529	6531	.	+	0	transcript_id "g3.t1"; gene_id "g3";
+SBJO01000001.1	AUGUSTUS	gene	6702	22906	.	-	.	g4
+SBJO01000001.1	AUGUSTUS	transcript	6702	22906	0.23	-	.	g4.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	6702	6704	.	-	0	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	CDS	6702	6880	0.77	-	2	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	exon	6702	6880	.	-	.	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	intron	6881	6922	0.76	-	.	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	CDS	6923	13792	0.67	-	2	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	exon	6923	13792	.	-	.	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	intron	13793	15423	0.29	-	.	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	CDS	15424	22906	0.29	-	0	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	exon	15424	22906	.	-	.	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	start_codon	22904	22906	.	-	0	transcript_id "g4.t1"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	transcript	6702	13970	.	-	.	g4.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	6702	6704	.	-	0	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	CDS	6702	13792	.	-	2	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	exon	6702	13792	.	-	2	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	mRNA	6702	13970	.	-	.	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	intron	13793	13885	.	-	1	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	CDS	13886	13970	.	-	0	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	exon	13886	13970	.	-	0	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	start_codon	13968	13970	.	-	0	transcript_id "g4.t2"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	transcript	15320	22906	.	-	.	g4.t3
+SBJO01000001.1	GeneMark.hmm3	stop_codon	15320	15322	.	-	0	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	CDS	15320	20428	.	-	0	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	exon	15320	20428	.	-	0	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	mRNA	15320	22906	.	-	.	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	intron	20429	20572	.	-	0	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	CDS	20573	22906	.	-	0	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	exon	20573	22906	.	-	0	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	GeneMark.hmm3	start_codon	22904	22906	.	-	0	transcript_id "g4.t3"; gene_id "g4";
+SBJO01000001.1	AUGUSTUS	gene	23557	24723	.	-	.	g5
+SBJO01000001.1	AUGUSTUS	transcript	23557	24723	0.74	-	.	g5.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	23557	23559	.	-	0	transcript_id "g5.t1"; gene_id "g5";
+SBJO01000001.1	AUGUSTUS	CDS	23557	24723	0.74	-	0	transcript_id "g5.t1"; gene_id "g5";
+SBJO01000001.1	AUGUSTUS	exon	23557	24723	.	-	.	transcript_id "g5.t1"; gene_id "g5";
+SBJO01000001.1	AUGUSTUS	start_codon	24721	24723	.	-	0	transcript_id "g5.t1"; gene_id "g5";
+SBJO01000001.1	AUGUSTUS	gene	24947	26416	.	-	.	g6
+SBJO01000001.1	AUGUSTUS	transcript	24947	26416	0.76	-	.	g6.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	24947	24949	.	-	0	transcript_id "g6.t1"; gene_id "g6";
+SBJO01000001.1	AUGUSTUS	CDS	24947	26416	0.76	-	0	transcript_id "g6.t1"; gene_id "g6";
+SBJO01000001.1	AUGUSTUS	exon	24947	26416	.	-	.	transcript_id "g6.t1"; gene_id "g6";
+SBJO01000001.1	AUGUSTUS	start_codon	26414	26416	.	-	0	transcript_id "g6.t1"; gene_id "g6";
+SBJO01000001.1	AUGUSTUS	gene	26556	27755	.	+	.	g7
+SBJO01000001.1	AUGUSTUS	transcript	26556	27755	1	+	.	g7.t1
+SBJO01000001.1	AUGUSTUS	start_codon	26556	26558	.	+	0	transcript_id "g7.t1"; gene_id "g7";
+SBJO01000001.1	AUGUSTUS	CDS	26556	27755	1	+	0	transcript_id "g7.t1"; gene_id "g7";
+SBJO01000001.1	AUGUSTUS	exon	26556	27755	.	+	.	transcript_id "g7.t1"; gene_id "g7";
+SBJO01000001.1	AUGUSTUS	stop_codon	27753	27755	.	+	0	transcript_id "g7.t1"; gene_id "g7";
+SBJO01000001.1	AUGUSTUS	gene	28579	29661	.	+	.	g8
+SBJO01000001.1	AUGUSTUS	transcript	28579	29661	0.86	+	.	g8.t1
+SBJO01000001.1	AUGUSTUS	start_codon	28579	28581	.	+	0	transcript_id "g8.t1"; gene_id "g8";
+SBJO01000001.1	AUGUSTUS	CDS	28579	29661	0.86	+	0	transcript_id "g8.t1"; gene_id "g8";
+SBJO01000001.1	AUGUSTUS	exon	28579	29661	.	+	.	transcript_id "g8.t1"; gene_id "g8";
+SBJO01000001.1	AUGUSTUS	stop_codon	29659	29661	.	+	0	transcript_id "g8.t1"; gene_id "g8";
+SBJO01000001.1	AUGUSTUS	gene	30368	31081	.	-	.	g9
+SBJO01000001.1	AUGUSTUS	transcript	30368	31081	0.71	-	.	g9.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	30368	30370	.	-	0	transcript_id "g9.t1"; gene_id "g9";
+SBJO01000001.1	AUGUSTUS	CDS	30368	31081	0.71	-	0	transcript_id "g9.t1"; gene_id "g9";
+SBJO01000001.1	AUGUSTUS	exon	30368	31081	.	-	.	transcript_id "g9.t1"; gene_id "g9";
+SBJO01000001.1	AUGUSTUS	start_codon	31079	31081	.	-	0	transcript_id "g9.t1"; gene_id "g9";
+SBJO01000001.1	AUGUSTUS	gene	31246	33984	.	-	.	g10
+SBJO01000001.1	AUGUSTUS	transcript	31246	33984	0.73	-	.	g10.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	31246	31248	.	-	0	transcript_id "g10.t1"; gene_id "g10";
+SBJO01000001.1	AUGUSTUS	CDS	31246	33984	0.73	-	0	transcript_id "g10.t1"; gene_id "g10";
+SBJO01000001.1	AUGUSTUS	exon	31246	33984	.	-	.	transcript_id "g10.t1"; gene_id "g10";
+SBJO01000001.1	AUGUSTUS	start_codon	33982	33984	.	-	0	transcript_id "g10.t1"; gene_id "g10";
+SBJO01000001.1	AUGUSTUS	gene	31275	39471	.	-	.	g11
+SBJO01000001.1	AUGUSTUS	transcript	34156	39471	0.98	-	.	g11.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	34156	34158	.	-	0	transcript_id "g11.t1"; gene_id "g11";
+SBJO01000001.1	AUGUSTUS	CDS	34156	39471	0.98	-	0	transcript_id "g11.t1"; gene_id "g11";
+SBJO01000001.1	AUGUSTUS	exon	34156	39471	.	-	.	transcript_id "g11.t1"; gene_id "g11";
+SBJO01000001.1	AUGUSTUS	start_codon	39469	39471	.	-	0	transcript_id "g11.t1"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	transcript	31275	39471	.	-	.	g11.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	31275	31277	.	-	0	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	CDS	31275	31320	.	-	1	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	exon	31275	31320	.	-	1	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	mRNA	31275	39471	.	-	.	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	intron	31321	31441	.	-	2	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	CDS	31442	33958	.	-	1	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	exon	31442	33958	.	-	1	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	intron	33959	34195	.	-	2	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	CDS	34196	39471	.	-	0	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	exon	34196	39471	.	-	0	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	GeneMark.hmm3	start_codon	39469	39471	.	-	0	transcript_id "g11.t2"; gene_id "g11";
+SBJO01000001.1	AUGUSTUS	gene	39659	40270	.	+	.	g12
+SBJO01000001.1	AUGUSTUS	transcript	39659	40270	0.92	+	.	g12.t1
+SBJO01000001.1	AUGUSTUS	start_codon	39659	39661	.	+	0	transcript_id "g12.t1"; gene_id "g12";
+SBJO01000001.1	AUGUSTUS	CDS	39659	40270	0.92	+	0	transcript_id "g12.t1"; gene_id "g12";
+SBJO01000001.1	AUGUSTUS	exon	39659	40270	.	+	.	transcript_id "g12.t1"; gene_id "g12";
+SBJO01000001.1	AUGUSTUS	stop_codon	40268	40270	.	+	0	transcript_id "g12.t1"; gene_id "g12";
+SBJO01000001.1	AUGUSTUS	gene	40369	41324	.	-	.	g13
+SBJO01000001.1	AUGUSTUS	transcript	40369	41324	0.44	-	.	g13.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	40369	40371	.	-	0	transcript_id "g13.t1"; gene_id "g13";
+SBJO01000001.1	AUGUSTUS	CDS	40369	40410	0.52	-	0	transcript_id "g13.t1"; gene_id "g13";
+SBJO01000001.1	AUGUSTUS	exon	40369	40410	.	-	.	transcript_id "g13.t1"; gene_id "g13";
+SBJO01000001.1	AUGUSTUS	intron	40411	40745	0.44	-	.	transcript_id "g13.t1"; gene_id "g13";
+SBJO01000001.1	AUGUSTUS	CDS	40746	41324	0.8	-	0	transcript_id "g13.t1"; gene_id "g13";
+SBJO01000001.1	AUGUSTUS	exon	40746	41324	.	-	.	transcript_id "g13.t1"; gene_id "g13";
+SBJO01000001.1	AUGUSTUS	start_codon	41322	41324	.	-	0	transcript_id "g13.t1"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	transcript	40754	41297	.	-	.	g13.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	40754	40756	.	-	0	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	CDS	40754	40767	.	-	2	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	exon	40754	40767	.	-	2	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	mRNA	40754	41297	.	-	.	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	intron	40768	40801	.	-	1	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	CDS	40802	41297	.	-	0	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	exon	40802	41297	.	-	0	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	GeneMark.hmm3	start_codon	41295	41297	.	-	0	transcript_id "g13.t2"; gene_id "g13";
+SBJO01000001.1	AUGUSTUS	gene	41588	45177	.	+	.	g14
+SBJO01000001.1	AUGUSTUS	transcript	41588	45177	0.25	+	.	g14.t1
+SBJO01000001.1	AUGUSTUS	start_codon	41588	41590	.	+	0	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	CDS	41588	42137	0.45	+	0	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	exon	41588	42137	.	+	.	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	intron	42138	42815	0.44	+	.	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	CDS	42816	43854	0.85	+	2	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	exon	42816	43854	.	+	.	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	intron	43855	44297	0.73	+	.	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	CDS	44298	45177	0.49	+	1	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	exon	44298	45177	.	+	.	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	AUGUSTUS	stop_codon	45175	45177	.	+	0	transcript_id "g14.t1"; gene_id "g14";
+SBJO01000001.1	GeneMark.hmm3	transcript	41588	42169	.	+	.	g14.t2
+SBJO01000001.1	GeneMark.hmm3	start_codon	41588	41590	.	+	0	transcript_id "g14.t2"; gene_id "g14";
+SBJO01000001.1	GeneMark.hmm3	CDS	41588	42169	.	+	0	transcript_id "g14.t2"; gene_id "g14";
+SBJO01000001.1	GeneMark.hmm3	mRNA	41588	42169	.	+	.	transcript_id "g14.t2"; gene_id "g14";
+SBJO01000001.1	GeneMark.hmm3	exon	41588	42169	.	+	0	transcript_id "g14.t2"; gene_id "g14";
+SBJO01000001.1	GeneMark.hmm3	stop_codon	42167	42169	.	+	0	transcript_id "g14.t2"; gene_id "g14";
+SBJO01000001.1	GeneMark.hmm3	gene	42797	45177	.	+	.	g15
+SBJO01000001.1	GeneMark.hmm3	transcript	42797	45177	.	+	.	g15.t1
+SBJO01000001.1	GeneMark.hmm3	start_codon	42797	42799	.	+	0	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	GeneMark.hmm3	CDS	42797	43744	.	+	0	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	GeneMark.hmm3	exon	42797	43744	.	+	0	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	GeneMark.hmm3	mRNA	42797	45177	.	+	.	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	GeneMark.hmm3	intron	43745	44277	.	+	0	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	GeneMark.hmm3	CDS	44278	45177	.	+	0	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	GeneMark.hmm3	exon	44278	45177	.	+	0	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	GeneMark.hmm3	stop_codon	45175	45177	.	+	0	transcript_id "g15.t1"; gene_id "g15";
+SBJO01000001.1	AUGUSTUS	gene	46121	47275	.	+	.	g16
+SBJO01000001.1	AUGUSTUS	transcript	46121	47275	0.44	+	.	g16.t1
+SBJO01000001.1	AUGUSTUS	start_codon	46121	46123	.	+	0	transcript_id "g16.t1"; gene_id "g16";
+SBJO01000001.1	AUGUSTUS	CDS	46121	47275	0.44	+	0	transcript_id "g16.t1"; gene_id "g16";
+SBJO01000001.1	AUGUSTUS	exon	46121	47275	.	+	.	transcript_id "g16.t1"; gene_id "g16";
+SBJO01000001.1	AUGUSTUS	stop_codon	47273	47275	.	+	0	transcript_id "g16.t1"; gene_id "g16";
+SBJO01000001.1	AUGUSTUS	gene	47403	50393	.	+	.	g17
+SBJO01000001.1	AUGUSTUS	transcript	47403	50393	0.34	+	.	g17.t1
+SBJO01000001.1	AUGUSTUS	start_codon	47403	47405	.	+	0	transcript_id "g17.t1"; gene_id "g17";
+SBJO01000001.1	AUGUSTUS	CDS	47403	48635	0.38	+	0	transcript_id "g17.t1"; gene_id "g17";
+SBJO01000001.1	AUGUSTUS	exon	47403	48635	.	+	.	transcript_id "g17.t1"; gene_id "g17";
+SBJO01000001.1	AUGUSTUS	intron	48636	49307	0.43	+	.	transcript_id "g17.t1"; gene_id "g17";
+SBJO01000001.1	AUGUSTUS	CDS	49308	50393	0.43	+	0	transcript_id "g17.t1"; gene_id "g17";
+SBJO01000001.1	AUGUSTUS	exon	49308	50393	.	+	.	transcript_id "g17.t1"; gene_id "g17";
+SBJO01000001.1	AUGUSTUS	stop_codon	50391	50393	.	+	0	transcript_id "g17.t1"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	transcript	47403	48945	.	+	.	g17.t2
+SBJO01000001.1	GeneMark.hmm3	start_codon	47403	47405	.	+	0	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	CDS	47403	48635	.	+	0	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	exon	47403	48635	.	+	0	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	mRNA	47403	48945	.	+	.	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	intron	48636	48900	.	+	0	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	CDS	48901	48945	.	+	0	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	exon	48901	48945	.	+	0	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	stop_codon	48943	48945	.	+	0	transcript_id "g17.t2"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	transcript	49134	50393	.	+	.	g17.t3
+SBJO01000001.1	GeneMark.hmm3	start_codon	49134	49136	.	+	0	transcript_id "g17.t3"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	CDS	49134	50393	.	+	0	transcript_id "g17.t3"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	mRNA	49134	50393	.	+	.	transcript_id "g17.t3"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	exon	49134	50393	.	+	0	transcript_id "g17.t3"; gene_id "g17";
+SBJO01000001.1	GeneMark.hmm3	stop_codon	50391	50393	.	+	0	transcript_id "g17.t3"; gene_id "g17";
+SBJO01000001.1	AUGUSTUS	gene	50777	53938	.	-	.	g18
+SBJO01000001.1	AUGUSTUS	transcript	50777	53938	1	-	.	g18.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	50777	50779	.	-	0	transcript_id "g18.t1"; gene_id "g18";
+SBJO01000001.1	AUGUSTUS	CDS	50777	53938	1	-	0	transcript_id "g18.t1"; gene_id "g18";
+SBJO01000001.1	AUGUSTUS	exon	50777	53938	.	-	.	transcript_id "g18.t1"; gene_id "g18";
+SBJO01000001.1	AUGUSTUS	start_codon	53936	53938	.	-	0	transcript_id "g18.t1"; gene_id "g18";
+SBJO01000001.1	AUGUSTUS	gene	54111	55748	.	-	.	g19
+SBJO01000001.1	AUGUSTUS	transcript	54111	55748	1	-	.	g19.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	54111	54113	.	-	0	transcript_id "g19.t1"; gene_id "g19";
+SBJO01000001.1	AUGUSTUS	CDS	54111	55748	1	-	0	transcript_id "g19.t1"; gene_id "g19";
+SBJO01000001.1	AUGUSTUS	exon	54111	55748	.	-	.	transcript_id "g19.t1"; gene_id "g19";
+SBJO01000001.1	AUGUSTUS	start_codon	55746	55748	.	-	0	transcript_id "g19.t1"; gene_id "g19";
+SBJO01000001.1	AUGUSTUS	gene	56055	57152	.	+	.	g20
+SBJO01000001.1	AUGUSTUS	transcript	56055	57152	0.94	+	.	g20.t1
+SBJO01000001.1	AUGUSTUS	start_codon	56055	56057	.	+	0	transcript_id "g20.t1"; gene_id "g20";
+SBJO01000001.1	AUGUSTUS	CDS	56055	57152	0.94	+	0	transcript_id "g20.t1"; gene_id "g20";
+SBJO01000001.1	AUGUSTUS	exon	56055	57152	.	+	.	transcript_id "g20.t1"; gene_id "g20";
+SBJO01000001.1	AUGUSTUS	stop_codon	57150	57152	.	+	0	transcript_id "g20.t1"; gene_id "g20";
+SBJO01000001.1	AUGUSTUS	gene	57438	59149	.	-	.	g21
+SBJO01000001.1	AUGUSTUS	transcript	57438	59149	0.79	-	.	g21.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	57438	57440	.	-	0	transcript_id "g21.t1"; gene_id "g21";
+SBJO01000001.1	AUGUSTUS	CDS	57438	57443	0.79	-	0	transcript_id "g21.t1"; gene_id "g21";
+SBJO01000001.1	AUGUSTUS	exon	57438	57443	.	-	.	transcript_id "g21.t1"; gene_id "g21";
+SBJO01000001.1	AUGUSTUS	intron	57444	57628	0.79	-	.	transcript_id "g21.t1"; gene_id "g21";
+SBJO01000001.1	AUGUSTUS	CDS	57629	59149	0.81	-	0	transcript_id "g21.t1"; gene_id "g21";
+SBJO01000001.1	AUGUSTUS	exon	57629	59149	.	-	.	transcript_id "g21.t1"; gene_id "g21";
+SBJO01000001.1	AUGUSTUS	start_codon	59147	59149	.	-	0	transcript_id "g21.t1"; gene_id "g21";
+SBJO01000001.1	GeneMark.hmm3	gene	59247	59642	.	-	.	g22
+SBJO01000001.1	GeneMark.hmm3	transcript	59247	59642	.	-	.	g22.t1
+SBJO01000001.1	GeneMark.hmm3	stop_codon	59247	59249	.	-	0	transcript_id "g22.t1"; gene_id "g22";
+SBJO01000001.1	GeneMark.hmm3	CDS	59247	59642	.	-	0	transcript_id "g22.t1"; gene_id "g22";
+SBJO01000001.1	GeneMark.hmm3	mRNA	59247	59642	.	-	.	transcript_id "g22.t1"; gene_id "g22";
+SBJO01000001.1	GeneMark.hmm3	exon	59247	59642	.	-	0	transcript_id "g22.t1"; gene_id "g22";
+SBJO01000001.1	GeneMark.hmm3	start_codon	59640	59642	.	-	0	transcript_id "g22.t1"; gene_id "g22";
+SBJO01000001.1	AUGUSTUS	gene	59247	64178	.	-	.	g23
+SBJO01000001.1	AUGUSTUS	transcript	59247	64178	0.63	-	.	g23.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	59247	59249	.	-	0	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	CDS	59247	59676	0.85	-	1	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	exon	59247	59676	.	-	.	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	intron	59677	60898	0.79	-	.	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	CDS	60899	61249	0.74	-	1	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	exon	60899	61249	.	-	.	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	intron	61250	61704	0.8	-	.	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	CDS	61705	64178	0.96	-	0	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	exon	61705	64178	.	-	.	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	AUGUSTUS	start_codon	64176	64178	.	-	0	transcript_id "g23.t1"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	transcript	60540	64178	.	-	.	g23.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	60540	60542	.	-	0	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	CDS	60540	60610	.	-	2	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	exon	60540	60610	.	-	2	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	mRNA	60540	64178	.	-	.	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	intron	60611	60893	.	-	1	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	CDS	60894	61249	.	-	1	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	exon	60894	61249	.	-	1	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	intron	61250	61704	.	-	2	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	CDS	61705	64178	.	-	0	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	exon	61705	64178	.	-	0	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	start_codon	64176	64178	.	-	0	transcript_id "g23.t2"; gene_id "g23";
+SBJO01000001.1	GeneMark.hmm3	gene	59679	60215	.	+	.	g24
+SBJO01000001.1	GeneMark.hmm3	transcript	59679	60215	.	+	.	g24.t1
+SBJO01000001.1	GeneMark.hmm3	start_codon	59679	59681	.	+	0	transcript_id "g24.t1"; gene_id "g24";
+SBJO01000001.1	GeneMark.hmm3	CDS	59679	60215	.	+	0	transcript_id "g24.t1"; gene_id "g24";
+SBJO01000001.1	GeneMark.hmm3	mRNA	59679	60215	.	+	.	transcript_id "g24.t1"; gene_id "g24";
+SBJO01000001.1	GeneMark.hmm3	exon	59679	60215	.	+	0	transcript_id "g24.t1"; gene_id "g24";
+SBJO01000001.1	GeneMark.hmm3	stop_codon	60213	60215	.	+	0	transcript_id "g24.t1"; gene_id "g24";
+SBJO01000001.1	AUGUSTUS	gene	64390	66975	.	-	.	g25
+SBJO01000001.1	AUGUSTUS	transcript	64390	66975	1	-	.	g25.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	64390	64392	.	-	0	transcript_id "g25.t1"; gene_id "g25";
+SBJO01000001.1	AUGUSTUS	CDS	64390	66975	1	-	0	transcript_id "g25.t1"; gene_id "g25";
+SBJO01000001.1	AUGUSTUS	exon	64390	66975	.	-	.	transcript_id "g25.t1"; gene_id "g25";
+SBJO01000001.1	AUGUSTUS	start_codon	66973	66975	.	-	0	transcript_id "g25.t1"; gene_id "g25";
+SBJO01000001.1	AUGUSTUS	gene	67153	68241	.	-	.	g26
+SBJO01000001.1	AUGUSTUS	transcript	67153	68241	0.69	-	.	g26.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	67153	67155	.	-	0	transcript_id "g26.t1"; gene_id "g26";
+SBJO01000001.1	AUGUSTUS	CDS	67153	68241	0.69	-	0	transcript_id "g26.t1"; gene_id "g26";
+SBJO01000001.1	AUGUSTUS	exon	67153	68241	.	-	.	transcript_id "g26.t1"; gene_id "g26";
+SBJO01000001.1	AUGUSTUS	start_codon	68239	68241	.	-	0	transcript_id "g26.t1"; gene_id "g26";
+SBJO01000001.1	AUGUSTUS	gene	68285	69733	.	-	.	g27
+SBJO01000001.1	AUGUSTUS	transcript	68285	69733	0.42	-	.	g27.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	68285	68287	.	-	0	transcript_id "g27.t1"; gene_id "g27";
+SBJO01000001.1	AUGUSTUS	CDS	68285	68809	0.59	-	0	transcript_id "g27.t1"; gene_id "g27";
+SBJO01000001.1	AUGUSTUS	exon	68285	68809	.	-	.	transcript_id "g27.t1"; gene_id "g27";
+SBJO01000001.1	AUGUSTUS	intron	68810	68932	0.56	-	.	transcript_id "g27.t1"; gene_id "g27";
+SBJO01000001.1	AUGUSTUS	CDS	68933	69733	0.57	-	0	transcript_id "g27.t1"; gene_id "g27";
+SBJO01000001.1	AUGUSTUS	exon	68933	69733	.	-	.	transcript_id "g27.t1"; gene_id "g27";
+SBJO01000001.1	AUGUSTUS	start_codon	69731	69733	.	-	0	transcript_id "g27.t1"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	transcript	68285	69733	.	-	.	g27.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	68285	68287	.	-	0	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	CDS	68285	68778	.	-	2	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	exon	68285	68778	.	-	2	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	mRNA	68285	69733	.	-	.	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	intron	68779	68925	.	-	1	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	CDS	68926	69733	.	-	0	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	exon	68926	69733	.	-	0	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	GeneMark.hmm3	start_codon	69731	69733	.	-	0	transcript_id "g27.t2"; gene_id "g27";
+SBJO01000001.1	AUGUSTUS	gene	69786	71309	.	-	.	g28
+SBJO01000001.1	AUGUSTUS	transcript	69786	71309	0.97	-	.	g28.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	69786	69788	.	-	0	transcript_id "g28.t1"; gene_id "g28";
+SBJO01000001.1	AUGUSTUS	CDS	69786	71309	0.97	-	0	transcript_id "g28.t1"; gene_id "g28";
+SBJO01000001.1	AUGUSTUS	exon	69786	71309	.	-	.	transcript_id "g28.t1"; gene_id "g28";
+SBJO01000001.1	AUGUSTUS	start_codon	71307	71309	.	-	0	transcript_id "g28.t1"; gene_id "g28";
+SBJO01000001.1	AUGUSTUS	gene	71521	74207	.	+	.	g29
+SBJO01000001.1	AUGUSTUS	transcript	71521	74207	0.47	+	.	g29.t1
+SBJO01000001.1	AUGUSTUS	start_codon	71521	71523	.	+	0	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	CDS	71521	72160	0.55	+	0	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	exon	71521	72160	.	+	.	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	intron	72161	72656	0.8	+	.	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	CDS	72657	73647	0.79	+	2	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	exon	72657	73647	.	+	.	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	intron	73648	74119	0.86	+	.	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	CDS	74120	74207	0.84	+	1	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	exon	74120	74207	.	+	.	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	stop_codon	74205	74207	.	+	0	transcript_id "g29.t1"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	transcript	71521	73672	.	+	.	g29.t2
+SBJO01000001.1	GeneMark.hmm3	start_codon	71521	71523	.	+	0	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	CDS	71521	72079	.	+	0	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	exon	71521	72079	.	+	0	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	mRNA	71521	73672	.	+	.	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	intron	72080	72656	.	+	1	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	CDS	72657	73672	.	+	2	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	exon	72657	73672	.	+	2	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	GeneMark.hmm3	stop_codon	73670	73672	.	+	0	transcript_id "g29.t2"; gene_id "g29";
+SBJO01000001.1	AUGUSTUS	gene	75793	76611	.	+	.	g30
+SBJO01000001.1	AUGUSTUS	transcript	75793	76611	0.93	+	.	g30.t1
+SBJO01000001.1	AUGUSTUS	start_codon	75793	75795	.	+	0	transcript_id "g30.t1"; gene_id "g30";
+SBJO01000001.1	AUGUSTUS	CDS	75793	76611	0.93	+	0	transcript_id "g30.t1"; gene_id "g30";
+SBJO01000001.1	AUGUSTUS	exon	75793	76611	.	+	.	transcript_id "g30.t1"; gene_id "g30";
+SBJO01000001.1	AUGUSTUS	stop_codon	76609	76611	.	+	0	transcript_id "g30.t1"; gene_id "g30";
+SBJO01000001.1	AUGUSTUS	gene	77529	78108	.	-	.	g31
+SBJO01000001.1	AUGUSTUS	transcript	77529	78108	0.2	-	.	g31.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	77529	77531	.	-	0	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	CDS	77529	77590	0.56	-	2	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	exon	77529	77590	.	-	.	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	intron	77591	77657	0.44	-	.	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	CDS	77658	77810	0.31	-	2	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	exon	77658	77810	.	-	.	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	intron	77811	78011	0.55	-	.	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	CDS	78012	78108	0.56	-	0	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	exon	78012	78108	.	-	.	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	start_codon	78106	78108	.	-	0	transcript_id "g31.t1"; gene_id "g31";
+SBJO01000001.1	AUGUSTUS	gene	79254	80315	.	-	.	g32
+SBJO01000001.1	AUGUSTUS	transcript	79254	80315	0.71	-	.	g32.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	79254	79256	.	-	0	transcript_id "g32.t1"; gene_id "g32";
+SBJO01000001.1	AUGUSTUS	CDS	79254	80315	0.71	-	0	transcript_id "g32.t1"; gene_id "g32";
+SBJO01000001.1	AUGUSTUS	exon	79254	80315	.	-	.	transcript_id "g32.t1"; gene_id "g32";
+SBJO01000001.1	AUGUSTUS	start_codon	80313	80315	.	-	0	transcript_id "g32.t1"; gene_id "g32";
+SBJO01000001.1	AUGUSTUS	gene	80658	83691	.	-	.	g33
+SBJO01000001.1	AUGUSTUS	transcript	80658	83691	0.2	-	.	g33.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	80658	80660	.	-	0	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	CDS	80658	81047	0.78	-	0	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	exon	80658	81047	.	-	.	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	intron	81048	81221	0.51	-	.	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	CDS	81222	81949	0.28	-	2	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	exon	81222	81949	.	-	.	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	intron	81950	83081	0.3	-	.	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	CDS	83082	83691	0.36	-	0	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	exon	83082	83691	.	-	.	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	start_codon	83689	83691	.	-	0	transcript_id "g33.t1"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	transcript	80658	83691	.	-	.	g33.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	80658	80660	.	-	0	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	CDS	80658	80748	.	-	1	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	exon	80658	80748	.	-	1	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	mRNA	80658	83691	.	-	.	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	intron	80749	80976	.	-	2	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	CDS	80977	81094	.	-	2	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	exon	80977	81094	.	-	2	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	intron	81095	81253	.	-	1	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	CDS	81254	81712	.	-	2	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	exon	81254	81712	.	-	2	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	intron	81713	81868	.	-	1	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	CDS	81869	81949	.	-	2	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	exon	81869	81949	.	-	2	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	intron	81950	83081	.	-	1	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	CDS	83082	83691	.	-	0	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	exon	83082	83691	.	-	0	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	GeneMark.hmm3	start_codon	83689	83691	.	-	0	transcript_id "g33.t2"; gene_id "g33";
+SBJO01000001.1	AUGUSTUS	gene	83922	85397	.	-	.	g34
+SBJO01000001.1	AUGUSTUS	transcript	83922	85397	1	-	.	g34.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	83922	83924	.	-	0	transcript_id "g34.t1"; gene_id "g34";
+SBJO01000001.1	AUGUSTUS	CDS	83922	85397	1	-	0	transcript_id "g34.t1"; gene_id "g34";
+SBJO01000001.1	AUGUSTUS	exon	83922	85397	.	-	.	transcript_id "g34.t1"; gene_id "g34";
+SBJO01000001.1	AUGUSTUS	start_codon	85395	85397	.	-	0	transcript_id "g34.t1"; gene_id "g34";
+SBJO01000001.1	AUGUSTUS	gene	85795	87738	.	-	.	g35
+SBJO01000001.1	AUGUSTUS	transcript	85795	87738	0.57	-	.	g35.t1
+SBJO01000001.1	AUGUSTUS	stop_codon	85795	85797	.	-	0	transcript_id "g35.t1"; gene_id "g35";
+SBJO01000001.1	AUGUSTUS	CDS	85795	86133	0.6	-	0	transcript_id "g35.t1"; gene_id "g35";
+SBJO01000001.1	AUGUSTUS	exon	85795	86133	.	-	.	transcript_id "g35.t1"; gene_id "g35";
+SBJO01000001.1	AUGUSTUS	intron	86134	86316	0.6	-	.	transcript_id "g35.t1"; gene_id "g35";
+SBJO01000001.1	AUGUSTUS	CDS	86317	87738	0.61	-	0	transcript_id "g35.t1"; gene_id "g35";
+SBJO01000001.1	AUGUSTUS	exon	86317	87738	.	-	.	transcript_id "g35.t1"; gene_id "g35";
+SBJO01000001.1	AUGUSTUS	start_codon	87736	87738	.	-	0	transcript_id "g35.t1"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	transcript	85795	86151	.	-	.	g35.t2
+SBJO01000001.1	GeneMark.hmm3	stop_codon	85795	85797	.	-	0	transcript_id "g35.t2"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	CDS	85795	86151	.	-	0	transcript_id "g35.t2"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	mRNA	85795	86151	.	-	.	transcript_id "g35.t2"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	exon	85795	86151	.	-	0	transcript_id "g35.t2"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	start_codon	86149	86151	.	-	0	transcript_id "g35.t2"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	transcript	86278	87738	.	-	.	g35.t3
+SBJO01000001.1	GeneMark.hmm3	stop_codon	86278	86280	.	-	0	transcript_id "g35.t3"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	CDS	86278	87738	.	-	0	transcript_id "g35.t3"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	mRNA	86278	87738	.	-	.	transcript_id "g35.t3"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	exon	86278	87738	.	-	0	transcript_id "g35.t3"; gene_id "g35";
+SBJO01000001.1	GeneMark.hmm3	start_codon	87736	87738	.	-	0	transcript_id "g35.t3"; gene_id "g35";
+SBJO01000001.1	AUGUSTUS	gene	93618	97710	.	+	.	g36
+SBJO01000001.1	AUGUSTUS	transcript	93618	97710	0.26	+	.	g36.t1
+SBJO01000001.1	AUGUSTUS	start_codon	93618	93620	.	+	0	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	CDS	93618	95672	0.97	+	0	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	exon	93618	95672	.	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	intron	95673	95801	1	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	CDS	95802	96243	0.99	+	0	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	exon	95802	96243	.	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	intron	96244	96398	0.99	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	CDS	96399	96449	0.84	+	2	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	exon	96399	96449	.	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	intron	96450	97176	0.66	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	CDS	97177	97379	0.31	+	2	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	exon	97177	97379	.	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	intron	97380	97512	0.33	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	CDS	97513	97710	0.69	+	0	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	exon	97513	97710	.	+	.	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	AUGUSTUS	stop_codon	97708	97710	.	+	0	transcript_id "g36.t1"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	transcript	93618	96463	.	+	.	g36.t2
+SBJO01000001.1	GeneMark.hmm3	start_codon	93618	93620	.	+	0	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	CDS	93618	95672	.	+	0	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	exon	93618	95672	.	+	0	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	mRNA	93618	96463	.	+	.	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	intron	95673	95801	.	+	0	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	CDS	95802	96243	.	+	0	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	exon	95802	96243	.	+	0	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	intron	96244	96398	.	+	1	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	CDS	96399	96463	.	+	2	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	exon	96399	96463	.	+	2	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000001.1	GeneMark.hmm3	stop_codon	96461	96463	.	+	0	transcript_id "g36.t2"; gene_id "g36";
+SBJO01000002.1	AUGUSTUS	gene	622	1518	.	+	.	g37
+SBJO01000002.1	AUGUSTUS	transcript	622	1518	0.99	+	.	g37.t1
+SBJO01000002.1	AUGUSTUS	start_codon	622	624	.	+	0	transcript_id "g37.t1"; gene_id "g37";
+SBJO01000002.1	AUGUSTUS	CDS	622	1518	0.99	+	0	transcript_id "g37.t1"; gene_id "g37";
+SBJO01000002.1	AUGUSTUS	exon	622	1518	.	+	.	transcript_id "g37.t1"; gene_id "g37";
+SBJO01000002.1	AUGUSTUS	stop_codon	1516	1518	.	+	0	transcript_id "g37.t1"; gene_id "g37";
+SBJO01000002.1	AUGUSTUS	gene	4855	6114	.	-	.	g38
+SBJO01000002.1	AUGUSTUS	transcript	4855	6114	0.88	-	.	g38.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	4855	4857	.	-	0	transcript_id "g38.t1"; gene_id "g38";
+SBJO01000002.1	AUGUSTUS	CDS	4855	6114	0.88	-	0	transcript_id "g38.t1"; gene_id "g38";
+SBJO01000002.1	AUGUSTUS	exon	4855	6114	.	-	.	transcript_id "g38.t1"; gene_id "g38";
+SBJO01000002.1	AUGUSTUS	start_codon	6112	6114	.	-	0	transcript_id "g38.t1"; gene_id "g38";
+SBJO01000002.1	AUGUSTUS	gene	6648	7703	.	+	.	g39
+SBJO01000002.1	AUGUSTUS	transcript	6648	7703	0.75	+	.	g39.t1
+SBJO01000002.1	AUGUSTUS	start_codon	6648	6650	.	+	0	transcript_id "g39.t1"; gene_id "g39";
+SBJO01000002.1	AUGUSTUS	CDS	6648	7703	0.75	+	0	transcript_id "g39.t1"; gene_id "g39";
+SBJO01000002.1	AUGUSTUS	exon	6648	7703	.	+	.	transcript_id "g39.t1"; gene_id "g39";
+SBJO01000002.1	AUGUSTUS	stop_codon	7701	7703	.	+	0	transcript_id "g39.t1"; gene_id "g39";
+SBJO01000002.1	AUGUSTUS	gene	7943	9187	.	+	.	g40
+SBJO01000002.1	AUGUSTUS	transcript	7943	9187	0.25	+	.	g40.t1
+SBJO01000002.1	AUGUSTUS	start_codon	7943	7945	.	+	0	transcript_id "g40.t1"; gene_id "g40";
+SBJO01000002.1	AUGUSTUS	CDS	7943	8503	0.32	+	0	transcript_id "g40.t1"; gene_id "g40";
+SBJO01000002.1	AUGUSTUS	exon	7943	8503	.	+	.	transcript_id "g40.t1"; gene_id "g40";
+SBJO01000002.1	AUGUSTUS	intron	8504	8788	0.39	+	.	transcript_id "g40.t1"; gene_id "g40";
+SBJO01000002.1	AUGUSTUS	CDS	8789	9187	0.6	+	0	transcript_id "g40.t1"; gene_id "g40";
+SBJO01000002.1	AUGUSTUS	exon	8789	9187	.	+	.	transcript_id "g40.t1"; gene_id "g40";
+SBJO01000002.1	AUGUSTUS	stop_codon	9185	9187	.	+	0	transcript_id "g40.t1"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	transcript	7943	8521	.	+	.	g40.t2
+SBJO01000002.1	GeneMark.hmm3	start_codon	7943	7945	.	+	0	transcript_id "g40.t2"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	CDS	7943	8521	.	+	0	transcript_id "g40.t2"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	mRNA	7943	8521	.	+	.	transcript_id "g40.t2"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	exon	7943	8521	.	+	0	transcript_id "g40.t2"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	8519	8521	.	+	0	transcript_id "g40.t2"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	transcript	8756	9187	.	+	.	g40.t3
+SBJO01000002.1	GeneMark.hmm3	start_codon	8756	8758	.	+	0	transcript_id "g40.t3"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	CDS	8756	9187	.	+	0	transcript_id "g40.t3"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	mRNA	8756	9187	.	+	.	transcript_id "g40.t3"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	exon	8756	9187	.	+	0	transcript_id "g40.t3"; gene_id "g40";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	9185	9187	.	+	0	transcript_id "g40.t3"; gene_id "g40";
+SBJO01000002.1	AUGUSTUS	gene	10027	12558	.	+	.	g41
+SBJO01000002.1	AUGUSTUS	transcript	10027	12558	1	+	.	g41.t1
+SBJO01000002.1	AUGUSTUS	start_codon	10027	10029	.	+	0	transcript_id "g41.t1"; gene_id "g41";
+SBJO01000002.1	AUGUSTUS	CDS	10027	12558	1	+	0	transcript_id "g41.t1"; gene_id "g41";
+SBJO01000002.1	AUGUSTUS	exon	10027	12558	.	+	.	transcript_id "g41.t1"; gene_id "g41";
+SBJO01000002.1	AUGUSTUS	stop_codon	12556	12558	.	+	0	transcript_id "g41.t1"; gene_id "g41";
+SBJO01000002.1	AUGUSTUS	gene	12684	13478	.	-	.	g42
+SBJO01000002.1	AUGUSTUS	transcript	12684	13478	0.67	-	.	g42.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	12684	12686	.	-	0	transcript_id "g42.t1"; gene_id "g42";
+SBJO01000002.1	AUGUSTUS	CDS	12684	13040	0.95	-	0	transcript_id "g42.t1"; gene_id "g42";
+SBJO01000002.1	AUGUSTUS	exon	12684	13040	.	-	.	transcript_id "g42.t1"; gene_id "g42";
+SBJO01000002.1	AUGUSTUS	intron	13041	13166	0.67	-	.	transcript_id "g42.t1"; gene_id "g42";
+SBJO01000002.1	AUGUSTUS	CDS	13167	13478	0.67	-	0	transcript_id "g42.t1"; gene_id "g42";
+SBJO01000002.1	AUGUSTUS	exon	13167	13478	.	-	.	transcript_id "g42.t1"; gene_id "g42";
+SBJO01000002.1	AUGUSTUS	start_codon	13476	13478	.	-	0	transcript_id "g42.t1"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	transcript	12684	13478	.	-	.	g42.t2
+SBJO01000002.1	GeneMark.hmm3	stop_codon	12684	12686	.	-	0	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	CDS	12684	13033	.	-	2	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	exon	12684	13033	.	-	2	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	mRNA	12684	13478	.	-	.	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	intron	13034	13159	.	-	1	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	CDS	13160	13478	.	-	0	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	exon	13160	13478	.	-	0	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	GeneMark.hmm3	start_codon	13476	13478	.	-	0	transcript_id "g42.t2"; gene_id "g42";
+SBJO01000002.1	AUGUSTUS	gene	15936	17027	.	+	.	g43
+SBJO01000002.1	AUGUSTUS	transcript	15936	17027	0.92	+	.	g43.t1
+SBJO01000002.1	AUGUSTUS	start_codon	15936	15938	.	+	0	transcript_id "g43.t1"; gene_id "g43";
+SBJO01000002.1	AUGUSTUS	CDS	15936	17027	0.92	+	0	transcript_id "g43.t1"; gene_id "g43";
+SBJO01000002.1	AUGUSTUS	exon	15936	17027	.	+	.	transcript_id "g43.t1"; gene_id "g43";
+SBJO01000002.1	AUGUSTUS	stop_codon	17025	17027	.	+	0	transcript_id "g43.t1"; gene_id "g43";
+SBJO01000002.1	GeneMark.hmm3	gene	17304	19067	.	+	.	g44
+SBJO01000002.1	GeneMark.hmm3	transcript	17304	19067	.	+	.	g44.t1
+SBJO01000002.1	GeneMark.hmm3	start_codon	17304	17306	.	+	0	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	CDS	17304	17317	.	+	0	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	exon	17304	17317	.	+	0	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	mRNA	17304	19067	.	+	.	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	intron	17318	17385	.	+	2	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	CDS	17386	17594	.	+	1	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	exon	17386	17594	.	+	1	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	intron	17595	17734	.	+	1	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	CDS	17735	17964	.	+	2	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	exon	17735	17964	.	+	2	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	intron	17965	18863	.	+	0	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	CDS	18864	19067	.	+	0	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	exon	18864	19067	.	+	0	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	19065	19067	.	+	0	transcript_id "g44.t1"; gene_id "g44";
+SBJO01000002.1	AUGUSTUS	gene	19543	22124	.	-	.	g45
+SBJO01000002.1	AUGUSTUS	transcript	19543	22124	0.4	-	.	g45.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	19543	19545	.	-	0	transcript_id "g45.t1"; gene_id "g45";
+SBJO01000002.1	AUGUSTUS	CDS	19543	20484	0.92	-	0	transcript_id "g45.t1"; gene_id "g45";
+SBJO01000002.1	AUGUSTUS	exon	19543	20484	.	-	.	transcript_id "g45.t1"; gene_id "g45";
+SBJO01000002.1	AUGUSTUS	intron	20485	21074	0.4	-	.	transcript_id "g45.t1"; gene_id "g45";
+SBJO01000002.1	AUGUSTUS	CDS	21075	22124	0.56	-	0	transcript_id "g45.t1"; gene_id "g45";
+SBJO01000002.1	AUGUSTUS	exon	21075	22124	.	-	.	transcript_id "g45.t1"; gene_id "g45";
+SBJO01000002.1	AUGUSTUS	start_codon	22122	22124	.	-	0	transcript_id "g45.t1"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	transcript	19543	20502	.	-	.	g45.t2
+SBJO01000002.1	GeneMark.hmm3	stop_codon	19543	19545	.	-	0	transcript_id "g45.t2"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	CDS	19543	20502	.	-	0	transcript_id "g45.t2"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	mRNA	19543	20502	.	-	.	transcript_id "g45.t2"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	exon	19543	20502	.	-	0	transcript_id "g45.t2"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	start_codon	20500	20502	.	-	0	transcript_id "g45.t2"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	transcript	20754	22124	.	-	.	g45.t3
+SBJO01000002.1	GeneMark.hmm3	stop_codon	20754	20756	.	-	0	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	CDS	20754	20899	.	-	2	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	exon	20754	20899	.	-	2	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	mRNA	20754	22124	.	-	.	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	intron	20900	21058	.	-	1	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	CDS	21059	22124	.	-	0	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	exon	21059	22124	.	-	0	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	GeneMark.hmm3	start_codon	22122	22124	.	-	0	transcript_id "g45.t3"; gene_id "g45";
+SBJO01000002.1	AUGUSTUS	gene	22375	22794	.	+	.	g46
+SBJO01000002.1	AUGUSTUS	transcript	22375	22794	0.37	+	.	g46.t1
+SBJO01000002.1	AUGUSTUS	start_codon	22375	22377	.	+	0	transcript_id "g46.t1"; gene_id "g46";
+SBJO01000002.1	AUGUSTUS	CDS	22375	22686	0.72	+	0	transcript_id "g46.t1"; gene_id "g46";
+SBJO01000002.1	AUGUSTUS	exon	22375	22686	.	+	.	transcript_id "g46.t1"; gene_id "g46";
+SBJO01000002.1	AUGUSTUS	intron	22687	22728	0.37	+	.	transcript_id "g46.t1"; gene_id "g46";
+SBJO01000002.1	AUGUSTUS	CDS	22729	22794	0.37	+	0	transcript_id "g46.t1"; gene_id "g46";
+SBJO01000002.1	AUGUSTUS	exon	22729	22794	.	+	.	transcript_id "g46.t1"; gene_id "g46";
+SBJO01000002.1	AUGUSTUS	stop_codon	22792	22794	.	+	0	transcript_id "g46.t1"; gene_id "g46";
+SBJO01000002.1	GeneMark.hmm3	transcript	22375	22794	.	+	.	g46.t2
+SBJO01000002.1	GeneMark.hmm3	start_codon	22375	22377	.	+	0	transcript_id "g46.t2"; gene_id "g46";
+SBJO01000002.1	GeneMark.hmm3	CDS	22375	22794	.	+	0	transcript_id "g46.t2"; gene_id "g46";
+SBJO01000002.1	GeneMark.hmm3	mRNA	22375	22794	.	+	.	transcript_id "g46.t2"; gene_id "g46";
+SBJO01000002.1	GeneMark.hmm3	exon	22375	22794	.	+	0	transcript_id "g46.t2"; gene_id "g46";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	22792	22794	.	+	0	transcript_id "g46.t2"; gene_id "g46";
+SBJO01000002.1	GeneMark.hmm3	gene	22844	23893	.	-	.	g47
+SBJO01000002.1	GeneMark.hmm3	transcript	22844	23893	.	-	.	g47.t1
+SBJO01000002.1	GeneMark.hmm3	stop_codon	22844	22846	.	-	0	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	CDS	22844	22854	.	-	2	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	exon	22844	22854	.	-	2	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	mRNA	22844	23893	.	-	.	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	intron	22855	22974	.	-	1	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	CDS	22975	23324	.	-	1	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	exon	22975	23324	.	-	1	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	intron	23325	23480	.	-	2	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	CDS	23481	23893	.	-	0	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	exon	23481	23893	.	-	0	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	GeneMark.hmm3	start_codon	23891	23893	.	-	0	transcript_id "g47.t1"; gene_id "g47";
+SBJO01000002.1	AUGUSTUS	gene	22851	26376	.	-	.	g48
+SBJO01000002.1	AUGUSTUS	transcript	22851	26376	0.03	-	.	g48.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	22851	22853	.	-	0	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	CDS	22851	22858	0.25	-	2	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	exon	22851	22858	.	-	.	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	intron	22859	22974	0.2	-	.	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	CDS	22975	23400	0.2	-	2	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	exon	22975	23400	.	-	.	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	intron	23401	23547	0.23	-	.	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	CDS	23548	23654	0.22	-	1	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	exon	23548	23654	.	-	.	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	intron	23655	24523	0.45	-	.	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	CDS	24524	26376	0.52	-	0	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	exon	24524	26376	.	-	.	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	start_codon	26374	26376	.	-	0	transcript_id "g48.t1"; gene_id "g48";
+SBJO01000002.1	GeneMark.hmm3	transcript	24508	26376	.	-	.	g48.t2
+SBJO01000002.1	GeneMark.hmm3	stop_codon	24508	24510	.	-	0	transcript_id "g48.t2"; gene_id "g48";
+SBJO01000002.1	GeneMark.hmm3	CDS	24508	26376	.	-	0	transcript_id "g48.t2"; gene_id "g48";
+SBJO01000002.1	GeneMark.hmm3	mRNA	24508	26376	.	-	.	transcript_id "g48.t2"; gene_id "g48";
+SBJO01000002.1	GeneMark.hmm3	exon	24508	26376	.	-	0	transcript_id "g48.t2"; gene_id "g48";
+SBJO01000002.1	GeneMark.hmm3	start_codon	26374	26376	.	-	0	transcript_id "g48.t2"; gene_id "g48";
+SBJO01000002.1	AUGUSTUS	gene	27862	29499	.	-	.	g49
+SBJO01000002.1	AUGUSTUS	transcript	27862	29499	0.7	-	.	g49.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	27862	27864	.	-	0	transcript_id "g49.t1"; gene_id "g49";
+SBJO01000002.1	AUGUSTUS	CDS	27862	29499	0.7	-	0	transcript_id "g49.t1"; gene_id "g49";
+SBJO01000002.1	AUGUSTUS	exon	27862	29499	.	-	.	transcript_id "g49.t1"; gene_id "g49";
+SBJO01000002.1	AUGUSTUS	start_codon	29497	29499	.	-	0	transcript_id "g49.t1"; gene_id "g49";
+SBJO01000002.1	AUGUSTUS	gene	31638	33134	.	+	.	g50
+SBJO01000002.1	AUGUSTUS	transcript	31638	33134	1	+	.	g50.t1
+SBJO01000002.1	AUGUSTUS	start_codon	31638	31640	.	+	0	transcript_id "g50.t1"; gene_id "g50";
+SBJO01000002.1	AUGUSTUS	CDS	31638	33134	1	+	0	transcript_id "g50.t1"; gene_id "g50";
+SBJO01000002.1	AUGUSTUS	exon	31638	33134	.	+	.	transcript_id "g50.t1"; gene_id "g50";
+SBJO01000002.1	AUGUSTUS	stop_codon	33132	33134	.	+	0	transcript_id "g50.t1"; gene_id "g50";
+SBJO01000002.1	GeneMark.hmm3	gene	33320	34246	.	-	.	g51
+SBJO01000002.1	GeneMark.hmm3	transcript	33320	34246	.	-	.	g51.t1
+SBJO01000002.1	GeneMark.hmm3	stop_codon	33320	33322	.	-	0	transcript_id "g51.t1"; gene_id "g51";
+SBJO01000002.1	GeneMark.hmm3	CDS	33320	34246	.	-	0	transcript_id "g51.t1"; gene_id "g51";
+SBJO01000002.1	GeneMark.hmm3	mRNA	33320	34246	.	-	.	transcript_id "g51.t1"; gene_id "g51";
+SBJO01000002.1	GeneMark.hmm3	exon	33320	34246	.	-	0	transcript_id "g51.t1"; gene_id "g51";
+SBJO01000002.1	GeneMark.hmm3	start_codon	34244	34246	.	-	0	transcript_id "g51.t1"; gene_id "g51";
+SBJO01000002.1	AUGUSTUS	gene	33320	36620	.	-	.	g52
+SBJO01000002.1	AUGUSTUS	transcript	33320	36620	0.91	-	.	g52.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	33320	33322	.	-	0	transcript_id "g52.t1"; gene_id "g52";
+SBJO01000002.1	AUGUSTUS	CDS	33320	34241	0.96	-	1	transcript_id "g52.t1"; gene_id "g52";
+SBJO01000002.1	AUGUSTUS	exon	33320	34241	.	-	.	transcript_id "g52.t1"; gene_id "g52";
+SBJO01000002.1	AUGUSTUS	intron	34242	35676	0.95	-	.	transcript_id "g52.t1"; gene_id "g52";
+SBJO01000002.1	AUGUSTUS	CDS	35677	36620	0.91	-	0	transcript_id "g52.t1"; gene_id "g52";
+SBJO01000002.1	AUGUSTUS	exon	35677	36620	.	-	.	transcript_id "g52.t1"; gene_id "g52";
+SBJO01000002.1	AUGUSTUS	start_codon	36618	36620	.	-	0	transcript_id "g52.t1"; gene_id "g52";
+SBJO01000002.1	GeneMark.hmm3	transcript	35667	36620	.	-	.	g52.t2
+SBJO01000002.1	GeneMark.hmm3	stop_codon	35667	35669	.	-	0	transcript_id "g52.t2"; gene_id "g52";
+SBJO01000002.1	GeneMark.hmm3	CDS	35667	36620	.	-	0	transcript_id "g52.t2"; gene_id "g52";
+SBJO01000002.1	GeneMark.hmm3	mRNA	35667	36620	.	-	.	transcript_id "g52.t2"; gene_id "g52";
+SBJO01000002.1	GeneMark.hmm3	exon	35667	36620	.	-	0	transcript_id "g52.t2"; gene_id "g52";
+SBJO01000002.1	GeneMark.hmm3	start_codon	36618	36620	.	-	0	transcript_id "g52.t2"; gene_id "g52";
+SBJO01000002.1	AUGUSTUS	gene	36930	38324	.	-	.	g53
+SBJO01000002.1	AUGUSTUS	transcript	36930	38324	0.75	-	.	g53.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	36930	36932	.	-	0	transcript_id "g53.t1"; gene_id "g53";
+SBJO01000002.1	AUGUSTUS	CDS	36930	38324	0.75	-	0	transcript_id "g53.t1"; gene_id "g53";
+SBJO01000002.1	AUGUSTUS	exon	36930	38324	.	-	.	transcript_id "g53.t1"; gene_id "g53";
+SBJO01000002.1	AUGUSTUS	start_codon	38322	38324	.	-	0	transcript_id "g53.t1"; gene_id "g53";
+SBJO01000002.1	AUGUSTUS	gene	38928	40099	.	+	.	g54
+SBJO01000002.1	AUGUSTUS	transcript	38928	40099	0.4	+	.	g54.t1
+SBJO01000002.1	AUGUSTUS	start_codon	38928	38930	.	+	0	transcript_id "g54.t1"; gene_id "g54";
+SBJO01000002.1	AUGUSTUS	CDS	38928	39564	0.79	+	0	transcript_id "g54.t1"; gene_id "g54";
+SBJO01000002.1	AUGUSTUS	exon	38928	39564	.	+	.	transcript_id "g54.t1"; gene_id "g54";
+SBJO01000002.1	AUGUSTUS	intron	39565	39683	0.79	+	.	transcript_id "g54.t1"; gene_id "g54";
+SBJO01000002.1	AUGUSTUS	CDS	39684	40099	0.4	+	2	transcript_id "g54.t1"; gene_id "g54";
+SBJO01000002.1	AUGUSTUS	exon	39684	40099	.	+	.	transcript_id "g54.t1"; gene_id "g54";
+SBJO01000002.1	AUGUSTUS	stop_codon	40097	40099	.	+	0	transcript_id "g54.t1"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	transcript	38928	39570	.	+	.	g54.t2
+SBJO01000002.1	GeneMark.hmm3	start_codon	38928	38930	.	+	0	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	CDS	38928	39515	.	+	0	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	exon	38928	39515	.	+	0	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	mRNA	38928	39570	.	+	.	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	intron	39516	39558	.	+	0	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	CDS	39559	39570	.	+	0	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	exon	39559	39570	.	+	0	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	39568	39570	.	+	0	transcript_id "g54.t2"; gene_id "g54";
+SBJO01000002.1	GeneMark.hmm3	gene	39641	40048	.	-	.	g55
+SBJO01000002.1	GeneMark.hmm3	transcript	39641	40048	.	-	.	g55.t1
+SBJO01000002.1	GeneMark.hmm3	stop_codon	39641	39643	.	-	0	transcript_id "g55.t1"; gene_id "g55";
+SBJO01000002.1	GeneMark.hmm3	CDS	39641	40048	.	-	0	transcript_id "g55.t1"; gene_id "g55";
+SBJO01000002.1	GeneMark.hmm3	mRNA	39641	40048	.	-	.	transcript_id "g55.t1"; gene_id "g55";
+SBJO01000002.1	GeneMark.hmm3	exon	39641	40048	.	-	0	transcript_id "g55.t1"; gene_id "g55";
+SBJO01000002.1	GeneMark.hmm3	start_codon	40046	40048	.	-	0	transcript_id "g55.t1"; gene_id "g55";
+SBJO01000002.1	AUGUSTUS	gene	40464	41939	.	+	.	g56
+SBJO01000002.1	AUGUSTUS	transcript	40464	41939	0.97	+	.	g56.t1
+SBJO01000002.1	AUGUSTUS	start_codon	40464	40466	.	+	0	transcript_id "g56.t1"; gene_id "g56";
+SBJO01000002.1	AUGUSTUS	CDS	40464	41939	0.97	+	0	transcript_id "g56.t1"; gene_id "g56";
+SBJO01000002.1	AUGUSTUS	exon	40464	41939	.	+	.	transcript_id "g56.t1"; gene_id "g56";
+SBJO01000002.1	AUGUSTUS	stop_codon	41937	41939	.	+	0	transcript_id "g56.t1"; gene_id "g56";
+SBJO01000002.1	AUGUSTUS	gene	42714	43268	.	-	.	g57
+SBJO01000002.1	AUGUSTUS	transcript	42714	43268	1	-	.	g57.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	42714	42716	.	-	0	transcript_id "g57.t1"; gene_id "g57";
+SBJO01000002.1	AUGUSTUS	CDS	42714	43268	1	-	0	transcript_id "g57.t1"; gene_id "g57";
+SBJO01000002.1	AUGUSTUS	exon	42714	43268	.	-	.	transcript_id "g57.t1"; gene_id "g57";
+SBJO01000002.1	AUGUSTUS	start_codon	43266	43268	.	-	0	transcript_id "g57.t1"; gene_id "g57";
+SBJO01000002.1	AUGUSTUS	gene	43728	44282	.	+	.	g58
+SBJO01000002.1	AUGUSTUS	transcript	43728	44282	0.93	+	.	g58.t1
+SBJO01000002.1	AUGUSTUS	start_codon	43728	43730	.	+	0	transcript_id "g58.t1"; gene_id "g58";
+SBJO01000002.1	AUGUSTUS	CDS	43728	44282	0.93	+	0	transcript_id "g58.t1"; gene_id "g58";
+SBJO01000002.1	AUGUSTUS	exon	43728	44282	.	+	.	transcript_id "g58.t1"; gene_id "g58";
+SBJO01000002.1	AUGUSTUS	stop_codon	44280	44282	.	+	0	transcript_id "g58.t1"; gene_id "g58";
+SBJO01000002.1	AUGUSTUS	gene	44516	45439	.	-	.	g59
+SBJO01000002.1	AUGUSTUS	transcript	44516	45439	1	-	.	g59.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	44516	44518	.	-	0	transcript_id "g59.t1"; gene_id "g59";
+SBJO01000002.1	AUGUSTUS	CDS	44516	45439	1	-	0	transcript_id "g59.t1"; gene_id "g59";
+SBJO01000002.1	AUGUSTUS	exon	44516	45439	.	-	.	transcript_id "g59.t1"; gene_id "g59";
+SBJO01000002.1	AUGUSTUS	start_codon	45437	45439	.	-	0	transcript_id "g59.t1"; gene_id "g59";
+SBJO01000002.1	AUGUSTUS	gene	46191	47018	.	+	.	g60
+SBJO01000002.1	AUGUSTUS	transcript	46191	47018	0.66	+	.	g60.t1
+SBJO01000002.1	AUGUSTUS	start_codon	46191	46193	.	+	0	transcript_id "g60.t1"; gene_id "g60";
+SBJO01000002.1	AUGUSTUS	CDS	46191	47018	0.66	+	0	transcript_id "g60.t1"; gene_id "g60";
+SBJO01000002.1	AUGUSTUS	exon	46191	47018	.	+	.	transcript_id "g60.t1"; gene_id "g60";
+SBJO01000002.1	AUGUSTUS	stop_codon	47016	47018	.	+	0	transcript_id "g60.t1"; gene_id "g60";
+SBJO01000002.1	AUGUSTUS	gene	47159	47851	.	+	.	g61
+SBJO01000002.1	AUGUSTUS	transcript	47159	47851	0.65	+	.	g61.t1
+SBJO01000002.1	AUGUSTUS	start_codon	47159	47161	.	+	0	transcript_id "g61.t1"; gene_id "g61";
+SBJO01000002.1	AUGUSTUS	CDS	47159	47851	0.65	+	0	transcript_id "g61.t1"; gene_id "g61";
+SBJO01000002.1	AUGUSTUS	exon	47159	47851	.	+	.	transcript_id "g61.t1"; gene_id "g61";
+SBJO01000002.1	AUGUSTUS	stop_codon	47849	47851	.	+	0	transcript_id "g61.t1"; gene_id "g61";
+SBJO01000002.1	AUGUSTUS	gene	48200	49148	.	-	.	g62
+SBJO01000002.1	AUGUSTUS	transcript	48200	49124	0.71	-	.	g62.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	48200	48202	.	-	0	transcript_id "g62.t1"; gene_id "g62";
+SBJO01000002.1	AUGUSTUS	CDS	48200	48269	0.8	-	1	transcript_id "g62.t1"; gene_id "g62";
+SBJO01000002.1	AUGUSTUS	exon	48200	48269	.	-	.	transcript_id "g62.t1"; gene_id "g62";
+SBJO01000002.1	AUGUSTUS	intron	48270	48609	0.82	-	.	transcript_id "g62.t1"; gene_id "g62";
+SBJO01000002.1	AUGUSTUS	CDS	48610	49124	0.86	-	0	transcript_id "g62.t1"; gene_id "g62";
+SBJO01000002.1	AUGUSTUS	exon	48610	49124	.	-	.	transcript_id "g62.t1"; gene_id "g62";
+SBJO01000002.1	AUGUSTUS	start_codon	49122	49124	.	-	0	transcript_id "g62.t1"; gene_id "g62";
+SBJO01000002.1	GeneMark.hmm3	transcript	48597	49148	.	-	.	g62.t2
+SBJO01000002.1	GeneMark.hmm3	stop_codon	48597	48599	.	-	0	transcript_id "g62.t2"; gene_id "g62";
+SBJO01000002.1	GeneMark.hmm3	CDS	48597	49148	.	-	0	transcript_id "g62.t2"; gene_id "g62";
+SBJO01000002.1	GeneMark.hmm3	mRNA	48597	49148	.	-	.	transcript_id "g62.t2"; gene_id "g62";
+SBJO01000002.1	GeneMark.hmm3	exon	48597	49148	.	-	0	transcript_id "g62.t2"; gene_id "g62";
+SBJO01000002.1	GeneMark.hmm3	start_codon	49146	49148	.	-	0	transcript_id "g62.t2"; gene_id "g62";
+SBJO01000002.1	AUGUSTUS	gene	49599	51328	.	+	.	g63
+SBJO01000002.1	AUGUSTUS	transcript	49599	51328	0.51	+	.	g63.t1
+SBJO01000002.1	AUGUSTUS	start_codon	49599	49601	.	+	0	transcript_id "g63.t1"; gene_id "g63";
+SBJO01000002.1	AUGUSTUS	CDS	49599	50556	0.6	+	0	transcript_id "g63.t1"; gene_id "g63";
+SBJO01000002.1	AUGUSTUS	exon	49599	50556	.	+	.	transcript_id "g63.t1"; gene_id "g63";
+SBJO01000002.1	AUGUSTUS	intron	50557	50795	0.51	+	.	transcript_id "g63.t1"; gene_id "g63";
+SBJO01000002.1	AUGUSTUS	CDS	50796	51328	0.51	+	2	transcript_id "g63.t1"; gene_id "g63";
+SBJO01000002.1	AUGUSTUS	exon	50796	51328	.	+	.	transcript_id "g63.t1"; gene_id "g63";
+SBJO01000002.1	AUGUSTUS	stop_codon	51326	51328	.	+	0	transcript_id "g63.t1"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	transcript	49599	51328	.	+	.	g63.t2
+SBJO01000002.1	GeneMark.hmm3	start_codon	49599	49601	.	+	0	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	CDS	49599	50556	.	+	0	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	exon	49599	50556	.	+	0	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	mRNA	49599	51328	.	+	.	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	intron	50557	50783	.	+	1	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	CDS	50784	51328	.	+	2	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	exon	50784	51328	.	+	2	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	51326	51328	.	+	0	transcript_id "g63.t2"; gene_id "g63";
+SBJO01000002.1	AUGUSTUS	gene	51573	52799	.	-	.	g64
+SBJO01000002.1	AUGUSTUS	transcript	51573	52799	0.86	-	.	g64.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	51573	51575	.	-	0	transcript_id "g64.t1"; gene_id "g64";
+SBJO01000002.1	AUGUSTUS	CDS	51573	52799	0.86	-	0	transcript_id "g64.t1"; gene_id "g64";
+SBJO01000002.1	AUGUSTUS	exon	51573	52799	.	-	.	transcript_id "g64.t1"; gene_id "g64";
+SBJO01000002.1	AUGUSTUS	start_codon	52797	52799	.	-	0	transcript_id "g64.t1"; gene_id "g64";
+SBJO01000002.1	AUGUSTUS	gene	53017	53787	.	-	.	g65
+SBJO01000002.1	AUGUSTUS	transcript	53017	53787	0.86	-	.	g65.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	53017	53019	.	-	0	transcript_id "g65.t1"; gene_id "g65";
+SBJO01000002.1	AUGUSTUS	CDS	53017	53409	0.86	-	0	transcript_id "g65.t1"; gene_id "g65";
+SBJO01000002.1	AUGUSTUS	exon	53017	53409	.	-	.	transcript_id "g65.t1"; gene_id "g65";
+SBJO01000002.1	AUGUSTUS	intron	53410	53586	0.97	-	.	transcript_id "g65.t1"; gene_id "g65";
+SBJO01000002.1	AUGUSTUS	CDS	53587	53787	0.97	-	0	transcript_id "g65.t1"; gene_id "g65";
+SBJO01000002.1	AUGUSTUS	exon	53587	53787	.	-	.	transcript_id "g65.t1"; gene_id "g65";
+SBJO01000002.1	AUGUSTUS	start_codon	53785	53787	.	-	0	transcript_id "g65.t1"; gene_id "g65";
+SBJO01000002.1	GeneMark.hmm3	transcript	53017	53442	.	-	.	g65.t2
+SBJO01000002.1	GeneMark.hmm3	stop_codon	53017	53019	.	-	0	transcript_id "g65.t2"; gene_id "g65";
+SBJO01000002.1	GeneMark.hmm3	CDS	53017	53442	.	-	0	transcript_id "g65.t2"; gene_id "g65";
+SBJO01000002.1	GeneMark.hmm3	mRNA	53017	53442	.	-	.	transcript_id "g65.t2"; gene_id "g65";
+SBJO01000002.1	GeneMark.hmm3	exon	53017	53442	.	-	0	transcript_id "g65.t2"; gene_id "g65";
+SBJO01000002.1	GeneMark.hmm3	start_codon	53440	53442	.	-	0	transcript_id "g65.t2"; gene_id "g65";
+SBJO01000002.1	AUGUSTUS	gene	54231	54707	.	+	.	g66
+SBJO01000002.1	AUGUSTUS	transcript	54231	54707	0.98	+	.	g66.t1
+SBJO01000002.1	AUGUSTUS	start_codon	54231	54233	.	+	0	transcript_id "g66.t1"; gene_id "g66";
+SBJO01000002.1	AUGUSTUS	CDS	54231	54707	0.98	+	0	transcript_id "g66.t1"; gene_id "g66";
+SBJO01000002.1	AUGUSTUS	exon	54231	54707	.	+	.	transcript_id "g66.t1"; gene_id "g66";
+SBJO01000002.1	AUGUSTUS	stop_codon	54705	54707	.	+	0	transcript_id "g66.t1"; gene_id "g66";
+SBJO01000002.1	AUGUSTUS	gene	54984	56174	.	-	.	g67
+SBJO01000002.1	AUGUSTUS	transcript	54984	56174	1	-	.	g67.t1
+SBJO01000002.1	AUGUSTUS	stop_codon	54984	54986	.	-	0	transcript_id "g67.t1"; gene_id "g67";
+SBJO01000002.1	AUGUSTUS	CDS	54984	56174	1	-	0	transcript_id "g67.t1"; gene_id "g67";
+SBJO01000002.1	AUGUSTUS	exon	54984	56174	.	-	.	transcript_id "g67.t1"; gene_id "g67";
+SBJO01000002.1	AUGUSTUS	start_codon	56172	56174	.	-	0	transcript_id "g67.t1"; gene_id "g67";
+SBJO01000002.1	AUGUSTUS	gene	57229	62864	.	+	.	g68
+SBJO01000002.1	AUGUSTUS	transcript	57229	62864	.	+	.	g68.t1
+SBJO01000002.1	AUGUSTUS	start_codon	57229	57231	.	+	0	transcript_id "g68.t1"; gene_id "g68";
+SBJO01000002.1	AUGUSTUS	CDS	57229	57512	0.8	+	0	transcript_id "g68.t1"; gene_id "g68";
+SBJO01000002.1	AUGUSTUS	exon	57229	57512	.	+	.	transcript_id "g68.t1"; gene_id "g68";
+SBJO01000002.1	AUGUSTUS	intron	57513	62482	.	+	.	transcript_id "g68.t1"; gene_id "g68";
+SBJO01000002.1	AUGUSTUS	CDS	62483	62864	0.01	+	1	transcript_id "g68.t1"; gene_id "g68";
+SBJO01000002.1	AUGUSTUS	exon	62483	62864	.	+	.	transcript_id "g68.t1"; gene_id "g68";
+SBJO01000002.1	AUGUSTUS	stop_codon	62862	62864	.	+	0	transcript_id "g68.t1"; gene_id "g68";
+SBJO01000002.1	GeneMark.hmm3	gene	61019	61729	.	+	.	g69
+SBJO01000002.1	GeneMark.hmm3	transcript	61019	61729	.	+	.	g69.t1
+SBJO01000002.1	GeneMark.hmm3	start_codon	61019	61021	.	+	0	transcript_id "g69.t1"; gene_id "g69";
+SBJO01000002.1	GeneMark.hmm3	CDS	61019	61729	.	+	0	transcript_id "g69.t1"; gene_id "g69";
+SBJO01000002.1	GeneMark.hmm3	mRNA	61019	61729	.	+	.	transcript_id "g69.t1"; gene_id "g69";
+SBJO01000002.1	GeneMark.hmm3	exon	61019	61729	.	+	0	transcript_id "g69.t1"; gene_id "g69";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	61727	61729	.	+	0	transcript_id "g69.t1"; gene_id "g69";
+SBJO01000002.1	GeneMark.hmm3	gene	62391	62864	.	+	.	g70
+SBJO01000002.1	GeneMark.hmm3	transcript	62391	62864	.	+	.	g70.t1
+SBJO01000002.1	GeneMark.hmm3	start_codon	62391	62393	.	+	0	transcript_id "g70.t1"; gene_id "g70";
+SBJO01000002.1	GeneMark.hmm3	CDS	62391	62864	.	+	0	transcript_id "g70.t1"; gene_id "g70";
+SBJO01000002.1	GeneMark.hmm3	mRNA	62391	62864	.	+	.	transcript_id "g70.t1"; gene_id "g70";
+SBJO01000002.1	GeneMark.hmm3	exon	62391	62864	.	+	0	transcript_id "g70.t1"; gene_id "g70";
+SBJO01000002.1	GeneMark.hmm3	stop_codon	62862	62864	.	+	0	transcript_id "g70.t1"; gene_id "g70";
+SBJO01000003.1	AUGUSTUS	gene	700	2189	.	+	.	g71
+SBJO01000003.1	AUGUSTUS	transcript	700	2189	0.33	+	.	g71.t1
+SBJO01000003.1	AUGUSTUS	start_codon	700	702	.	+	0	transcript_id "g71.t1"; gene_id "g71";
+SBJO01000003.1	AUGUSTUS	CDS	700	987	0.51	+	0	transcript_id "g71.t1"; gene_id "g71";
+SBJO01000003.1	AUGUSTUS	exon	700	987	.	+	.	transcript_id "g71.t1"; gene_id "g71";
+SBJO01000003.1	AUGUSTUS	intron	988	1592	0.37	+	.	transcript_id "g71.t1"; gene_id "g71";
+SBJO01000003.1	AUGUSTUS	CDS	1593	2189	0.44	+	0	transcript_id "g71.t1"; gene_id "g71";
+SBJO01000003.1	AUGUSTUS	exon	1593	2189	.	+	.	transcript_id "g71.t1"; gene_id "g71";
+SBJO01000003.1	AUGUSTUS	stop_codon	2187	2189	.	+	0	transcript_id "g71.t1"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	transcript	700	2189	.	+	.	g71.t2
+SBJO01000003.1	GeneMark.hmm3	start_codon	700	702	.	+	0	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	CDS	700	1046	.	+	0	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	exon	700	1046	.	+	0	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	mRNA	700	2189	.	+	.	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	intron	1047	1648	.	+	2	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	CDS	1649	2189	.	+	1	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	exon	1649	2189	.	+	1	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	GeneMark.hmm3	stop_codon	2187	2189	.	+	0	transcript_id "g71.t2"; gene_id "g71";
+SBJO01000003.1	AUGUSTUS	gene	2248	3078	.	+	.	g72
+SBJO01000003.1	AUGUSTUS	transcript	2248	3078	0.93	+	.	g72.t1
+SBJO01000003.1	AUGUSTUS	start_codon	2248	2250	.	+	0	transcript_id "g72.t1"; gene_id "g72";
+SBJO01000003.1	AUGUSTUS	CDS	2248	3078	0.93	+	0	transcript_id "g72.t1"; gene_id "g72";
+SBJO01000003.1	AUGUSTUS	exon	2248	3078	.	+	.	transcript_id "g72.t1"; gene_id "g72";
+SBJO01000003.1	AUGUSTUS	stop_codon	3076	3078	.	+	0	transcript_id "g72.t1"; gene_id "g72";
+SBJO01000003.1	AUGUSTUS	gene	3164	3973	.	-	.	g73
+SBJO01000003.1	AUGUSTUS	transcript	3164	3973	0.72	-	.	g73.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	3164	3166	.	-	0	transcript_id "g73.t1"; gene_id "g73";
+SBJO01000003.1	AUGUSTUS	CDS	3164	3196	0.74	-	0	transcript_id "g73.t1"; gene_id "g73";
+SBJO01000003.1	AUGUSTUS	exon	3164	3196	.	-	.	transcript_id "g73.t1"; gene_id "g73";
+SBJO01000003.1	AUGUSTUS	intron	3197	3667	0.72	-	.	transcript_id "g73.t1"; gene_id "g73";
+SBJO01000003.1	AUGUSTUS	CDS	3668	3973	0.93	-	0	transcript_id "g73.t1"; gene_id "g73";
+SBJO01000003.1	AUGUSTUS	exon	3668	3973	.	-	.	transcript_id "g73.t1"; gene_id "g73";
+SBJO01000003.1	AUGUSTUS	start_codon	3971	3973	.	-	0	transcript_id "g73.t1"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	transcript	3406	3973	.	-	.	g73.t2
+SBJO01000003.1	GeneMark.hmm3	stop_codon	3406	3408	.	-	0	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	CDS	3406	3431	.	-	2	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	exon	3406	3431	.	-	2	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	mRNA	3406	3973	.	-	.	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	intron	3432	3651	.	-	1	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	CDS	3652	3973	.	-	0	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	exon	3652	3973	.	-	0	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	GeneMark.hmm3	start_codon	3971	3973	.	-	0	transcript_id "g73.t2"; gene_id "g73";
+SBJO01000003.1	AUGUSTUS	gene	4286	6862	.	-	.	g74
+SBJO01000003.1	AUGUSTUS	transcript	4286	6862	0.79	-	.	g74.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	4286	4288	.	-	0	transcript_id "g74.t1"; gene_id "g74";
+SBJO01000003.1	AUGUSTUS	CDS	4286	6862	0.79	-	0	transcript_id "g74.t1"; gene_id "g74";
+SBJO01000003.1	AUGUSTUS	exon	4286	6862	.	-	.	transcript_id "g74.t1"; gene_id "g74";
+SBJO01000003.1	AUGUSTUS	start_codon	6860	6862	.	-	0	transcript_id "g74.t1"; gene_id "g74";
+SBJO01000003.1	AUGUSTUS	gene	8114	9064	.	-	.	g75
+SBJO01000003.1	AUGUSTUS	transcript	8114	9064	1	-	.	g75.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	8114	8116	.	-	0	transcript_id "g75.t1"; gene_id "g75";
+SBJO01000003.1	AUGUSTUS	CDS	8114	9064	1	-	0	transcript_id "g75.t1"; gene_id "g75";
+SBJO01000003.1	AUGUSTUS	exon	8114	9064	.	-	.	transcript_id "g75.t1"; gene_id "g75";
+SBJO01000003.1	AUGUSTUS	start_codon	9062	9064	.	-	0	transcript_id "g75.t1"; gene_id "g75";
+SBJO01000003.1	AUGUSTUS	gene	9297	13956	.	+	.	g76
+SBJO01000003.1	AUGUSTUS	transcript	9297	13956	0.7	+	.	g76.t1
+SBJO01000003.1	AUGUSTUS	start_codon	9297	9299	.	+	0	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	CDS	9297	11255	0.95	+	0	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	exon	9297	11255	.	+	.	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	intron	11256	11673	1	+	.	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	CDS	11674	13155	0.75	+	0	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	exon	11674	13155	.	+	.	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	intron	13156	13203	0.75	+	.	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	CDS	13204	13956	0.75	+	0	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	exon	13204	13956	.	+	.	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	AUGUSTUS	stop_codon	13954	13956	.	+	0	transcript_id "g76.t1"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	transcript	9297	13956	.	+	.	g76.t2
+SBJO01000003.1	GeneMark.hmm3	start_codon	9297	9299	.	+	0	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	CDS	9297	11255	.	+	0	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	exon	9297	11255	.	+	0	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	mRNA	9297	13956	.	+	.	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	intron	11256	11673	.	+	0	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	CDS	11674	13956	.	+	0	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	exon	11674	13956	.	+	0	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	stop_codon	13954	13956	.	+	0	transcript_id "g76.t2"; gene_id "g76";
+SBJO01000003.1	GeneMark.hmm3	gene	14518	15726	.	-	.	g77
+SBJO01000003.1	GeneMark.hmm3	transcript	14518	15726	.	-	.	g77.t1
+SBJO01000003.1	GeneMark.hmm3	stop_codon	14518	14520	.	-	0	transcript_id "g77.t1"; gene_id "g77";
+SBJO01000003.1	GeneMark.hmm3	CDS	14518	15726	.	-	0	transcript_id "g77.t1"; gene_id "g77";
+SBJO01000003.1	GeneMark.hmm3	mRNA	14518	15726	.	-	.	transcript_id "g77.t1"; gene_id "g77";
+SBJO01000003.1	GeneMark.hmm3	exon	14518	15726	.	-	0	transcript_id "g77.t1"; gene_id "g77";
+SBJO01000003.1	GeneMark.hmm3	start_codon	15724	15726	.	-	0	transcript_id "g77.t1"; gene_id "g77";
+SBJO01000003.1	AUGUSTUS	gene	14518	16245	.	-	.	g78
+SBJO01000003.1	AUGUSTUS	transcript	14518	16245	0.68	-	.	g78.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	14518	14520	.	-	0	transcript_id "g78.t1"; gene_id "g78";
+SBJO01000003.1	AUGUSTUS	CDS	14518	15710	0.68	-	2	transcript_id "g78.t1"; gene_id "g78";
+SBJO01000003.1	AUGUSTUS	exon	14518	15710	.	-	.	transcript_id "g78.t1"; gene_id "g78";
+SBJO01000003.1	AUGUSTUS	intron	15711	15974	0.68	-	.	transcript_id "g78.t1"; gene_id "g78";
+SBJO01000003.1	AUGUSTUS	CDS	15975	16245	0.97	-	0	transcript_id "g78.t1"; gene_id "g78";
+SBJO01000003.1	AUGUSTUS	exon	15975	16245	.	-	.	transcript_id "g78.t1"; gene_id "g78";
+SBJO01000003.1	AUGUSTUS	start_codon	16243	16245	.	-	0	transcript_id "g78.t1"; gene_id "g78";
+SBJO01000003.1	AUGUSTUS	gene	16478	17776	.	+	.	g79
+SBJO01000003.1	AUGUSTUS	transcript	16478	17776	0.46	+	.	g79.t1
+SBJO01000003.1	AUGUSTUS	start_codon	16478	16480	.	+	0	transcript_id "g79.t1"; gene_id "g79";
+SBJO01000003.1	AUGUSTUS	CDS	16478	16768	0.46	+	0	transcript_id "g79.t1"; gene_id "g79";
+SBJO01000003.1	AUGUSTUS	exon	16478	16768	.	+	.	transcript_id "g79.t1"; gene_id "g79";
+SBJO01000003.1	AUGUSTUS	intron	16769	17287	0.81	+	.	transcript_id "g79.t1"; gene_id "g79";
+SBJO01000003.1	AUGUSTUS	CDS	17288	17776	0.81	+	0	transcript_id "g79.t1"; gene_id "g79";
+SBJO01000003.1	AUGUSTUS	exon	17288	17776	.	+	.	transcript_id "g79.t1"; gene_id "g79";
+SBJO01000003.1	AUGUSTUS	stop_codon	17774	17776	.	+	0	transcript_id "g79.t1"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	transcript	16478	16837	.	+	.	g79.t2
+SBJO01000003.1	GeneMark.hmm3	start_codon	16478	16480	.	+	0	transcript_id "g79.t2"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	CDS	16478	16837	.	+	0	transcript_id "g79.t2"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	mRNA	16478	16837	.	+	.	transcript_id "g79.t2"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	exon	16478	16837	.	+	0	transcript_id "g79.t2"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	stop_codon	16835	16837	.	+	0	transcript_id "g79.t2"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	transcript	17264	17776	.	+	.	g79.t3
+SBJO01000003.1	GeneMark.hmm3	start_codon	17264	17266	.	+	0	transcript_id "g79.t3"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	CDS	17264	17776	.	+	0	transcript_id "g79.t3"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	mRNA	17264	17776	.	+	.	transcript_id "g79.t3"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	exon	17264	17776	.	+	0	transcript_id "g79.t3"; gene_id "g79";
+SBJO01000003.1	GeneMark.hmm3	stop_codon	17774	17776	.	+	0	transcript_id "g79.t3"; gene_id "g79";
+SBJO01000003.1	AUGUSTUS	gene	17805	19289	.	-	.	g80
+SBJO01000003.1	AUGUSTUS	transcript	17805	19289	0.37	-	.	g80.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	17805	17807	.	-	0	transcript_id "g80.t1"; gene_id "g80";
+SBJO01000003.1	AUGUSTUS	CDS	17805	18255	0.44	-	1	transcript_id "g80.t1"; gene_id "g80";
+SBJO01000003.1	AUGUSTUS	exon	17805	18255	.	-	.	transcript_id "g80.t1"; gene_id "g80";
+SBJO01000003.1	AUGUSTUS	intron	18256	18447	0.44	-	.	transcript_id "g80.t1"; gene_id "g80";
+SBJO01000003.1	AUGUSTUS	CDS	18448	19289	0.37	-	0	transcript_id "g80.t1"; gene_id "g80";
+SBJO01000003.1	AUGUSTUS	exon	18448	19289	.	-	.	transcript_id "g80.t1"; gene_id "g80";
+SBJO01000003.1	AUGUSTUS	start_codon	19287	19289	.	-	0	transcript_id "g80.t1"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	transcript	17805	19289	.	-	.	g80.t2
+SBJO01000003.1	GeneMark.hmm3	stop_codon	17805	17807	.	-	0	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	CDS	17805	18272	.	-	0	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	exon	17805	18272	.	-	0	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	mRNA	17805	19289	.	-	.	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	intron	18273	18407	.	-	0	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	CDS	18408	19289	.	-	0	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	exon	18408	19289	.	-	0	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	GeneMark.hmm3	start_codon	19287	19289	.	-	0	transcript_id "g80.t2"; gene_id "g80";
+SBJO01000003.1	AUGUSTUS	gene	19730	20173	.	+	.	g81
+SBJO01000003.1	AUGUSTUS	transcript	19730	20173	0.89	+	.	g81.t1
+SBJO01000003.1	AUGUSTUS	start_codon	19730	19732	.	+	0	transcript_id "g81.t1"; gene_id "g81";
+SBJO01000003.1	AUGUSTUS	CDS	19730	19858	0.89	+	0	transcript_id "g81.t1"; gene_id "g81";
+SBJO01000003.1	AUGUSTUS	exon	19730	19858	.	+	.	transcript_id "g81.t1"; gene_id "g81";
+SBJO01000003.1	AUGUSTUS	intron	19859	19948	0.89	+	.	transcript_id "g81.t1"; gene_id "g81";
+SBJO01000003.1	AUGUSTUS	CDS	19949	20173	0.89	+	0	transcript_id "g81.t1"; gene_id "g81";
+SBJO01000003.1	AUGUSTUS	exon	19949	20173	.	+	.	transcript_id "g81.t1"; gene_id "g81";
+SBJO01000003.1	AUGUSTUS	stop_codon	20171	20173	.	+	0	transcript_id "g81.t1"; gene_id "g81";
+SBJO01000003.1	GeneMark.hmm3	transcript	19730	20173	.	+	.	g81.t2
+SBJO01000003.1	GeneMark.hmm3	start_codon	19730	19732	.	+	0	transcript_id "g81.t2"; gene_id "g81";
+SBJO01000003.1	GeneMark.hmm3	CDS	19730	20173	.	+	0	transcript_id "g81.t2"; gene_id "g81";
+SBJO01000003.1	GeneMark.hmm3	mRNA	19730	20173	.	+	.	transcript_id "g81.t2"; gene_id "g81";
+SBJO01000003.1	GeneMark.hmm3	exon	19730	20173	.	+	0	transcript_id "g81.t2"; gene_id "g81";
+SBJO01000003.1	GeneMark.hmm3	stop_codon	20171	20173	.	+	0	transcript_id "g81.t2"; gene_id "g81";
+SBJO01000003.1	AUGUSTUS	gene	20312	21091	.	-	.	g82
+SBJO01000003.1	AUGUSTUS	transcript	20312	21091	0.97	-	.	g82.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	20312	20314	.	-	0	transcript_id "g82.t1"; gene_id "g82";
+SBJO01000003.1	AUGUSTUS	CDS	20312	21091	0.97	-	0	transcript_id "g82.t1"; gene_id "g82";
+SBJO01000003.1	AUGUSTUS	exon	20312	21091	.	-	.	transcript_id "g82.t1"; gene_id "g82";
+SBJO01000003.1	AUGUSTUS	start_codon	21089	21091	.	-	0	transcript_id "g82.t1"; gene_id "g82";
+SBJO01000003.1	AUGUSTUS	gene	22185	23258	.	-	.	g83
+SBJO01000003.1	AUGUSTUS	transcript	22185	23258	0.38	-	.	g83.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	22185	22187	.	-	0	transcript_id "g83.t1"; gene_id "g83";
+SBJO01000003.1	AUGUSTUS	CDS	22185	22569	0.75	-	1	transcript_id "g83.t1"; gene_id "g83";
+SBJO01000003.1	AUGUSTUS	exon	22185	22569	.	-	.	transcript_id "g83.t1"; gene_id "g83";
+SBJO01000003.1	AUGUSTUS	intron	22570	23007	0.5	-	.	transcript_id "g83.t1"; gene_id "g83";
+SBJO01000003.1	AUGUSTUS	CDS	23008	23258	0.49	-	0	transcript_id "g83.t1"; gene_id "g83";
+SBJO01000003.1	AUGUSTUS	exon	23008	23258	.	-	.	transcript_id "g83.t1"; gene_id "g83";
+SBJO01000003.1	AUGUSTUS	start_codon	23256	23258	.	-	0	transcript_id "g83.t1"; gene_id "g83";
+SBJO01000003.1	AUGUSTUS	gene	23113	24903	.	-	.	g84
+SBJO01000003.1	AUGUSTUS	transcript	23992	24903	0.87	-	.	g84.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	23992	23994	.	-	0	transcript_id "g84.t1"; gene_id "g84";
+SBJO01000003.1	AUGUSTUS	CDS	23992	24903	0.87	-	0	transcript_id "g84.t1"; gene_id "g84";
+SBJO01000003.1	AUGUSTUS	exon	23992	24903	.	-	.	transcript_id "g84.t1"; gene_id "g84";
+SBJO01000003.1	AUGUSTUS	start_codon	24901	24903	.	-	0	transcript_id "g84.t1"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	transcript	23113	24903	.	-	.	g84.t2
+SBJO01000003.1	GeneMark.hmm3	stop_codon	23113	23115	.	-	0	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	CDS	23113	23237	.	-	2	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	exon	23113	23237	.	-	2	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	mRNA	23113	24903	.	-	.	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	intron	23238	23999	.	-	1	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	CDS	24000	24903	.	-	0	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	exon	24000	24903	.	-	0	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	GeneMark.hmm3	start_codon	24901	24903	.	-	0	transcript_id "g84.t2"; gene_id "g84";
+SBJO01000003.1	AUGUSTUS	gene	25203	25946	.	+	.	g85
+SBJO01000003.1	AUGUSTUS	transcript	25203	25946	1	+	.	g85.t1
+SBJO01000003.1	AUGUSTUS	start_codon	25203	25205	.	+	0	transcript_id "g85.t1"; gene_id "g85";
+SBJO01000003.1	AUGUSTUS	CDS	25203	25946	1	+	0	transcript_id "g85.t1"; gene_id "g85";
+SBJO01000003.1	AUGUSTUS	exon	25203	25946	.	+	.	transcript_id "g85.t1"; gene_id "g85";
+SBJO01000003.1	AUGUSTUS	stop_codon	25944	25946	.	+	0	transcript_id "g85.t1"; gene_id "g85";
+SBJO01000003.1	AUGUSTUS	gene	26099	26605	.	-	.	g86
+SBJO01000003.1	AUGUSTUS	transcript	26099	26605	0.86	-	.	g86.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	26099	26101	.	-	0	transcript_id "g86.t1"; gene_id "g86";
+SBJO01000003.1	AUGUSTUS	CDS	26099	26605	0.86	-	0	transcript_id "g86.t1"; gene_id "g86";
+SBJO01000003.1	AUGUSTUS	exon	26099	26605	.	-	.	transcript_id "g86.t1"; gene_id "g86";
+SBJO01000003.1	AUGUSTUS	start_codon	26603	26605	.	-	0	transcript_id "g86.t1"; gene_id "g86";
+SBJO01000003.1	AUGUSTUS	gene	26705	27439	.	-	.	g87
+SBJO01000003.1	AUGUSTUS	transcript	26705	27439	0.86	-	.	g87.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	26705	26707	.	-	0	transcript_id "g87.t1"; gene_id "g87";
+SBJO01000003.1	AUGUSTUS	CDS	26705	27439	0.86	-	0	transcript_id "g87.t1"; gene_id "g87";
+SBJO01000003.1	AUGUSTUS	exon	26705	27439	.	-	.	transcript_id "g87.t1"; gene_id "g87";
+SBJO01000003.1	AUGUSTUS	start_codon	27437	27439	.	-	0	transcript_id "g87.t1"; gene_id "g87";
+SBJO01000003.1	AUGUSTUS	gene	27506	28672	.	-	.	g88
+SBJO01000003.1	AUGUSTUS	transcript	27506	28672	0.99	-	.	g88.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	27506	27508	.	-	0	transcript_id "g88.t1"; gene_id "g88";
+SBJO01000003.1	AUGUSTUS	CDS	27506	28672	0.99	-	0	transcript_id "g88.t1"; gene_id "g88";
+SBJO01000003.1	AUGUSTUS	exon	27506	28672	.	-	.	transcript_id "g88.t1"; gene_id "g88";
+SBJO01000003.1	AUGUSTUS	start_codon	28670	28672	.	-	0	transcript_id "g88.t1"; gene_id "g88";
+SBJO01000003.1	AUGUSTUS	gene	28709	29185	.	-	.	g89
+SBJO01000003.1	AUGUSTUS	transcript	28709	29185	0.61	-	.	g89.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	28709	28711	.	-	0	transcript_id "g89.t1"; gene_id "g89";
+SBJO01000003.1	AUGUSTUS	CDS	28709	29185	0.61	-	0	transcript_id "g89.t1"; gene_id "g89";
+SBJO01000003.1	AUGUSTUS	exon	28709	29185	.	-	.	transcript_id "g89.t1"; gene_id "g89";
+SBJO01000003.1	AUGUSTUS	start_codon	29183	29185	.	-	0	transcript_id "g89.t1"; gene_id "g89";
+SBJO01000003.1	AUGUSTUS	gene	29384	29887	.	+	.	g90
+SBJO01000003.1	AUGUSTUS	transcript	29384	29887	0.91	+	.	g90.t1
+SBJO01000003.1	AUGUSTUS	start_codon	29384	29386	.	+	0	transcript_id "g90.t1"; gene_id "g90";
+SBJO01000003.1	AUGUSTUS	CDS	29384	29887	0.91	+	0	transcript_id "g90.t1"; gene_id "g90";
+SBJO01000003.1	AUGUSTUS	exon	29384	29887	.	+	.	transcript_id "g90.t1"; gene_id "g90";
+SBJO01000003.1	AUGUSTUS	stop_codon	29885	29887	.	+	0	transcript_id "g90.t1"; gene_id "g90";
+SBJO01000003.1	AUGUSTUS	gene	31443	35205	.	-	.	g91
+SBJO01000003.1	AUGUSTUS	transcript	31443	35205	0.7	-	.	g91.t1
+SBJO01000003.1	AUGUSTUS	stop_codon	31443	31445	.	-	0	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	CDS	31443	31519	0.99	-	2	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	exon	31443	31519	.	-	.	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	intron	31520	31680	0.77	-	.	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	CDS	31681	31746	0.77	-	2	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	exon	31681	31746	.	-	.	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	intron	31747	32080	0.74	-	.	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	CDS	32081	32566	0.97	-	2	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	exon	32081	32566	.	-	.	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	intron	32567	33695	1	-	.	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	CDS	33696	34132	0.99	-	1	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	exon	33696	34132	.	-	.	transcript_id "g91.t1"; gene_id "g91";
+SBJO01000003.1	AUGUSTUS	intron	34133	34462	0.95	-	.	transcript_id "g91.t1"; gene_id "g91";
