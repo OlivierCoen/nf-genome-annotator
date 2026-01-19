@@ -5,7 +5,7 @@ process INTERPROSCAN_DOWNLOADDB {
 
     storeDir "${workflow.projectDir}/.nextflow/cache/interproscan"
 
-    errorStrategy = {
+    errorStrategy {
         if (task.exitStatus == 100) {
             log.warn("md5 checksum failed for Interproscan URL ${db_url}. Please delete the local file and relaunch the pipeline.")
             return 'terminate'

@@ -5,12 +5,13 @@
 */
 
 include { AGAT_SPCOMPLEMENTANNOTATIONS as COMPLEMENT_ANNOTATIONS        } from '../modules/local/agat/spcomplementannotations'
-include { AGAT_SPEXTRACTSEQUENCES as GET_PROTEOME                       } from '../modules/local/agat/spextractsequences'
+
 
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
+include { GET_PROTEOMES                                                 } from '../subworkflows/local/get_proteomes'
 include { FUNCTIONAL_ANNOTATION                                         } from '../subworkflows/local/functional_annotation'
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { MULTIQC_WORKFLOW                                              } from '../subworkflows/local/multiqc'
@@ -54,7 +55,7 @@ workflow GENOME_ANNOTATOR {
     STRUCTURAL_ANNOTATION ( ch_genome )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // COMPLEMENTATION OF ANNOTATION ()WHEN NECESSARY)
+    // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_branched_annotations = STRUCTURAL_ANNOTATION.out.annotations
@@ -80,26 +81,21 @@ workflow GENOME_ANNOTATOR {
         ch_genome
      )
      ch_gff = CLEAN_ANNOTATIONS.out.gff
-                .map {
-                    meta, file ->
-                        [ meta + [main_annotation: true], file ]
-                }
-     ch_cleaned_gffs = CLEAN_ANNOTATIONS.out.cleaned_gffs
+     ch_intermediate_gffs = CLEAN_ANNOTATIONS.out.intermediate_gffs
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GET_PROTEOME (
-        ch_cleaned_gffs.join( ch_genome ),
-        params.codon_usage_id,
-        []
+    GET_PROTEOMES (
+        ch_gff,
+        ch_intermediate_gffs,
+        ch_genome,
+        params.codon_usage_id
     )
-    ch_proteome = GET_PROTEOME.out.proteins
-                    .filter {
-                        meta, file ->
-                            meta.main_annotation == true
-                    }
+
+    ch_proteomes = GET_PROTEOMES.out.proteomes
+    ch_main_proteome = GET_PROTEOMES.out.main_proteome
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
@@ -107,7 +103,7 @@ workflow GENOME_ANNOTATOR {
 
     if ( !params.skip_functional_annotation ) {
         FUNCTIONAL_ANNOTATION (
-            ch_proteome,
+            ch_main_proteome,
             ch_gff
         )
     }
@@ -119,7 +115,7 @@ workflow GENOME_ANNOTATOR {
     QUALITY_CONTROLS (
         ch_genome,
         ch_gff,
-        ch_proteome
+        ch_proteomes
     )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

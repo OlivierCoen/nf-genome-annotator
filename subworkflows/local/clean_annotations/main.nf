@@ -24,6 +24,7 @@ workflow CLEAN_ANNOTATIONS {
     // remove redundant entries and convert all GTFs / GFFs to GFFs
     FIX_DUPLICATIONS ( ch_annotation, [] )
     ch_gff = FIX_DUPLICATIONS.out.gff
+    ch_intermediate_gffs = ch_intermediate_gffs.mix( FIX_DUPLICATIONS.out.gff )
 
     if ( !params.skip_gff_keep_longest_isoform ) {
         KEEP_LONGEST_ISOFORM ( ch_gff, [] )
@@ -51,9 +52,13 @@ workflow CLEAN_ANNOTATIONS {
 
     // removing main GFF from intermediate GFFs
     ch_intermediate_gffs = ch_intermediate_gffs
-                            .join ( ch_gff )
-                            .filter { meta, intermediate_gff, main_gff -> intermediate_gff != main_gff }
-                            .map { meta, intermediate_gff, main_gff -> [ meta, intermediate_gff ] }
+                            .combine ( ch_gff, by: 0 )
+                            .filter {
+                                meta, intermediate_gff, main_gff -> intermediate_gff != main_gff
+                            }
+                            .map {
+                                meta, intermediate_gff, main_gff -> [ meta, intermediate_gff ]
+                            }
 
     emit:
     gff                     = ch_gff
