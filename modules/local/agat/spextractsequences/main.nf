@@ -19,7 +19,7 @@ process AGAT_SPEXTRACTSEQUENCES {
 
     script:
     def args        = task.ext.args   ?: ''
-    def prefix      = task.ext.prefix ?: "${meta.id}"
+    def prefix      = meta.main_annotation ? "${meta.id}" : "${gxf.baseName}"
     def config_arg  = config ? "-c ${config}" : ''
     def is_compressed = genome.getExtension() == "gz" ? true : false
     def genome_fasta = is_compressed ? genome.getBaseName() : genome

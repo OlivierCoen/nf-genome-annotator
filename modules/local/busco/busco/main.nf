@@ -34,7 +34,7 @@ process BUSCO_BUSCO {
         error("Mode must be one of 'genome', 'proteins', or 'transcriptome'.")
     }
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}-${lineage}"
+    def prefix = mode == 'genome' ? "${meta.id}.genome" : meta.main_annotation ? "${meta.id}.final_proteome" : "${fasta.simpleName}.intermediate_proteome"
     def busco_config = config_file ? "--config ${config_file}" : ''
     def busco_lineage = lineage in ['auto', 'auto_prok', 'auto_euk']
         ? lineage.replaceFirst('auto', '--auto-lineage').replaceAll('_', '-')

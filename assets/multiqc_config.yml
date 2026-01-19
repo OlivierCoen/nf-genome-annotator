@@ -18,7 +18,7 @@ run_modules:
 
 sample_names_replace_regex: True
 sample_names_replace:
-  "SAMPLE(\\d)_([PS]E)_(\\d)": "XXX_\\1_\\2_\\3"
+  "(.*)\\.busco": "\\1"
 
 sp:
   busco:
