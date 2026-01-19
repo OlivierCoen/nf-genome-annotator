@@ -64,8 +64,8 @@
                 "structural_annotator": {
                     "type": "string",
                     "description": "Tool to use for structural annotation",
-                    "enum": ["auto", "braker3", "metaeuk"],
-                    "default": "auto"
+                    "enum": ["braker3", "metaeuk"],
+                    "default": "braker3"
                 },
                 "genome_max_size_auto_metaeuk": {
                     "type": "integer",
