@@ -23,9 +23,8 @@ process BUSCO_BUSCO {
 
     output:
     tuple val(meta), path("*-busco.batch_summary.txt"), emit: batch_summary
-    tuple val(meta), path("short_summaries/*.txt"), emit: short_summaries_txt
-    tuple val(meta), path("*-busco.log"), emit: log, optional: true
-
+    tuple val(meta), path("*-busco.log"),               emit: log, optional: true
+    path("short_summaries/*.txt"),                      topic: mqc_busco_short_summaries_txt
     tuple val("${task.process}"), val('busco'), eval('busco --version | sed "s/^BUSCO //"'),    topic: versions
 
 
@@ -34,7 +33,7 @@ process BUSCO_BUSCO {
         error("Mode must be one of 'genome', 'proteins', or 'transcriptome'.")
     }
     def args = task.ext.args ?: ''
-    def prefix = mode == 'genome' ? "${meta.id}.genome" : meta.main_annotation ? "${meta.id}.final_proteome" : "${fasta.simpleName}.intermediate_proteome"
+    def prefix = mode == 'genome' ? "${meta.id}.genome" : meta.final_annotation ? "${meta.id}.final_proteome" : "${fasta.simpleName}.intermediate_proteome"
     def busco_config = config_file ? "--config ${config_file}" : ''
     def busco_lineage = lineage in ['auto', 'auto_prok', 'auto_euk']
         ? lineage.replaceFirst('auto', '--auto-lineage').replaceAll('_', '-')

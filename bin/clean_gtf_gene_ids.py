@@ -2,32 +2,35 @@
 
 # Written by Olivier Coen. Released under the MIT license.
 
-from pathlib import Path
-import pandas as pd
-import numpy as np
-import csv
 import argparse
+import csv
 import logging
+from pathlib import Path
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+import numpy as np
+import pandas as pd
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
 GTF_COLUMNS = [
-    'seqname',
-    'source',
-    'feature',
-    'start',
-    'end',
-    'score',
-    'strand',
-    'frame',
-    'attribute'
+    "seqname",
+    "source",
+    "feature",
+    "start",
+    "end",
+    "score",
+    "strand",
+    "frame",
+    "attribute",
 ]
 
 ID_WITH_QUOTES_PATTERN = r'("[a-zA-Z0-9._+-|,]+")'
 ID_PATTERN = r"([a-zA-Z0-9._+-|,]+)"
-TRANSCRIPT_ID_PATTERN = r'(g[0-9]+\.t[0-9]+)'
-GENE_ID_PATTERN = r'(g[0-9]+)'
+TRANSCRIPT_ID_PATTERN = r"(g[0-9]+\.t[0-9]+)"
+GENE_ID_PATTERN = r"(g[0-9]+)"
 
 
 #####################################################
@@ -38,11 +41,9 @@ GENE_ID_PATTERN = r'(g[0-9]+)'
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Clean GTF gene IDs"
-    )
+    parser = argparse.ArgumentParser(description="Clean GTF gene IDs")
     parser.add_argument(
-        "--gtf", dest="gtf_file", type=Path, required=True, help="Family name"
+        "--gtf", dest="gtf_file", type=Path, required=True, help="Input GTF file"
     )
     parser.add_argument(
         "--out", dest="outfile", type=Path, required=True, help="Outfile name"
@@ -59,36 +60,35 @@ def clean_gtf(df: pd.DataFrame) -> pd.DataFrame:
     Write new cleaned gtf dataframe to outfile
     """
     # parsing gene_id from attribute field
-    df['gene_id'] = make_intermediate_column(df, 'gene_id')
+    df["gene_id"] = make_intermediate_column(df, "gene_id")
 
     # getting entries where attributes is not correctly shaped
-    nan_df = df[df['gene_id'].isna()]
+    nan_df = df[df["gene_id"].isna()]
 
     # guessing transcript_id from gene_id for those entries
-    nan_df['transcript_id'] = nan_df['attribute'].str.extract(TRANSCRIPT_ID_PATTERN)
+    nan_df["transcript_id"] = nan_df["attribute"].str.extract(TRANSCRIPT_ID_PATTERN)
 
     # separating gene_id from transcript_id for these entries
-    nan_df['gene_id_from_transcript'] = nan_df['transcript_id'].str.extract(GENE_ID_PATTERN)
-    nan_df['gene_id'] = nan_df['gene_id_from_transcript']
-    nan_df['gene_id'] = np.where(nan_df['gene_id'].isna(), nan_df['attribute'], nan_df['gene_id'])
+    nan_df["gene_id_from_transcript"] = nan_df["transcript_id"].str.extract(
+        GENE_ID_PATTERN
+    )
+    nan_df["gene_id"] = nan_df["gene_id_from_transcript"]
+    nan_df["gene_id"] = np.where(
+        nan_df["gene_id"].isna(), nan_df["attribute"], nan_df["gene_id"]
+    )
 
     # making new attribute field
-    nan_df['attribute'] = nan_df.apply(
-        lambda row: make_new_attribute(row['gene_id'], row['transcript_id']),
-        axis=1
+    nan_df["attribute"] = nan_df.apply(
+        lambda row: make_new_attribute(row["gene_id"], row["transcript_id"]), axis=1
     )
-    nan_df.drop(
-        columns=['gene_id_from_transcript', 'transcript_id'],
-        inplace=True
-    )
+    nan_df.drop(columns=["gene_id_from_transcript", "transcript_id"], inplace=True)
 
     # putting back the good entries and these fixed entries in a new dataframe
-    new_df = pd.concat([df[~df['gene_id'].isna()], nan_df])
+    new_df = pd.concat([df[~df["gene_id"].isna()], nan_df])
     new_df = new_df.sort_values(
-        by=['seqname', 'gene_id', 'start', 'end', 'strand'],
-        ascending=True
+        by=["seqname", "gene_id", "start", "end", "strand"], ascending=True
     )
-    new_df = new_df.drop(columns=['gene_id'])
+    new_df = new_df.drop(columns=["gene_id"])
 
     return new_df
 
@@ -103,7 +103,7 @@ def make_intermediate_column(df: pd.DataFrame, attribute: str) -> str:
 
 
 def make_new_attribute(gene_id: str, transcript_id: str) -> str:
-    new_attribute = ''
+    new_attribute = ""
     if not pd.isnull(transcript_id):
         new_attribute += f'transcript_id "{transcript_id}";'
     new_attribute += f' gene_id "{gene_id}";'
@@ -119,8 +119,10 @@ def make_new_attribute(gene_id: str, transcript_id: str) -> str:
 if __name__ == "__main__":
     args = parse_args()
 
-    df = pd.read_csv(str(args.gtf_file), sep='\t', names=GTF_COLUMNS, comment='#')
+    df = pd.read_csv(str(args.gtf_file), sep="\t", names=GTF_COLUMNS, comment="#")
 
     df = clean_gtf(df)
 
-    df.to_csv(str(args.outfile), sep='\t', index=False, header=False, quoting=csv.QUOTE_NONE)
+    df.to_csv(
+        str(args.outfile), sep="\t", index=False, header=False, quoting=csv.QUOTE_NONE
+    )

@@ -15,6 +15,69 @@ disable_version_detection: true
 
 run_modules:
   - busco
+  - custom_content
+
+module_order:
+  - busco:
+      pconfig:
+        cpswitch: true # show the 'Counts / Percentages' switch
+        cpswitch_c_active: false # show pct per default
+  - custom_content
+
+custom_data:
+  with_isoforms_mrna_gff_stats:
+    parent_id: gff_stats
+    parent_name: "GFF statistics"
+    parent_description: "Various statistics about GFF files."
+    section_name: "With isoforms and mRNA"
+    file_format: "csv"
+    no_violin: true
+    plot_type: "table"
+
+  without_isoforms_mrna_gff_stats:
+    parent_id: gff_stats
+    parent_name: "GFF statistics"
+    parent_description: "Various statistics about GFF files."
+    section_name: "Without isoforms and mRNA"
+    file_format: "csv"
+    no_violin: true
+    plot_type: "table"
+
+  with_isoforms_rna_gff_stats:
+    parent_id: gff_stats
+    parent_name: "GFF statistics"
+    parent_description: "Various statistics about GFF files."
+    section_name: "With isoforms and RNA"
+    file_format: "csv"
+    no_violin: true
+    plot_type: "table"
+
+  without_isoforms_rna_gff_stats:
+    parent_id: gff_stats
+    parent_name: "GFF statistics"
+    parent_description: "Various statistics about GFF files."
+    section_name: "Without isoforms and RNA"
+    file_format: "csv"
+    no_violin: true
+    plot_type: "table"
+
+  with_isoforms_transcript_gff_stats:
+    parent_id: gff_stats
+    parent_name: "GFF statistics"
+    parent_description: "Various statistics about GFF files."
+    section_name: "With isoforms and transcript"
+    file_format: "csv"
+    no_violin: true
+    plot_type: "table"
+
+  without_isoforms_transcript_gff_stats:
+    parent_id: gff_stats
+    parent_name: "GFF statistics"
+    parent_description: "Various statistics about GFF files."
+    section_name: "Without isoforms and transcript"
+    file_format: "csv"
+    no_violin: true
+    plot_type: "table"
 
 sample_names_replace_regex: True
 sample_names_replace:
@@ -23,5 +86,15 @@ sample_names_replace:
 sp:
   busco:
     fn: "*busco.txt"
-  gtf_stats:
-    fn: "gtf_stats.txt.yaml"
+  with_isoforms_mrna_gff_stats:
+    fn: "*_with_isoforms_mrna_gff_stats.csv"
+  without_isoforms_mrna_gff_stats:
+    fn: "*_without_isoforms_mrna_gff_stats.csv"
+  with_isoforms_rna_gff_stats:
+    fn: "*_with_isoforms_rna_gff_stats.csv"
+  without_isoforms_rna_gff_stats:
+    fn: "*_without_isoforms_rna_gff_stats.csv"
+  with_isoforms_transcript_gff_stats:
+    fn: "*_with_isoforms_transcript_gff_stats.csv"
+  without_isoforms_transcript_gff_stats:
+    fn: "*_without_isoforms_transcript_gff_stats.csv"

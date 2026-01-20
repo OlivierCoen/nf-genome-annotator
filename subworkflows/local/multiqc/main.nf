@@ -17,10 +17,22 @@ include { methodsDescriptionText                                  } from '../uti
 workflow MULTIQC_WORKFLOW {
 
     take:
-    ch_multiqc_files
     ch_versions
 
     main:
+
+    // ------------------------------------------------------------------------------------
+    // DATA
+    // ------------------------------------------------------------------------------------
+
+    ch_multiqc_files = channel.empty()
+                        .mix( channel.topic('mqc_busco_short_summaries_txt') )
+                        .mix( channel.topic('mqc_mrna_with_isoforms_gff_stats') )
+                        .mix( channel.topic('mqc_rna_with_isoforms_gff_stats') )
+                        .mix( channel.topic('mqc_transcript_with_isoforms_gff_stats') )
+                        .mix( channel.topic('mqc_mrna_without_isoforms_gff_stats') )
+                        .mix( channel.topic('mqc_rna_without_isoforms_gff_stats') )
+                        .mix( channel.topic('mqc_transcript_without_isoforms_gff_stats') )
 
     // ------------------------------------------------------------------------------------
     // VERSIONS
