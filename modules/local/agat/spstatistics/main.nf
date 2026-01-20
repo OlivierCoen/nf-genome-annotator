@@ -4,7 +4,7 @@ process AGAT_SPSTATISTICS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/agat:1.4.2--pl5321hdfd78af_0' :
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/d0/d0194019d3fcefea0875ce4703df12dd2244cf9b8932b935197e9063cbc118ae/data' :
         'biocontainers/agat:1.4.2--pl5321hdfd78af_0' }"
 
     input:
