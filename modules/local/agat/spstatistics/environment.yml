@@ -5,3 +5,5 @@ channels:
   - bioconda
 dependencies:
   - bioconda::agat=1.6.1
+  - conda-forge::python=3.
+  - conda-forge::pyyaml=6.0

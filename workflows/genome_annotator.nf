@@ -30,7 +30,6 @@ workflow GENOME_ANNOTATOR {
     main:
 
     ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME PREPARATION
@@ -78,24 +77,37 @@ workflow GENOME_ANNOTATOR {
 
     CLEAN_ANNOTATIONS (
         ch_annotation,
-        ch_genome
+        ch_genome,
+        params.skip_gff_keep_longest_isoform,
+        params.skip_gff_fix_overlapping_genes,
+        params.skip_gff_filter_incomplete_gene_models,
+        params.skip_gff_fix_cds_phases
      )
+
      ch_gff = CLEAN_ANNOTATIONS.out.gff
+                .map {
+                    meta, file -> [ meta + [final_annotation: true], file ]
+                }
+
      ch_intermediate_gffs = CLEAN_ANNOTATIONS.out.intermediate_gffs
+                                .map {
+                                    meta, file -> [ meta + [final_annotation: false], file ]
+                                }
+
+    ch_gffs = ch_gff.mix( ch_intermediate_gffs )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GET_PROTEOMES (
-        ch_gff,
-        ch_intermediate_gffs,
+        ch_gffs,
         ch_genome,
         params.codon_usage_id
     )
 
     ch_proteomes = GET_PROTEOMES.out.proteomes
-    ch_main_proteome = GET_PROTEOMES.out.main_proteome
+    ch_main_proteome = ch_proteomes.filter{ meta, file -> meta.final_annotation == true }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
@@ -114,7 +126,7 @@ workflow GENOME_ANNOTATOR {
 
     QUALITY_CONTROLS (
         ch_genome,
-        ch_gff,
+        ch_gffs,
         ch_proteomes
     )
 
@@ -122,14 +134,7 @@ workflow GENOME_ANNOTATOR {
     // MULTIQC
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_multiqc_files = ch_multiqc_files
-                        .mix ( QUALITY_CONTROLS.out.busco_short_summaries )
-                        .mix ( QUALITY_CONTROLS.out.gtf_stats )
-                        .map { meta, file -> file }
-
-
     MULTIQC_WORKFLOW(
-        ch_multiqc_files,
         ch_versions
     )
 

@@ -1,6 +1,6 @@
-include { AGAT_SPSTATISTICS as GTF_STATISTICS          } from '../../../modules/local/agat/spstatistics'
-include { BUSCO_BUSCO as BUSCO_GENOME                  } from '../../../modules/local/busco/busco'
-include { BUSCO_BUSCO as BUSCO_PROTEOME                } from '../../../modules/local/busco/busco'
+include { BUSCO_BUSCO as BUSCO_GENOME                       } from '../../../modules/local/busco/busco'
+include { BUSCO_BUSCO as BUSCO_PROTEOME                     } from '../../../modules/local/busco/busco'
+include { AGAT_SPSTATISTICS as AGAT_GTF_STATISTICS          } from '../../../modules/local/agat/spstatistics'
 
 
 
@@ -46,20 +46,10 @@ workflow QUALITY_CONTROLS {
         busco_clean_intermediates
     )
 
-    BUSCO_GENOME.out.short_summaries_txt
-        .mix ( BUSCO_PROTEOME.out.short_summaries_txt )
-        .set { ch_busco_short_summaries }
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // QUALITY CONTROLS OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GTF_STATISTICS ( ch_gtf )
-
-
-
-    emit:
-    gtf_stats                           = GTF_STATISTICS.out.stats_yaml
-    busco_short_summaries               = ch_busco_short_summaries
+    AGAT_GTF_STATISTICS ( ch_gtf )
 
 }
