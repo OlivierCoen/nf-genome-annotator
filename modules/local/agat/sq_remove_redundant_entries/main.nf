@@ -13,7 +13,6 @@ process AGAT_SQREMOVEREDUNDANTENTRIES {
 
     output:
     tuple val(meta), path("*_redundant_entries_removes.gff"), emit: gff
-    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sq_remove_redundant_entries.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -23,8 +22,7 @@ process AGAT_SQREMOVEREDUNDANTENTRIES {
     agat_sq_remove_redundant_entries.pl \\
         --gff $gff \\
         ${config_param} \\
-        --output ${prefix}_redundant_entries_removes.gff \\
-        > agat.log 2>&1
+        --output ${prefix}_redundant_entries_removes.gff
     """
 
     stub:

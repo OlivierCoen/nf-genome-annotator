@@ -12,11 +12,7 @@ process AGAT_CONVERTSPGFF2GTF {
 
     output:
     tuple val(meta), path("*.agat.gtf"), emit: output_gtf
-    tuple val(meta), path("agat.log")     , emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_convert_sp_gff2gtf.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
-
-    when:
-    task.ext.when == null || task.ext.when
 
     script:
     def args   = task.ext.args   ?: ''
@@ -25,8 +21,7 @@ process AGAT_CONVERTSPGFF2GTF {
     agat_convert_sp_gff2gtf.pl \\
         --gff ${gff} \\
         --output ${prefix}.agat.gtf \\
-        ${args} \\
-        > agat.log 2>&1
+        ${args}
     """
 
     stub:
