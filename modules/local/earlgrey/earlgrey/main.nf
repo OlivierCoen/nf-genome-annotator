@@ -3,7 +3,7 @@ process EARLGREY_EARLGREY {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/16/16c8c9a119c6aaf7d52786859fe29f57480848c13a5a34d3127e392c1b366570/data':
         'community.wave.seqera.io/library/earlgrey:6.3.3--4a2200a6b48c86ec' }"
 

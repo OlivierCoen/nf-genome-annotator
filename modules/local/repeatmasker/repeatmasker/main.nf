@@ -3,7 +3,7 @@ process REPEATMASKER_REPEATMASKER {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/eb/eb2c806e7a34fc52eabb8809fa9f4e0e34117e397162a516cbb80454e50b2e72/data':
         'community.wave.seqera.io/library/repeatmasker:4.2.1--94dd45a91fa85e83' }"
 
