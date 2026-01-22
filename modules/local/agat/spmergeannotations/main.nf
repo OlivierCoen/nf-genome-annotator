@@ -13,7 +13,6 @@ process AGAT_SPMERGEANNOTATIONS {
 
     output:
     tuple val(meta), path("*_prepared.gff"), emit: gff
-    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_merge_annotations.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -24,8 +23,7 @@ process AGAT_SPMERGEANNOTATIONS {
     agat_sp_merge_annotations.pl \\
         --gff ${gff} \\
         ${config_param} \\
-        --output ${prefix}_prepared.gff \\
-        > agat.log 2>&1
+        --output ${prefix}_prepared.gff
     """
 
     stub:

@@ -13,7 +13,6 @@ process AGAT_SPKEEPLONGESTISOFORM {
 
     output:
     tuple val(meta), path("${output}"), emit: gff
-    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_keep_longest_isoform.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     when:
@@ -29,8 +28,7 @@ process AGAT_SPKEEPLONGESTISOFORM {
         --gff ${gxf} \\
         ${config_param} \\
         --out ${output} \\
-        ${args} \\
-        > agat.log 2>&1
+        ${args}
     """
 
     stub:

@@ -13,7 +13,6 @@ process AGAT_SPMANAGEIDS {
 
     output:
     tuple val(meta), path("*_ids_fixed.gff"), emit: gff
-    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_manage_IDs.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -26,8 +25,7 @@ process AGAT_SPMANAGEIDS {
         --prefix $prefix \\
         ${config_param} \\
         ${args} \\
-        --output ${prefix}_ids_fixed.gff \\
-        > agat.log 2>&1
+        --output ${prefix}_ids_fixed.gff
 
     """
 
