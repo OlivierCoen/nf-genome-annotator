@@ -27,9 +27,11 @@ process AGAT_SPSTATISTICS {
     script:
     def args   = task.ext.args   ?: ''
     def prefix = meta.final_annotation ? "${meta.id}.final_annotation" : "${gff.simpleName}.intermediate_annotation"
+    def genome_size_arg = meta.genome_size ? "--gs ${meta.genome_size}" : ''
     """
     agat_sp_statistics.pl \\
         --gff ${gff} \\
+        ${genome_size_arg} \\
         --output ${prefix}.gtf_stats.txt \\
         --yaml \\
         ${args} \\
