@@ -10,7 +10,7 @@ process EARLGREY_DOWNLOADDB {
     }
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/fa/facc3740411bc51eaa97d2e0208a7dd571bf5b650b16173e747cc3b6de2b0c3c/data':
         'community.wave.seqera.io/library/aria2_pigz:6b38092500fd4da6' }"
 

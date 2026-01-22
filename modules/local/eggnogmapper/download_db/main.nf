@@ -4,7 +4,7 @@ process EGGNOGMAPPER_DOWNLOADDB {
     storeDir "${workflow.projectDir}/.nextflow/cache/eggnogmapper"
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/eggnog-mapper:2.1.12--pyhdfd78af_0':
         'biocontainers/eggnog-mapper:2.1.12--pyhdfd78af_0' }"
 

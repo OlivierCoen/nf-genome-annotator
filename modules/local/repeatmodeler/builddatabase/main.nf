@@ -3,7 +3,7 @@ process REPEATMODELER_BUILDDATABASE {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/6b/6b9637a9d4d72993f80c5014ece53d39161871c94845f420a5313a31a7ae5d2a/data':
         'community.wave.seqera.io/library/repeatmodeler:2.0.7--136d59ab97ab30de' }"
 

@@ -3,7 +3,7 @@ process AGAT_SPSTATISTICS {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/8e/8e7e31998b8d46049a71d795c8b63c59cc38823b0f06eca2869b98b1a1515cd9/data' :
         'community.wave.seqera.io/library/agat_python_pyyaml:bd0b5d997a84b24b' }"
 
