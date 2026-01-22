@@ -2,8 +2,13 @@ process AGAT_SPEXTRACTSEQUENCES {
     tag "$meta.id"
     label 'process_single'
 
+    // for now, the version of AGAT is 1.4.2 for this module
+    // version 1.6.1 gives issues
+    // TODO: update when issues are resolved
     conda "${moduleDir}/environment.yml"
-    container 'community.wave.seqera.io/library/agat:1.6.1--d39db4f54af12afb'
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/e7/e7fd8135f4654d5e5827ef55f7a9eb17995b2e7d2a30633d672c127dde340072/data':
+        'community.wave.seqera.io/library/agat:1.4.2--f0c60073d54a9afe' }"
 
     input:
     tuple val(meta), path(gxf), path(genome)
