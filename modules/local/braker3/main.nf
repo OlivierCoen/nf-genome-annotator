@@ -49,10 +49,10 @@ process BRAKER3 {
 
     perl -p -e 's/^(>\\S+).*\$/\$1/' \\
         $fasta_name \\
-        > ${prefix}.name.only.genome.masked.fasta
+        > ${prefix}.genome.masked.fasta
 
     braker.pl \\
-        --genome ${prefix}.name.only.genome.masked.fasta \\
+        --genome ${prefix}.genome.masked.fasta \\
         $new_species \\
         --workingdir $prefix \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
