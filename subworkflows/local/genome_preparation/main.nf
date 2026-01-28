@@ -14,6 +14,8 @@ workflow GENOME_PREPARATION {
 
     main:
 
+    ch_versions = channel.empty()
+
     SEQKIT_STATS ( ch_genome )
 
     ch_genome
@@ -26,7 +28,11 @@ workflow GENOME_PREPARATION {
         }
         .set { ch_prepared_genome }
 
+    ch_versions = ch_versions
+                    .mix( SEQKIT_STATS.out.versions )
+
     emit:
     prepared_genome     = ch_prepared_genome
+    versions            = ch_versions
 
 }

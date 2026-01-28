@@ -15,7 +15,7 @@ workflow QUALITY_CONTROLS {
 
     take:
     ch_genome
-    ch_gtf
+    ch_all_annotations
     ch_proteome
 
     main:
@@ -50,6 +50,6 @@ workflow QUALITY_CONTROLS {
     // QUALITY CONTROLS OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    AGAT_GTF_STATISTICS ( ch_gtf )
+    AGAT_GTF_STATISTICS ( ch_all_annotations )
 
 }

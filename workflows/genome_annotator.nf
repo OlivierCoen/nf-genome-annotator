@@ -29,7 +29,7 @@ workflow GENOME_ANNOTATOR {
 
     main:
 
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME PREPARATION
@@ -52,12 +52,13 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     STRUCTURAL_ANNOTATION ( ch_genome )
+    ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_branched_annotations = STRUCTURAL_ANNOTATION.out.annotations
+    ch_branched_annotations = ch_structural_annotations
                                 .branch{
                                     meta, annotation ->
                                         to_complement: meta.ref_gff != []
@@ -82,26 +83,27 @@ workflow GENOME_ANNOTATOR {
         params.skip_gff_fix_overlapping_genes,
         params.skip_gff_filter_incomplete_gene_models,
         params.skip_gff_fix_cds_phases
-     )
+    )
 
-     ch_gff = CLEAN_ANNOTATIONS.out.gff
+    ch_gff = CLEAN_ANNOTATIONS.out.gff
                 .map {
                     meta, file -> [ meta + [final_annotation: true], file ]
                 }
 
-     ch_intermediate_gffs = CLEAN_ANNOTATIONS.out.intermediate_gffs
-                                .map {
-                                    meta, file -> [ meta + [final_annotation: false], file ]
-                                }
+    ch_intermediate_annotations = ch_structural_annotations
+                                    .mix( CLEAN_ANNOTATIONS.out.intermediate_gffs )
+                                    .map {
+                                        meta, file -> [ meta + [final_annotation: false], file ]
+                                    }
 
-    ch_gffs = ch_gff.mix( ch_intermediate_gffs )
+    ch_all_annotations = ch_gff.mix( ch_intermediate_annotations )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GET_PROTEOMES (
-        ch_gffs,
+        ch_all_annotations,
         ch_genome,
         params.codon_usage_id
     )
@@ -126,13 +128,18 @@ workflow GENOME_ANNOTATOR {
 
     QUALITY_CONTROLS (
         ch_genome,
-        ch_gffs,
+        ch_all_annotations,
         ch_proteomes
     )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MULTIQC
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ch_versions = ch_versions
+                    .mix( GENOME_PREPARATION.out.versions )
+                    .mix( STRUCTURAL_ANNOTATION.out.versions )
+                    .mix( FUNCTIONAL_ANNOTATION.out.versions )
 
     MULTIQC_WORKFLOW(
         ch_versions
