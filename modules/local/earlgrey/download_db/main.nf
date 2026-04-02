@@ -1,6 +1,8 @@
 process EARLGREY_DOWNLOADDB {
-    tag "$meta.id"
-    label 'process_medium'
+
+    label 'process_high'
+
+    storeDir "${workflow.projectDir}/.nextflow/cache/dfam"
 
     errorStrategy = {
         if (task.exitStatus == 100) {
@@ -15,35 +17,42 @@ process EARLGREY_DOWNLOADDB {
         'community.wave.seqera.io/library/aria2_pigz:6b38092500fd4da6' }"
 
     input:
-    val partition
+    val partitions
 
     output:
     path("*/data"), emit: db
-    tuple val("${task.process}"), val('aria2'), eval("aria2c -v | head -1 | sed 's/aria2 version //g'"), topic: versions
-    tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"),           topic: versions
+    //tuple val("${task.process}"), val('aria2'), eval("aria2c -v | head -1 | sed 's/aria2 version //g'"), topic: versions
+    //tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"),           topic: versions
 
     script:
-    def filename = "dfam39_full.${partition}.h5.gz"
-    def url = "https://dfam.org/releases/current/families/FamDB/${filename}"
+    def formatted_partitions = partitions.join(' ')
     """
-    aria2c \\
-        -s ${task.cpus} \\
-        -x ${task.cpus} \\
-        -c \\
-        --max-tries=10 \\
-        --retry-wait=30 \\
-        --timeout=60 \\
-        "${url}"
+    for i in ${formatted_partitions}
+    do
+        url="https://dfam.org/releases/current/families/FamDB/dfam39_full.\${i}.h5.gz"
+        outfile="fam39_full.\${i}.h5.gz"
 
-    echo "Checking md5"
-    aria2c -c "${url}.md5"
-    md5sum -c --status ${filename}.md5 && echo "Chechsum ok" || exit 100
+        echo "Downloading \$url to \$outfile"
+        aria2c \\
+            -s ${task.cpus} \\
+            -x ${task.cpus} \\
+            -c \\
+            --max-tries=10 \\
+            --retry-wait=30 \\
+            --timeout=60 \\
+            \$url \\
+            -o \$outfile
 
-    echo "Extracting archive"
-    pigz -d ${filename}
+        echo "Checking md5"
+        wget "\${url}.md5"
+        md5sum -c --status \${outfile}.md5 && echo "Chechsum ok" || exit 100
+        rm \${outfile}.md5
 
-    echo "Deleting archive"
-    rm ${filename} ${filename}.md5
+        echo "Decompressing \$outfile"
+        pigz -d \$outfile
+    done
+
+    echo "Done"
     """
 
 }

@@ -43,7 +43,7 @@
             }
         },
         "masking_options": {
-            "title": "Options for genome masking",
+            "title": "Options for detection of repeated elements / genome masking",
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Options for genome masking",
@@ -52,6 +52,12 @@
                     "type": "boolean",
                     "description": "Skip genome masking",
                     "fa_icon": "fas fa-hand-scissors"
+                },
+                "dfam_db": {
+                    "type": "string",
+                    "description": "Path to DFAM database",
+                    "fa_icon": "fas fa-hand-scissors",
+                    "help": "Folder containing the DFAM database files"
                 }
             }
         },
