@@ -18,13 +18,15 @@ process EARLGREY_EARLGREY {
     def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${meta.id}"
     """
-    ${fasta_gz_cmd}
-    RepeatMasker \\
-        $lib_arg \\
-        -pa ${task.cpus} \\
-        -dir ${prefix} \\
-        ${args} \\
-        ${out_fasta}
+
+
+    earlGrey \\
+        $args \\
+        -g $fasta \\
+        -o results \\
+        -s ${prefix} \\
+        -t 16 \\
+        -d
     """
 
 }
