@@ -4,8 +4,8 @@ process EGGNOGMAPPER_EMAPPER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/eggnog-mapper:2.1.12--pyhdfd78af_0':
-        'biocontainers/eggnog-mapper:2.1.12--pyhdfd78af_0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/d1/d12124094d33e21ac770e9447e8e3be6f9208e8bc49f84af236996eb61b243dc/data':
+        'community.wave.seqera.io/library/eggnog-mapper:2.1.13--c99d97a9121734e6' }"
 
     input:
     tuple val(meta), path(fasta), path(gff)
