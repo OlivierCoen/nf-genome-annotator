@@ -17,7 +17,6 @@ process AGAT_SPEXTRACTSEQUENCES {
 
     output:
     tuple val(meta), path("*.prot.faa"), emit: proteins
-    tuple val(meta), path("agat.log"), emit: log
     tuple val("${task.process}"), val('agat'), eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
