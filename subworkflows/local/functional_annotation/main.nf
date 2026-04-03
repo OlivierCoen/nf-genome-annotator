@@ -1,5 +1,5 @@
 include { EGGNOGMAPPER_DOWNLOADDB                      } from '../../../modules/local/eggnogmapper/download_db'
-include { EGGNOGMAPPER_EMAPPER as EMAPPER              } from '../../../modules/local/eggnogmapper/emapper'
+include { EGGNOGMAPPER_EMAPPER                         } from '../../../modules/local/eggnogmapper/emapper'
 
 include { INTERPROSCAN_DOWNLOADDB                      } from '../../../modules/local/interproscan/download_db'
 include { INTERPROSCAN_INTERPROSCAN as INTERPROSCAN    } from '../../../modules/local/interproscan/interproscan'
@@ -24,7 +24,7 @@ workflow FUNCTIONAL_ANNOTATION {
     if ( params.functional_annotator == "eggnogmapper" ) {
 
         EGGNOGMAPPER_DOWNLOADDB ( )
-        EMAPPER(
+        EGGNOGMAPPER_EMAPPER(
             ch_proteome.join( ch_gff ),
             EGGNOGMAPPER_DOWNLOADDB.out.eggnog_data_dir
         )
