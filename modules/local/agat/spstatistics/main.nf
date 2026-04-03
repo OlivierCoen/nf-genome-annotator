@@ -34,8 +34,7 @@ process AGAT_SPSTATISTICS {
         ${genome_size_arg} \\
         --output ${prefix}.gtf_stats.txt \\
         --yaml \\
-        ${args} \\
-        > agat.log 2>&1
+        ${args}
 
     # parse yaml file
     parse_gff_stat_file.py \\

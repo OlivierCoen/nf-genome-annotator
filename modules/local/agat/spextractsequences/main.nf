@@ -39,8 +39,7 @@ process AGAT_SPEXTRACTSEQUENCES {
         --clean_final_stop \\
         --codon $codon_usage_id \\
         ${config_arg} \\
-        --output ${prefix}.prot.faa \\
-        > agat.log 2>&1
+        --output ${prefix}.prot.faa
     """
 
     stub:
