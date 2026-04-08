@@ -17,7 +17,11 @@ workflow STRUCTURAL_ANNOTATION {
 
     take:
     ch_genome
+    structural_annotator
     species
+    mmseqs_db
+    orthodb_lineage
+    busco_lineage
 
     main:
 
@@ -39,11 +43,11 @@ workflow STRUCTURAL_ANNOTATION {
     // DOWNLOAD PROTEIN DATABASE IF NECESSARY
     // ----------------------------------------------------------
 
-    if ( params.mmseqs_db == null ) {
+    if ( mmseqs_db == null ) {
 
         // trick to execute the process DOWNLOAD_ORTHODB_PROTEINS
         // only if there are elements in the channel ch_separated_on_proteins.no_proteins
-        def orthodb_lineage = params.orthodb_lineage ?: params.busco_lineage
+        def orthodb_lineage = orthodb_lineage ?: busco_lineage
         ch_separated_on_proteins.no_proteins
             .take (1)
             .map { orthodb_lineage }
@@ -51,11 +55,11 @@ workflow STRUCTURAL_ANNOTATION {
 
         ch_protein_db = DOWNLOAD_ORTHODB_PROTEINS.out.proteins
 
-    } else { // params.orthodb_lineage == null && params.mmseqs_db != null
+    } else { // orthodb_lineage == null && mmseqs_db != null
 
         ch_separated_on_proteins.no_proteins
             .take (1)
-            .map { params.mmseqs_db }
+            .map { mmseqs_db }
             | MMSEQS_DATABASES
 
         ch_protein_db = MMSEQS_DATABASES.out.database
@@ -78,16 +82,20 @@ workflow STRUCTURAL_ANNOTATION {
     ch_to_annotate = ch_separated_on_proteins.with_proteins
                         .mix ( ch_no_proteins_with_protein_db )
 
-    if ( params.structural_annotator == "braker3" ) {
+    if ( structural_annotator == "braker3" ) {
 
         // ----------------------------------------------------------
         // RUN BRAKER3 & TSEBRA
         // ----------------------------------------------------------
 
         // extracts bam file from the meta map
+        ch_braker_input = ch_to_annotate
+                            .map { meta, genome, proteins -> [ meta, genome, meta.bam, proteins ] }
+
+        def species_arg = species ?: []
         BRAKER3(
-            ch_to_annotate.map { meta, genome, proteins -> [ meta, genome, meta.bam, proteins ] },
-            species
+            ch_braker_input,
+            species_arg
         )
 
         // MERGE ANNOTATIONS WHEN NECESSARY
