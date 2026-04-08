@@ -23,6 +23,11 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "species": {
+                    "type": "string",
+                    "description": "Species name for the genome assembly. Required by the following tools: BRAKER3",
+                    "fa_icon": "fas fa-dna"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
