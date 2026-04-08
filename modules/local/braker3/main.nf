@@ -9,7 +9,7 @@ process BRAKER3 {
 
     input:
     tuple val(meta), path(fasta), path(bam), path(proteins)
-
+    val species
 
     output:
     tuple val(meta), path("$prefix/braker.gtf")         , emit: gtf
@@ -35,7 +35,6 @@ process BRAKER3 {
     def bam_arg     = bam                       ? "--bam=$bam"                              : ''
     def prot_arg    = proteins                  ? "--prot_seq=$proteins"                    : ''
     //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
-    def new_species = args.contains('--species')? ''                                        : '--species new_species'
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
@@ -53,7 +52,7 @@ process BRAKER3 {
 
     braker.pl \\
         --genome ${prefix}.genome.masked.fasta \\
-        $new_species \\
+        --species "$species" \\
         --workingdir $prefix \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
         --threads $task.cpus \\

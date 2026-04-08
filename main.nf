@@ -44,7 +44,9 @@ workflow {
         params.input,
         params.busco_lineage,
         params.orthodb_lineage,
-        params.mmseqs_db
+        params.mmseqs_db,
+        params.species,
+        params.structural_annotator
     )
 
     //

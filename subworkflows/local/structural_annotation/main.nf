@@ -17,6 +17,7 @@ workflow STRUCTURAL_ANNOTATION {
 
     take:
     ch_genome
+    species
 
     main:
 
@@ -85,7 +86,8 @@ workflow STRUCTURAL_ANNOTATION {
 
         // extracts bam file from the meta map
         BRAKER3(
-            ch_to_annotate.map { meta, genome, proteins -> [ meta, genome, meta.bam, proteins ] }
+            ch_to_annotate.map { meta, genome, proteins -> [ meta, genome, meta.bam, proteins ] },
+            species
         )
 
         // MERGE ANNOTATIONS WHEN NECESSARY
