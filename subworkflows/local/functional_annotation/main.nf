@@ -16,12 +16,15 @@ workflow FUNCTIONAL_ANNOTATION {
     take:
     ch_proteome
     ch_gff
+    functional_annotator
+    interproscan_db
+    interproscan_db_url
 
     main:
 
     ch_versions = Channel.empty()
 
-    if ( params.functional_annotator == "eggnogmapper" ) {
+    if ( functional_annotator == "eggnogmapper" ) {
 
         EGGNOGMAPPER_DOWNLOADDB ( )
         EGGNOGMAPPER_EMAPPER(
@@ -33,16 +36,16 @@ workflow FUNCTIONAL_ANNOTATION {
 
     } else { // interproscan
 
-        if ( params.interproscan_db != null ) {
+        if ( interproscan_db != null ) {
 
-            interproscan_db = file( params.interproscan_db, checkExists: true )
+            interproscan_db = file( interproscan_db, checkExists: true )
 
         } else {
 
             // DOWNLOADING
             ch_db_url = Channel.value([
-                [ id: params.interproscan_db_url.tokenize("/")[-1] - '.tar.gz'],
-                params.interproscan_db_url
+                [ id: interproscan_db_url.tokenize("/")[-1] - '.tar.gz'],
+                interproscan_db_url
             ])
             INTERPROSCAN_DOWNLOADDB ( ch_db_url )
             interproscan_db = INTERPROSCAN_DOWNLOADDB.out.db

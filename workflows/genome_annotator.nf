@@ -14,7 +14,7 @@ include { CLEAN_ANNOTATIONS                                             } from '
 include { GET_PROTEOMES                                                 } from '../subworkflows/local/get_proteomes'
 include { FUNCTIONAL_ANNOTATION                                         } from '../subworkflows/local/functional_annotation'
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
-include { MULTIQC_WORKFLOW                                              } from '../subworkflows/local/multiqc'
+include { REPORTING                                                     } from '../subworkflows/local/reporting'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +53,11 @@ workflow GENOME_ANNOTATOR {
 
     STRUCTURAL_ANNOTATION (
         ch_genome,
-        params.species
+        params.structural_annotator,
+        params.species,
+        params.mmseqs_db,
+        params.orthodb_lineage,
+        params.busco_lineage
     )
     ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
 
@@ -121,7 +125,10 @@ workflow GENOME_ANNOTATOR {
     if ( !params.skip_functional_annotation ) {
         FUNCTIONAL_ANNOTATION (
             ch_main_proteome,
-            ch_gff
+            ch_gff,
+            params.functional_annotator,
+            params.interproscan_db,
+            params.interproscan_db_url
         )
     }
 
@@ -144,13 +151,17 @@ workflow GENOME_ANNOTATOR {
                     .mix( STRUCTURAL_ANNOTATION.out.versions )
                     .mix( FUNCTIONAL_ANNOTATION.out.versions )
 
-    MULTIQC_WORKFLOW(
-        ch_versions
+    REPORTING(
+        ch_versions,
+        params.multiqc_config,
+        params.multiqc_logo,
+        params.multiqc_methods_description,
+        params.outdir
     )
 
 
     emit:
-    multiqc_report = MULTIQC_WORKFLOW.out.report.toList()
+    multiqc_report = REPORTING.out.report.toList()
     versions       = ch_versions
 
 }

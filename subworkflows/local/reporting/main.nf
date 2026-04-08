@@ -14,10 +14,14 @@ include { methodsDescriptionText                                  } from '../uti
 */
 
 
-workflow MULTIQC_WORKFLOW {
+workflow REPORTING {
 
     take:
     ch_versions
+    multiqc_config
+    multiqc_logo
+    multiqc_methods_description
+    outdir
 
     main:
 
@@ -44,7 +48,7 @@ workflow MULTIQC_WORKFLOW {
     // Collate and save software versions
     formatVersionsToYAML ( Channel.topic('versions') )
         .mix ( softwareVersionsToYAML( ch_versions ) ) // mix with versions obtained from emit outputs
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'software_mqc_versions.yml', sort: true, newLine: true)
+        .collectFile(storeDir: "${outdir}/pipeline_info", name: 'software_mqc_versions.yml', sort: true, newLine: true)
         .set { ch_collated_versions }
 
 
@@ -57,16 +61,16 @@ workflow MULTIQC_WORKFLOW {
     summary_params = paramsSummaryMap( workflow, parameters_schema: "nextflow_schema.json")
     ch_workflow_summary = Channel.value( paramsSummaryMultiqc(summary_params) )
 
-    ch_multiqc_custom_config = params.multiqc_config ?
-                                    Channel.fromPath(params.multiqc_config, checkIfExists: true) :
+    ch_multiqc_custom_config = multiqc_config ?
+                                    Channel.fromPath(multiqc_config, checkIfExists: true) :
                                     Channel.empty()
 
-    ch_multiqc_logo = params.multiqc_logo ?
-                        Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+    ch_multiqc_logo = multiqc_logo ?
+                        Channel.fromPath(multiqc_logo, checkIfExists: true) :
                         Channel.empty()
 
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
-                                                file(params.multiqc_methods_description, checkIfExists: true) :
+    ch_multiqc_custom_methods_description = multiqc_methods_description ?
+                                                file(multiqc_methods_description, checkIfExists: true) :
                                                 file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
     ch_methods_description = Channel.value( methodsDescriptionText(ch_multiqc_custom_methods_description) )

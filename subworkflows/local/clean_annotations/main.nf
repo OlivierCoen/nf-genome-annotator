@@ -39,19 +39,19 @@ workflow CLEAN_ANNOTATIONS {
         ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_KEEP_LONGEST_ISOFORM.out.gff )
     }
 
-    if ( !params.skip_gff_fix_overlapping_genes ) {
+    if ( !skip_gff_fix_overlapping_genes ) {
         AGAT_FIX_OVERLAPPING_GENES ( ch_gff, [] )
         ch_gff = AGAT_FIX_OVERLAPPING_GENES.out.gff
         ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_FIX_OVERLAPPING_GENES.out.gff )
     }
 
-    if ( !params.skip_gff_filter_incomplete_gene_models ) {
+    if ( !skip_gff_filter_incomplete_gene_models ) {
         AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS ( ch_gff.join( ch_genome ), [] )
         ch_gff = AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS.out.gff
         ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS.out.gff )
     }
 
-    if ( !params.skip_gff_fix_cds_phases ) {
+    if ( !skip_gff_fix_cds_phases ) {
         AGAT_FIX_CDS_PHASES ( ch_gff.join( ch_genome ), [] )
         ch_gff = AGAT_FIX_CDS_PHASES.out.gff
         ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_FIX_CDS_PHASES.out.gff ) // keeping it in case other cleaning steps are added afterwards
