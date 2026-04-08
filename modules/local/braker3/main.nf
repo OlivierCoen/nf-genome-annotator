@@ -35,6 +35,7 @@ process BRAKER3 {
     def bam_arg     = bam                       ? "--bam=$bam"                              : ''
     def prot_arg    = proteins                  ? "--prot_seq=$proteins"                    : ''
     //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
+    def new_species = args.contains('--species')? ''                                        : '--species new_species'
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}

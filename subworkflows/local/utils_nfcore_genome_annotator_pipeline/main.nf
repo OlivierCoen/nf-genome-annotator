@@ -34,8 +34,6 @@ workflow PIPELINE_INITIALISATION {
     input             //  string: Path to input samplesheet
     busco_lineage     //  string: BUSCO lineage
     orthodb_lineage   //  string: OrthoDB lineage
-    species           //  string: Species name for the genome assembly
-    structural_annotator //  string: Structural annotator to use
     mmseqs_db         //  string: MMseqs2 database
 
     main:
@@ -59,9 +57,7 @@ workflow PIPELINE_INITIALISATION {
     validateInputParameters(
         busco_lineage,
         orthodb_lineage,
-        mmseqs_db,
-        species,
-        structural_annotator
+        mmseqs_db
     )
 
     UTILS_NFSCHEMA_PLUGIN (
@@ -129,18 +125,13 @@ workflow PIPELINE_COMPLETION {
 //
 // Validate parameters
 //
-def validateInputParameters(busco_lineage, orthodb_lineage, mmseqs_db, species, structural_annotator) {
+def validateInputParameters(busco_lineage, orthodb_lineage, mmseqs_db) {
 
     // check that at least one db was selected
     if (orthodb_lineage != null && mmseqs_db != null) {
         error("Both OrthoDB lineage and MMseqs2 database cannot be provided at the same time")
     } else if (orthodb_lineage == null && mmseqs_db == null) {
         log.info("Busco lineage ${busco_lineage} will be used for structural annotation")
-    }
-
-    // check that species was provided if needed
-    if (structural_annotator == "braker3" && species == null) {
-        error("Species must be provided when using BRAKER3 structural annotation")
     }
 }
 
