@@ -51,7 +51,10 @@ workflow GENOME_ANNOTATOR {
     // STRUCTURAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    STRUCTURAL_ANNOTATION ( ch_genome )
+    STRUCTURAL_ANNOTATION (
+        ch_genome,
+        params.species
+    )
     ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
