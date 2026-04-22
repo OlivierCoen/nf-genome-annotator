@@ -3,6 +3,7 @@ include { BRAKER3                                               } from '../../..
 include { TSEBRA_TSEBRA          as TSEBRA                      } from '../../../modules/local/tsebra/tsebra'
 
 include { MMSEQS_DATABASES                                      } from '../../../modules/nf-core/mmseqs/databases'
+include { SAMTOOLS_MERGE                                        } from '../../../modules/nf-core/samtools/merge'
 include { METAEUK_EASYPREDICT                                   } from '../../../modules/local/metaeuk/easypredict'
 
 
@@ -17,80 +18,47 @@ workflow STRUCTURAL_ANNOTATION {
 
     take:
     ch_genome
+    ch_proteins
+    ch_bam
+    ch_gtf
+    ch_hintsfile
     structural_annotator
     species
-    mmseqs_db
-    orthodb_lineage
-    busco_lineage
 
     main:
 
     ch_versions = channel.empty()
 
-    // ----------------------------------------------------------
-    // EXTRACT GENOMES ALREADY ASSOCIATED WITH A CUSTOM PROTEOME FILE
-    // ----------------------------------------------------------
-
-    ch_separated_on_proteins = ch_genome
-                                .branch {
-                                    meta, genome ->
-                                        no_proteins: meta.proteins == []
-                                        with_proteins: meta.proteins != []
-                                            [ meta, genome, meta.proteins ]
-                                }
-
-    // ----------------------------------------------------------
-    // DOWNLOAD PROTEIN DATABASE IF NECESSARY
-    // ----------------------------------------------------------
-
-    if ( mmseqs_db == null ) {
-
-        // trick to execute the process DOWNLOAD_ORTHODB_PROTEINS
-        // only if there are elements in the channel ch_separated_on_proteins.no_proteins
-        def orthodb_lineage = orthodb_lineage ?: busco_lineage
-        ch_separated_on_proteins.no_proteins
-            .take (1)
-            .map { orthodb_lineage }
-            | DOWNLOAD_ORTHODB_PROTEINS
-
-        ch_protein_db = DOWNLOAD_ORTHODB_PROTEINS.out.proteins
-
-    } else { // orthodb_lineage == null && mmseqs_db != null
-
-        ch_separated_on_proteins.no_proteins
-            .take (1)
-            .map { mmseqs_db }
-            | MMSEQS_DATABASES
-
-        ch_protein_db = MMSEQS_DATABASES.out.database
-
-        ch_versions = ch_versions.mix( MMSEQS_DATABASES.out.versions )
-
-    }
-
-    // ----------------------------------------------------------
-    // ADD DOWNLOAD PROTEINS TO THE ITEMS WITHOUT PROTEINS
-    // ----------------------------------------------------------
-
-    ch_no_proteins_with_protein_db = ch_separated_on_proteins.no_proteins
-                                        .combine( ch_protein_db )
-                                        .map {
-                                            meta, genome, protein_db ->
-                                                [ meta, genome, protein_db ]
-                                        }
-
-    ch_to_annotate = ch_separated_on_proteins.with_proteins
-                        .mix ( ch_no_proteins_with_protein_db )
-
     if ( structural_annotator == "braker3" ) {
+
+        // ----------------------------------------------------------
+        // MERGE MULTIPLE BAM FILES
+        // ----------------------------------------------------------
+
+        ch_branched_bam = ch_bam
+                            .branch{
+                                meta, bams ->
+                                    leave_me_alone: bams.size() == 1
+                                        [ meta, bams[0] ]
+                                    merge_me: bams.size() > 1
+                                        [ meta, bams ]
+                            }
+
+        SAMTOOLS_MERGE(
+            ch_branched_bam.merge_me,
+            []
+        )
+
+        ch_single_bam = ch_branched_bam.leave_me_alone
+                            .mix( SAMTOOLS_MERGE.out.bam )
 
         // ----------------------------------------------------------
         // RUN BRAKER3 & TSEBRA
         // ----------------------------------------------------------
 
-        // extracts bam file from the meta map
-        ch_braker_input = ch_to_annotate
-                            .map { meta, genome, proteins -> [ meta, genome, meta.bam, proteins ] }
+        ch_braker_input = ch_genome
+                            .join( ch_proteins )
+                            .join( ch_single_bam )
 
         def species_arg = species ?: []
         BRAKER3(
@@ -102,23 +70,28 @@ workflow STRUCTURAL_ANNOTATION {
 
         // separate inputs that need to be merged from the rest
         ch_braker_gtfs = BRAKER3.out.gtf
-                            .branch {
-                                meta, gtf ->
-                                    to_merge: meta.gtf != [] && meta.hintsfile != []
-                                    not_to_merge: meta.gtf == [] || meta.hintsfile == []
-                            }
-
-        // add the newly computed hintsfile from BRAKER to these inputs
-        ch_tsebra_input = ch_braker_gtfs.to_merge
                             .join ( BRAKER3.out.hintsfile )
+                            .join( ch_gtf )
+                            .join( ch_hintsfile )
                             .map {
-                                meta, gtf, hintsfile ->
-                                    [ meta, [ gtf, meta.gtf ], [ hintsfile, meta.hintsfile ] ]
+                                meta, braker_gtf, braker_hintsfile, gtf, hintsfile ->
+                                    if ( gtf != [] && hintsfile == [] ) {
+                                        log.warn("Cannot merge BRAKER output with existing gtf for sample ${meta.id} because hintsfile is absent")
+                                    } else if ( gtf == [] && hintsfile != [] ) {
+                                        log.warn("Cannot merge BRAKER output with existing gtf for sample ${meta.id} because gtf is absent")
+                                    }
+                            }
+                            .branch {
+                                meta, braker_gtf, braker_hintsfile, gtf, hintsfile ->
+                                    to_merge: gtf != [] && hintsfile != []
+                                        [ meta, [ braker_gtf, gtf ], [ braker_hintsfile, hintsfile ] ]
+                                    not_to_merge: gtf == [] || hintsfile == []
+                                        [ meta, braker_gtf ]
                             }
 
         // TSEBRA
         TSEBRA(
-            ch_tsebra_input,
+            ch_braker_gtfs.to_merge,
             [],
             []
         )
