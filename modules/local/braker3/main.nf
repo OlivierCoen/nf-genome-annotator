@@ -8,7 +8,7 @@ process BRAKER3 {
     container "docker.io/teambraker/braker3:v3.0.7.5"
 
     input:
-    tuple val(meta), path(fasta), path(bam), path(proteins)
+    tuple val(meta), path(fasta), path(proteins), path(bam)
     val species
 
     output:

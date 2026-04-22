@@ -25,9 +25,30 @@ include { REPORTING                                                     } from '
 workflow GENOME_ANNOTATOR {
 
     take:
-    ch_genome // channel: samplesheet read in from --input
+    ch_samplesheet
 
     main:
+
+    ch_input = ch_samplesheet.multiMap{
+                    meta, genome, rnaseq_bam, rnaseq_fastq, rnaseq_sra, proteins, gtf, hintsfile, ref_gff ->
+                        genome: [ meta, genome ]
+                        rnaseq_bam: rnaseq_bam ? [ meta, rnaseq_bam ] : [[:], []]
+                        rnaseq_fastq: rnaseq_fastq ? [ meta, rnaseq_fastq ] : [[:], []]
+                        rnaseq_sra: rnaseq_sra ? [ meta, rnaseq_sra ] : [[:], []]
+                        proteins: proteins ? [ meta, proteins ] : [[:], []]
+                        gtf: gtf ? [ meta, gtf ] : [[:], []]
+                        hintsfile: hintsfile ? [ meta, hintsfile ] : [[:], []]
+                        ref_gff: ref_gff ? [ meta, ref_gff ] : [[:], []]
+                }
+
+    ch_genome       = ch_input.genome
+    ch_rnaseq_bam   = ch_input.rnaseq_bam
+    ch_rnaseq_fastq = ch_input.rnaseq_fastq
+    ch_rnaseq_sra   = ch_input.rnaseq_sra
+    ch_proteins     = ch_input.proteins
+    ch_gtf          = ch_input.gtf
+    ch_hintsfile    = ch_input.hintsfile
+    ch_ref_gff      = ch_input.ref_gff
 
     ch_versions = channel.empty()
 
@@ -53,11 +74,12 @@ workflow GENOME_ANNOTATOR {
 
     STRUCTURAL_ANNOTATION (
         ch_genome,
+        ch_proteins,
+        ch_rnaseq_bam,
+        ch_gtf,
+        ch_hintsfile,
         params.structural_annotator,
-        params.species,
-        params.mmseqs_db,
-        params.orthodb_lineage,
-        params.busco_lineage
+        params.species
     )
     ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
 
@@ -66,11 +88,12 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_branched_annotations = ch_structural_annotations
+                                .join( ch_ref_gff )
                                 .branch{
-                                    meta, annotation ->
-                                        to_complement: meta.ref_gff != []
-                                            [ meta, meta.ref_gff, annotation ]
-                                        leave_me_alone: meta.ref_gff == []
+                                    meta, annotation, ref_gff ->
+                                        to_complement: ref_gff != []
+                                            [ meta, ref_gff, annotation ]
+                                        leave_me_alone: ref_gff == []
                                             [ meta, annotation ]
                                 }
 
