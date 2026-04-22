@@ -170,7 +170,6 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_versions = ch_versions
-                    .mix( GENOME_PREPARATION.out.versions )
                     .mix( STRUCTURAL_ANNOTATION.out.versions )
                     .mix( FUNCTIONAL_ANNOTATION.out.versions )
 
