@@ -20,45 +20,80 @@
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|n)?a(\\.gz)?$",
                 "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
             },
-            "bam": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
-                "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'",
-                "meta": ["bam"]
+            "rnaseq_bam": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "file-path",
+                  "exists": true,
+                  "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
+                  "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'"
+                }
+            },
+            "rnaseq_fastq": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "fastq_1": {
+                        "type": "string",
+                        "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                        "format": "file-path",
+                        "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                    },
+                    "fastq_2": {
+                        "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                                "format": "file-path"
+                            },
+                            {
+                                "type": "string",
+                                "maxLength": 0
+                            }
+                        ]
+                    }
+                  }
+                }
+            },
+            "rnaseq_sra": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "proteins": {
+              "type": "array",
+              "items": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|a)?a(\\.gz)?$",
-                "errorMessage": "Protein Fasta file cannot contain spaces and must have extension '.fa', 'faa' or '.fasta' (possibly gzip compressed)",
-                "meta": ["proteins"]
+                "errorMessage": "Protein Fasta file cannot contain spaces and must have extension '.fa', 'faa' or '.fasta' (possibly gzip compressed)"
+              }
             },
             "gtf": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.gtf$",
-                "errorMessage": "GTF file cannot contain spaces and must have extension '.gtf'",
-                "meta": ["gtf"]
+                "errorMessage": "GTF file cannot contain spaces and must have extension '.gtf'"
             },
             "hintsfile": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.hintsfile.gff$",
-                "errorMessage": "Hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'",
-                "meta": ["hintsfile"]
+                "errorMessage": "Hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'"
             },
             "ref_gff": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gff|gtf)$",
-                "errorMessage": "Current reference annotation file cannot contain spaces and must have extension '.gff' or '.gtf'",
-                "meta": ["ref_gff"]
+                "errorMessage": "Current reference annotation file cannot contain spaces and must have extension '.gff' or '.gtf'"
             }
         },
         "required": ["sample", "genome"]

@@ -38,8 +38,6 @@ workflow PIPELINE_INITIALISATION {
 
     main:
 
-    ch_versions = Channel.empty()
-
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
     //
@@ -77,13 +75,10 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
 
-    Channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .set { ch_samplesheet }
+    ch_samplesheet = channel.fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
 
     emit:
     samplesheet = ch_samplesheet
-    versions    = ch_versions
 }
 
 /*
