@@ -4,4 +4,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::eggnog-mapper=2.1.12
+  - conda-forge::tenacity=9.1.4
+  - conda-forge::httpx=0.28.1
+  - conda-forge::aria2=1.37.0
+  - conda-forge::pigz=2.8
