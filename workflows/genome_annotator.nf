@@ -9,6 +9,7 @@ include { AGAT_SPCOMPLEMENTANNOTATIONS as COMPLEMENT_ANNOTATIONS        } from '
 
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
+include { MAP_RNASEQ_READS                                              } from '../subworkflows/local/map_rnaseq_reads'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
 include { GET_PROTEOMES                                                 } from '../subworkflows/local/get_proteomes'
@@ -43,12 +44,24 @@ workflow GENOME_ANNOTATOR {
 
     ch_genome       = ch_input.genome
     ch_rnaseq_bam   = ch_input.rnaseq_bam
-    ch_rnaseq_fastq = ch_input.rnaseq_fastq
     ch_rnaseq_sra   = ch_input.rnaseq_sra
     ch_proteins     = ch_input.proteins
     ch_gtf          = ch_input.gtf
     ch_hintsfile    = ch_input.hintsfile
     ch_ref_gff      = ch_input.ref_gff
+
+    ch_rnaseq_fastq = ch_input.rnaseq_fastq
+                        .transpose()
+                        .filter { meta, reads -> reads != []}
+                        .map { meta, reads ->
+                            fastq_1 = reads[0]
+                            fastq_2 = reads[1]
+                            if ( fastq_2 ) {
+                                [ meta + [ single_end: 'false' ], [ fastq_1, fastq_2 ] ]
+                            } else {
+                                [ meta + [ single_end: 'true' ], fastq_1 ]
+                            }
+                        }
 
     ch_versions = channel.empty()
 
@@ -67,6 +80,22 @@ workflow GENOME_ANNOTATOR {
         GENOME_MASKING ( ch_genome )
         ch_genome = GENOME_MASKING.out.masked_genome
     }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // MAP RNASEQ READS TO GENOME
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    MAP_RNASEQ_READS(
+        ch_genome,
+        ch_rnaseq_fastq,
+        ch_gtf,
+        params.star_ignore_existing_gtf
+    )
+
+    ch_bam = ch_rnaseq_bam
+                .mix( MAP_RNASEQ_READS.out.bam )
+                .groupTuple()
+                .view()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // STRUCTURAL ANNOTATION

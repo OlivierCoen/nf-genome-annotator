@@ -66,6 +66,19 @@
                 }
             }
         },
+        "rnaseq_mapping_options": {
+            "title": "Options for mapping RNA-seq reads to genome",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for genome masking",
+            "properties": {
+                "star_ignore_existing_gtf": {
+                    "type": "boolean",
+                    "description": "Ignore existing GTF (when provided) for guiding RNA-seq read mapping.",
+                    "fa_icon": "fas fa-hand-scissors"
+                }
+            }
+        },
         "structural_annotation_options": {
             "title": "Options for structural annotation",
             "type": "object",

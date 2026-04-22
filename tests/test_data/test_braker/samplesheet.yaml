@@ -2,8 +2,14 @@
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
   rnaseq_bam:
     - http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
+  rnaseq_fastq:
+    - fastq_1: tests/test_data/test_braker/RNAseq.1.fq.gz
+      fastq_2: tests/test_data/test_braker/RNAseq.2.fq.gz
+    - fastq_1: tests/test_data/test_braker/RNAseq.1.fq.gz
+
 
 - sample: braker_proteins
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
   proteins:
     - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
+  rnaseq_fastq:
