@@ -5,7 +5,6 @@
   rnaseq_fastq:
     - fastq_1: tests/test_data/test_braker/RNAseq.1.fq.gz
       fastq_2: tests/test_data/test_braker/RNAseq.2.fq.gz
-    - fastq_1: tests/test_data/test_braker/RNAseq.1.fq.gz
 
 
 - sample: braker_proteins
