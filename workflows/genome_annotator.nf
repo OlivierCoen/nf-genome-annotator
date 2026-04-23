@@ -43,7 +43,6 @@ workflow GENOME_ANNOTATOR {
                 }
 
     ch_genome       = ch_input.genome
-    ch_rnaseq_bam   = ch_input.rnaseq_bam
     ch_rnaseq_sra   = ch_input.rnaseq_sra
     ch_proteins     = ch_input.proteins
     ch_gtf          = ch_input.gtf
@@ -57,11 +56,15 @@ workflow GENOME_ANNOTATOR {
                             fastq_1 = reads[0]
                             fastq_2 = reads[1]
                             if ( fastq_2 ) {
-                                [ meta + [ single_end: 'false' ], [ fastq_1, fastq_2 ] ]
+                                [ meta + [ single_end: false ], [ fastq_1, fastq_2 ] ]
                             } else {
-                                [ meta + [ single_end: 'true' ], fastq_1 ]
+                                [ meta + [ single_end: true ], fastq_1 ]
                             }
                         }
+
+    ch_rnaseq_bam   = ch_input.rnaseq_bam
+                        .transpose()
+                        .filter { meta, bam -> bam != []}
 
     ch_versions = channel.empty()
 
@@ -89,6 +92,9 @@ workflow GENOME_ANNOTATOR {
         ch_genome,
         ch_rnaseq_fastq,
         ch_gtf,
+        params.skip_fastqc,
+        params.skip_umi_extract,
+        params.skip_trimming,
         params.star_ignore_existing_gtf
     )
 
