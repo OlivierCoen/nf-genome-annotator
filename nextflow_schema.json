@@ -72,6 +72,21 @@
             "fa_icon": "fas fa-terminal",
             "description": "Options for genome masking",
             "properties": {
+              "skip_fastqc": {
+                  "type": "boolean",
+                  "description": "Skip FastQC for RNA-seq reads.",
+                  "fa_icon": "fas fa-hand-scissors"
+              },
+              "skip_umi_extract": {
+                  "type": "boolean",
+                  "description": "Skip UMI extract for RNA-seq reads.",
+                  "fa_icon": "fas fa-hand-scissors"
+              },
+              "skip_trimming": {
+                  "type": "boolean",
+                  "description": "Skip trimming / cleaning (Fastp) for RNA-seq reads.",
+                  "fa_icon": "fas fa-hand-scissors"
+              },
                 "star_ignore_existing_gtf": {
                     "type": "boolean",
                     "description": "Ignore existing GTF (when provided) for guiding RNA-seq read mapping.",
