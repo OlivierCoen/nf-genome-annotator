@@ -7,3 +7,4 @@ channels:
 dependencies:
   - conda-forge::aria2=1.37.0
   - conda-forge::pigz=2.8
+  - conda-forge::python=3.14.4
