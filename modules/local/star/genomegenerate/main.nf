@@ -9,6 +9,7 @@ process STAR_GENOMEGENERATE {
 
     input:
     tuple val(meta), path(fasta), path(gtf)
+    val ignore_existing_gtf
 
     output:
     tuple val(meta), path("star")  , emit: index
@@ -20,7 +21,7 @@ process STAR_GENOMEGENERATE {
     def args        = task.ext.args ?: ''
     def args_list   = args.tokenize()
     def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
-    def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
+    def gtf_arg     = ignore_existing_gtf ? "" : gtf ? "--sjdbGTFfile $gtf" : ''
     if (args_list.contains('--genomeSAindexNbases')) {
         """
         mkdir star
@@ -28,7 +29,7 @@ process STAR_GENOMEGENERATE {
             --runMode genomeGenerate \\
             --genomeDir star/ \\
             --genomeFastaFiles $fasta \\
-            $include_gtf \\
+            $gtf_arg \\
             --runThreadN $task.cpus \\
             $memory \\
             $args
