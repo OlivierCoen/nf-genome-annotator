@@ -24,6 +24,9 @@ workflow CLEAN_ANNOTATIONS {
     main:
 
     ch_intermediate_gffs = channel.empty()
+    
+    ch_genome = ch_genome
+                    .map{ meta, genome -> [ [id: meta.id], genome ] }
 
     // remove redundant entries and convert all GTFs / GFFs to GFFs
     AGAT_FIX_DUPLICATIONS ( ch_annotation, [] )

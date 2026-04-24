@@ -13,7 +13,7 @@ process ORTHODB_MAKECLADEDB {
     val excluded_species
 
     output:
-    path("${clade}.orthodb_proteins.faa"), emit: db
+    path("${clade}.orthodb_proteins.faa.gz"), emit: db
     tuple val("${task.process}"), val('python'), eval("python3 --version | sed 's/Python //'"),           topic: versions
     tuple val("${task.process}"), val('aria2'),  eval("aria2c -v | head -1 | sed 's/aria2 version //g'"), topic: versions
     tuple val("${task.process}"), val('pigz'),   eval("pigz --version 2>&1 | sed 's/pigz //g'"),          topic: versions
@@ -52,6 +52,7 @@ process ORTHODB_MAKECLADEDB {
     # Renaming fasta file
     mv odb12v2_aa_fasta odb12v2_all.faa
 
+    echo "Filtering odb12v2_all.faa"
     select_clade_from_orthodb.py \\
         odb12v2_all.faa \\
         odb12v2_levels.tab \\
@@ -61,8 +62,11 @@ process ORTHODB_MAKECLADEDB {
         $excluded_clades_arg \\
         $excluded_species_arg \\
         > ${clade}.orthodb_proteins.faa
+    
+    echo "Compressing ${clade}.orthodb_proteins.faa"
+    pigz ${clade}.orthodb_proteins.faa
 
-    # removing intermediate files
+    echo "Removing intermediate files"
     rm odb12v2_all.faa odb12v2_levels.tab odb12v2_level2species.tab odb12v2_species.tab
     """
 
