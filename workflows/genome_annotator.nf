@@ -43,11 +43,11 @@ workflow GENOME_ANNOTATOR {
                 }
 
     ch_genome       = ch_input.genome
-    ch_rnaseq_sra   = ch_input.rnaseq_sra
+    
     ch_proteins     = ch_input.proteins
-    ch_gtf          = ch_input.gtf
-    ch_hintsfile    = ch_input.hintsfile
-    ch_ref_gff      = ch_input.ref_gff
+                        .transpose()
+                        .filter { meta, fasta -> fasta != [] }
+                        .groupTuple()
 
     ch_rnaseq_fastq = ch_input.rnaseq_fastq
                         .transpose()
@@ -65,6 +65,18 @@ workflow GENOME_ANNOTATOR {
     ch_rnaseq_bam   = ch_input.rnaseq_bam
                         .transpose()
                         .filter { meta, bam -> bam != []}
+    
+    ch_gtf          = ch_input.gtf
+                        .filter { meta, gtf -> gtf != []}
+    
+    ch_hintsfile    = ch_input.hintsfile
+                        .filter { meta, file -> file != []}
+    
+    //ch_ref_gff      = ch_input.ref_gff.filter { meta, gff -> gff != []}.ifEmpty([])
+    
+    ch_rnaseq_sra   = ch_input.rnaseq_sra
+                        .filter { meta, sra -> sra != []}
+                        
 
     ch_versions = channel.empty()
 
@@ -99,9 +111,8 @@ workflow GENOME_ANNOTATOR {
         params.star_ignore_existing_gtf
     )
 
-    ch_bam = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
-                        .groupTuple()
-                        .view()
+    ch_grouped_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
+                            .groupTuple()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // STRUCTURAL ANNOTATION
@@ -110,7 +121,7 @@ workflow GENOME_ANNOTATOR {
     STRUCTURAL_ANNOTATION (
         ch_genome,
         ch_proteins,
-        ch_bam,
+        ch_grouped_bam_bai,
         ch_gtf,
         ch_hintsfile,
         params.structural_annotator,
@@ -120,18 +131,21 @@ workflow GENOME_ANNOTATOR {
         params.excluded_species
     )
     ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
-
+    
+    /*
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_branched_annotations = ch_structural_annotations
-                                .join( ch_ref_gff )
+                                .join( ch_ref_gff, remainder: true )
+                                
+                                .view{ v -> "after join $v"}
                                 .branch{
                                     meta, annotation, ref_gff ->
-                                        to_complement: ref_gff != []
+                                        to_complement: ref_gff != null
                                             [ meta, ref_gff, annotation ]
-                                        leave_me_alone: ref_gff == []
+                                        leave_me_alone: ref_gff == null
                                             [ meta, annotation ]
                                 }
 
@@ -139,20 +153,20 @@ workflow GENOME_ANNOTATOR {
 
     ch_annotation = ch_branched_annotations.leave_me_alone
                         .mix( COMPLEMENT_ANNOTATIONS.out.gff )
-
+    */
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    
     CLEAN_ANNOTATIONS (
-        ch_annotation,
+        ch_structural_annotations,
         ch_genome,
         params.skip_gff_keep_longest_isoform,
         params.skip_gff_fix_overlapping_genes,
         params.skip_gff_filter_incomplete_gene_models,
         params.skip_gff_fix_cds_phases
     )
-
+ch_genome.view()
     ch_gff = CLEAN_ANNOTATIONS.out.gff
                 .map {
                     meta, file -> [ meta + [final_annotation: true], file ]
