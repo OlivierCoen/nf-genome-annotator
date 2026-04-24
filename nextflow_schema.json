@@ -82,6 +82,35 @@
                   "description": "Skip UMI extract for RNA-seq reads.",
                   "fa_icon": "fas fa-hand-scissors"
               },
+              "umitools_extract_method": {
+                  "type": "string",
+                  "default": "string",
+                  "fa_icon": "fas fa-barcode",
+                  "description": "UMI pattern to use. Can be either 'string' (default) or 'regex'.",
+                  "help_text": "Detailed information can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method)."
+              },
+              "umitools_bc_pattern": {
+                  "type": "string",
+                  "minLength": 1,
+                  "fa_icon": "fas fa-barcode",
+                  "help_text": "Detailed information can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method).",
+                  "description": "The UMI barcode pattern to use e.g. 'NNNNNN' indicates that the first 6 nucleotides of the read are from the UMI."
+              },
+              "umitools_bc_pattern2": {
+                  "type": "string",
+                  "minLength": 1,
+                  "fa_icon": "fas fa-barcode",
+                  "description": "The UMI barcode pattern to use if the UMI is located in read 2."
+              },
+              "umitools_umi_separator": {
+                  "type": "string",
+                  "pattern": "^\\S+$",
+                  "minLength": 1,
+                  "maxLength": 1,
+                  "errorMessage": "The UMI separator must not contain spaces and must be a single character (e.g., ':').",
+                  "fa_icon": "fas fa-star-half-alt",
+                  "description": "The character that separates the UMI in the read name. Most likely a colon if you skipped the extraction with UMI-tools and used other software."
+              },
               "skip_trimming": {
                   "type": "boolean",
                   "description": "Skip trimming / cleaning (Fastp) for RNA-seq reads.",
