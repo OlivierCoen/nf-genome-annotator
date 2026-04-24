@@ -9,7 +9,7 @@ include { AGAT_SPCOMPLEMENTANNOTATIONS as COMPLEMENT_ANNOTATIONS        } from '
 
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
-include { MAP_RNASEQ_READS                                              } from '../subworkflows/local/map_rnaseq_reads'
+include { MAP_TO_GENOME_SORT_INDEX                                      } from '../subworkflows/local/map_to_genome_sort_index'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
 include { GET_PROTEOMES                                                 } from '../subworkflows/local/get_proteomes'
@@ -88,9 +88,10 @@ workflow GENOME_ANNOTATOR {
     // MAP RNASEQ READS TO GENOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    MAP_RNASEQ_READS(
+    MAP_TO_GENOME_SORT_INDEX(
         ch_genome,
         ch_rnaseq_fastq,
+        ch_rnaseq_bam,
         ch_gtf,
         params.skip_fastqc,
         params.skip_umi_extract,
@@ -98,10 +99,9 @@ workflow GENOME_ANNOTATOR {
         params.star_ignore_existing_gtf
     )
 
-    ch_bam = ch_rnaseq_bam
-                .mix( MAP_RNASEQ_READS.out.bam )
-                .groupTuple()
-                .view()
+    ch_bam = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
+                        .groupTuple()
+                        .view()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // STRUCTURAL ANNOTATION
@@ -110,11 +110,14 @@ workflow GENOME_ANNOTATOR {
     STRUCTURAL_ANNOTATION (
         ch_genome,
         ch_proteins,
-        ch_rnaseq_bam,
+        ch_bam,
         ch_gtf,
         ch_hintsfile,
         params.structural_annotator,
-        params.species
+        params.species,
+        params.clade,
+        params.excluded_clades,
+        params.excluded_species
     )
     ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
 

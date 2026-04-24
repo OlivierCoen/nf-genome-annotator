@@ -9,6 +9,7 @@ process STAR_ALIGN {
 
     input:
     tuple val(meta), path(reads, stageAs: "input*/*"), path(index), path(gtf)
+    val ignore_existing_gtf
 
     output:
     tuple val(meta), path('*Log.final.out')   , emit: log_final
@@ -38,19 +39,17 @@ process STAR_ALIGN {
     def reads1 = []
     def reads2 = []
     meta.single_end ? [reads].flatten().each{ read -> reads1 << read} : reads.eachWithIndex{ v, ix -> ( ix & 1 ? reads2 : reads1) << v }
-    def gtf_arg      = gtf ? "--sjdbGTFfile $gtf": ""
-    attrRG          = args.contains("--outSAMattrRGline") ? "" : "--outSAMattrRGline 'ID:$prefix' 'SM:$prefix'"
-    def out_sam_type    = (args.contains('--outSAMtype')) ? '' : '--outSAMtype BAM Unsorted'
-    mv_unsorted_bam = (args.contains('--outSAMtype BAM Unsorted SortedByCoordinate')) ? "mv ${prefix}.Aligned.out.bam ${prefix}.Aligned.unsort.out.bam" : ''
+    def gtf_arg      = ignore_existing_gtf ? "" : gtf ? "--sjdbGTFfile $gtf": ""
     """
     STAR \\
         --genomeDir $index \\
         --readFilesIn ${reads1.join(",")} ${reads2.join(",")} \\
+        --readFilesCommand zcat \\
         --runThreadN $task.cpus \\
         --outFileNamePrefix $prefix. \\
-        $out_sam_type \\
-        $ignore_gtf \\
-        $attrRG \\
+        --outSAMstrandField intronMotif \\
+        --outSAMtype BAM Unsorted \\
+        $gtf_arg \\
         $args
 
     $mv_unsorted_bam
