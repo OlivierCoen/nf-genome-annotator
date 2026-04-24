@@ -19,11 +19,11 @@ workflow FASTQ_ALIGN_STAR {
 
     ch_star_genomegenerate_input = ch_genome
                                     .join( ch_gtf, remainder: true ) // gives objects even if no corresponding gtf
+                                    .filter{ meta, genome, gtf -> genome != null }
                                     .map{
                                         meta, genome, gtf ->
-                                            [ meta, genome, genome ]
+                                            [ meta, genome, gtf?: [] ]
                                     }
-                                    .view{ v -> "genome $v"}
 
     STAR_GENOMEGENERATE(
         ch_star_genomegenerate_input,
@@ -37,12 +37,12 @@ workflow FASTQ_ALIGN_STAR {
 
     if (star_ignore_existing_gtf) {
         ch_star_input = ch_reads
-                            .cross( ch_index ) { v -> v[0].id } // match only on id, ignore single_end
+                            .cross( ch_index ) { v -> v[0][0] } // match only on id, ignore single_end
                             .map{ meta, reads, index -> [ meta, reads, index, [] ] }
     } else {
         ch_star_input = ch_reads
-                            .cross( ch_index ) { v -> v[0].id }
-                            .cross( ch_gtf ) { v -> v[0].id }
+                            .cross( ch_index ) { v -> v[0][0] }
+                            .cross( ch_gtf ) { v -> v[0][0] }
     }
 
     STAR_ALIGN(
