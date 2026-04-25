@@ -27,8 +27,9 @@ process ORTHODB_MAKECLADEDB {
     ].join(' ').trim()
     def excluded_clades_arg = excluded_clades != "" ? "--exclude $excluded_clades": ""
     def excluded_species_arg = excluded_species != "" ? "--excludeSpecies $excluded_species" : ""
-    def nb_splits = min(16, task.cpus)
-    def nb_max_connections = min(16, task.cpus)
+    def nb_splits = Math.min(16, task.cpus.toInteger())
+    def nb_max_connections = Math.min(16, task.cpus)
+    println nb_splits
     """
     for url in ${orthodb_file_urls}
     do
@@ -36,8 +37,8 @@ process ORTHODB_MAKECLADEDB {
 
         echo "Downloading \$url to \$outfile"
         aria2c \\
-            --split 16 \\
-            --max-connection-per-server 16 \\
+            --split $nb_splits \\
+            --max-connection-per-server $nb_max_connections \\
             --optimize-concurrent-downloads \\
             --check-integrity=true \\
             --max-tries=10 \\
@@ -64,7 +65,7 @@ process ORTHODB_MAKECLADEDB {
         $excluded_clades_arg \\
         $excluded_species_arg \\
         > ${clade}.orthodb_proteins.faa
-    
+
     echo "Compressing ${clade}.orthodb_proteins.faa"
     pigz ${clade}.orthodb_proteins.faa
 
