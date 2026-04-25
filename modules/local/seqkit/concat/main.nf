@@ -23,7 +23,7 @@ process SEQKIT_CONCAT {
         concat \\
         --threads ${task.cpus} \\
         ${args} \\
-        in/* > ${prefix}.${file_type}
+        in/* > ${prefix}.faa
     """
 
     stub:
