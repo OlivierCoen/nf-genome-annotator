@@ -11,7 +11,7 @@ process SEQKIT_CONCAT {
     tuple val(meta), path(input, stageAs: 'in/*')
 
     output:
-    tuple val(meta), path("*.{fasta,fastq,fa,fq,fas,fna,faa}"), emit: fastx
+    tuple val(meta), path("*.{fasta,fastq,fa,fq,fas,fna,faa}.gz"), emit: fastx
     tuple val("${task.process}"), val('seqkit'), eval("seqkit version | sed 's/^.*v//'"), emit: versions_seqkit, topic: versions
 
     script:
@@ -24,11 +24,13 @@ process SEQKIT_CONCAT {
         --threads ${task.cpus} \\
         ${args} \\
         in/* > ${prefix}.faa
+
+    gzip ${prefix}.faa
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.fasta
+    touch ${prefix}.fasta.gz
     """
 }
