@@ -5,8 +5,8 @@ process CHECK_FASTA_HEADERS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/38/386577baf029b1bd12bc58855e52a8b73575c62ccdb4c09dfcfa158dcf1bbcee/data':
-        'community.wave.seqera.io/library/biopython:1.87--7dac4c636fcf94ae' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/03/039340bbfffa2261c6ab74f8f66c68151b9116f7784d82cdfe167b2dc90eca1e/data':
+        'community.wave.seqera.io/library/biopython_python:f180d02b12dd489c' }"
 
     input:
     tuple val(meta), path(fasta)
@@ -15,7 +15,7 @@ process CHECK_FASTA_HEADERS {
     output:
     tuple val(meta), path("*headers_cleaned.{fasta,fa,fas,fna,faa}.gz"), emit: fasta, optional: true
     tuple val("${task.process}"), val('python'),eval("python3 --version | sed 's/Python //'"),            topic: versions
-    //tuple val("${task.process}"), val('Bio'),    eval('python3 -c "import Bio; print(Bio.__version__)"'), topic: versions
+    tuple val("${task.process}"), val('Bio'),    eval('python3 -c "import Bio; print(Bio.__version__)"'), topic: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}.headers_cleaned"
@@ -35,7 +35,7 @@ process CHECK_FASTA_HEADERS {
         --out \$outfile \\
         $fix_arg
 
-    if [ "${fix}" == "true" && ${is_compressed}" == "true" ]; then
+    if [ "${fix}" == "true" && "${is_compressed}" == "true" ]; then
         gzip \$outfile
     fi
     """
