@@ -1,13 +1,10 @@
-//include { BUSCO_DOWNLOADPROTEINS as DOWNLOAD_ORTHODB_PROTEINS   } from '../../../modules/local/busco/download'
-include { ORTHODB_MAKECLADEDB                                   } from '../../../modules/local/orthodb/make_clade_db'
-include { SEQKIT_CONCAT                                         } from '../../../modules/local/seqkit/concat'
 include { BRAKER3                                               } from '../../../modules/local/braker3'
 include { TSEBRA_TSEBRA as TSEBRA                               } from '../../../modules/local/tsebra/tsebra'
-
-//include { MMSEQS_DATABASES                                      } from '../../../modules/nf-core/mmseqs/databases'
 include { SAMTOOLS_INDEX                                        } from '../../../modules/nf-core/samtools/index'
 include { SAMTOOLS_MERGE                                        } from '../../../modules/local/samtools/merge'
 include { METAEUK_EASYPREDICT                                   } from '../../../modules/local/metaeuk/easypredict'
+
+include { PROTEIN_DB_PREPARATION                                } from '../protein_db_preparation'
 
 
 /*
@@ -57,28 +54,17 @@ workflow STRUCTURAL_ANNOTATION {
                             .map{ meta, bam, bai -> [ meta, bam ] }
 
         // ----------------------------------------------------------
-        // DOWNLOAD CLASE-SPECIFIC ORTHODB PROTEIN DB
+        // PREPARE PROTEIN DB FROM CLADE-SPECIFIC ORTHODB AND CUSTOM PROTEIN FASTA FILES
         // ----------------------------------------------------------
 
-        ORTHODB_MAKECLADEDB(
+        PROTEIN_DB_PREPARATION(
+            ch_proteins,
             clade,
             excluded_clades,
             excluded_species
         )
-        
-        // ----------------------------------------------------------
-        // CONCAT ALL PROTEIN DBS INTO A SINLE ONE
-        // ----------------------------------------------------------
 
-        ch_to_concat = ch_proteins
-                            .combine( ORTHODB_MAKECLADEDB.out.db ) // cartesian product: add the clade orthodb protein db to each item separately
-                            .map { 
-                                meta, input_fasta_list, orthodb_data ->  
-                                    [ meta, input_fasta_list + [orthodb_data] ]
-                            }          
-                            
-        SEQKIT_CONCAT ( ch_to_concat )
-        ch_combined_proteins = SEQKIT_CONCAT.out.fastx
+        ch_prepared_proteins = PROTEIN_DB_PREPARATION.out.proteins
 
         // ----------------------------------------------------------
         // RUN BRAKER3
@@ -86,10 +72,10 @@ workflow STRUCTURAL_ANNOTATION {
 
         ch_braker_input = ch_genome
                             .map{ meta, genome -> [ [id: meta.id], genome ] }
-                            .join( ch_combined_proteins, remainder: true )
+                            .join( ch_prepared_proteins, remainder: true )
                             .join( ch_single_bam, remainder: true )
-                            .map{ 
-                                meta, genome, prot, bam -> 
+                            .map{
+                                meta, genome, prot, bam ->
                                     [ meta, genome, prot?: [], bam?: [] ]
                             }
 

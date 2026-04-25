@@ -42,9 +42,7 @@ workflow {
         args,
         params.outdir,
         params.input,
-        params.busco_lineage,
-        params.orthodb_lineage,
-        params.mmseqs_db
+        params.busco_lineage
     )
 
     //

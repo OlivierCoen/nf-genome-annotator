@@ -26,19 +26,27 @@ process BRAKER3 {
     tuple val("${task.process}"), val('prothint'), eval("prothint.py --version | sed 's/prothint.py //1'"),                         topic: versions
 
     script:
-    def args        = task.ext.args             ?: ''
-    prefix          = task.ext.prefix           ?: "${meta.id}"
-    def is_compressed = fasta.getExtension() == "gz" ? true : false
-    def fasta_name = is_compressed ? fasta.getBaseName() : fasta
+    def args               = task.ext.args                   ?: ''
+    prefix                 = task.ext.prefix                 ?: "${meta.id}"
+    // The number of CPUs cannot exceed 48, otherwise BRAKER warns that it could create problems with GeneMark
+    def nb_threads         = Math.min(48, $task.cpus)
+    def is_compressed      = fasta.getExtension() == "gz"    ? true : false
+    def fasta_name         = is_compressed                   ? fasta.getBaseName() : fasta.name
     //def rna_ids     = rnaseq_sets_ids           ? "--rnaseq_sets_ids=$rnaseq_sets_ids"      : ''
     //def rna_dirs    = rnaseq_sets_dirs          ? "--rnaseq_sets_dirs=$rnaseq_sets_dirs"    : ''
-    def bam_arg     = bam                       ? "--bam=$bam"                              : ''
-    def prot_arg    = proteins                  ? "--prot_seq=$proteins"                    : ''
+    def bam_arg            = bam                             ? "--bam=$bam" : ''
+    def prot_is_compressed = proteins.getExtension() == "gz" ? true : false
+    def prot_fasta_name    = prot_is_compressed              ? proteins.getBaseName() : proteins.name
+    def prot_arg           = proteins                        ? "--prot_seq=$prot_fasta_name" : ''
     //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
-    def new_species = args.contains('--species')? ''                                        : '--species new_species'
+    def new_species        = args.contains('--species')      ? '' : '--species new_species'
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
+    fi
+
+    if [ "${prot_is_compressed}" == "true" ]; then
+        gzip -c -d ${proteins} > ${prot_fasta_name}
     fi
 
     cp -r \$AUGUSTUS_CONFIG_PATH \\
@@ -56,7 +64,7 @@ process BRAKER3 {
         --species "$species" \\
         --workingdir $prefix \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
-        --threads $task.cpus \\
+        --threads $nb_threads \\
         $bam_arg \\
         $prot_arg \\
         $args
