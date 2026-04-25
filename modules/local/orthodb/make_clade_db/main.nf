@@ -29,7 +29,6 @@ process ORTHODB_MAKECLADEDB {
     def excluded_species_arg = excluded_species != "" ? "--excludeSpecies $excluded_species" : ""
     def nb_splits = Math.min(16, task.cpus.toInteger())
     def nb_max_connections = Math.min(16, task.cpus)
-    println nb_splits
     """
     for url in ${orthodb_file_urls}
     do

@@ -33,8 +33,6 @@ workflow PIPELINE_INITIALISATION {
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
     busco_lineage     //  string: BUSCO lineage
-    orthodb_lineage   //  string: OrthoDB lineage
-    mmseqs_db         //  string: MMseqs2 database
 
     main:
 
@@ -46,16 +44,6 @@ workflow PIPELINE_INITIALISATION {
         true,
         outdir,
         workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1
-    )
-
-    //
-    // Validate parameters and generate parameter summary to stdout
-    //
-
-    validateInputParameters(
-        busco_lineage,
-        orthodb_lineage,
-        mmseqs_db
     )
 
     UTILS_NFSCHEMA_PLUGIN (
@@ -116,19 +104,6 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-//
-// Validate parameters
-//
-def validateInputParameters(busco_lineage, orthodb_lineage, mmseqs_db) {
-
-    // check that at least one db was selected
-    if (orthodb_lineage != null && mmseqs_db != null) {
-        error("Both OrthoDB lineage and MMseqs2 database cannot be provided at the same time")
-    } else if (orthodb_lineage == null && mmseqs_db == null) {
-        log.info("Busco lineage ${busco_lineage} will be used for structural annotation")
-    }
-}
 
 //
 // Generate methods description for MultiQC
