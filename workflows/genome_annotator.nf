@@ -43,7 +43,7 @@ workflow GENOME_ANNOTATOR {
                 }
 
     ch_genome       = ch_input.genome
-    
+
     ch_proteins     = ch_input.proteins
                         .transpose()
                         .filter { meta, fasta -> fasta != [] }
@@ -65,18 +65,18 @@ workflow GENOME_ANNOTATOR {
     ch_rnaseq_bam   = ch_input.rnaseq_bam
                         .transpose()
                         .filter { meta, bam -> bam != []}
-    
+
     ch_gtf          = ch_input.gtf
                         .filter { meta, gtf -> gtf != []}
-    
+
     ch_hintsfile    = ch_input.hintsfile
                         .filter { meta, file -> file != []}
-    
+
     //ch_ref_gff      = ch_input.ref_gff.filter { meta, gff -> gff != []}.ifEmpty([])
-    
+
     ch_rnaseq_sra   = ch_input.rnaseq_sra
                         .filter { meta, sra -> sra != []}
-                        
+
 
     ch_versions = channel.empty()
 
@@ -131,7 +131,7 @@ workflow GENOME_ANNOTATOR {
         params.excluded_species
     )
     ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
-    
+
     /*
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
@@ -139,7 +139,7 @@ workflow GENOME_ANNOTATOR {
 
     ch_branched_annotations = ch_structural_annotations
                                 .join( ch_ref_gff, remainder: true )
-                                
+
                                 .view{ v -> "after join $v"}
                                 .branch{
                                     meta, annotation, ref_gff ->
@@ -157,7 +157,7 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     CLEAN_ANNOTATIONS (
         ch_structural_annotations,
         ch_genome,
@@ -166,7 +166,7 @@ workflow GENOME_ANNOTATOR {
         params.skip_gff_filter_incomplete_gene_models,
         params.skip_gff_fix_cds_phases
     )
-ch_genome.view()
+
     ch_gff = CLEAN_ANNOTATIONS.out.gff
                 .map {
                     meta, file -> [ meta + [final_annotation: true], file ]

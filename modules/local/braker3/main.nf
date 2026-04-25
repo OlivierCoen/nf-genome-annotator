@@ -29,15 +29,17 @@ process BRAKER3 {
     def args               = task.ext.args                   ?: ''
     prefix                 = task.ext.prefix                 ?: "${meta.id}"
     // The number of CPUs cannot exceed 48, otherwise BRAKER warns that it could create problems with GeneMark
-    def nb_threads         = Math.min(48, $task.cpus)
+    def nb_threads         = Math.min(48, task.cpus)
     def is_compressed      = fasta.getExtension() == "gz"    ? true : false
     def fasta_name         = is_compressed                   ? fasta.getBaseName() : fasta.name
     //def rna_ids     = rnaseq_sets_ids           ? "--rnaseq_sets_ids=$rnaseq_sets_ids"      : ''
     //def rna_dirs    = rnaseq_sets_dirs          ? "--rnaseq_sets_dirs=$rnaseq_sets_dirs"    : ''
     def bam_arg            = bam                             ? "--bam=$bam" : ''
-    def prot_is_compressed = proteins.getExtension() == "gz" ? true : false
-    def prot_fasta_name    = prot_is_compressed              ? proteins.getBaseName() : proteins.name
-    def prot_arg           = proteins                        ? "--prot_seq=$prot_fasta_name" : ''
+
+    def prot_is_compressed = proteins && proteins.getExtension() == "gz" ? true : false
+    def prot_fasta_name    = proteins && prot_is_compressed              ? proteins.getBaseName() : proteins.name
+    def prot_arg           = proteins ? "--prot_seq=$prot_fasta_name": ""
+
     //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
     def new_species        = args.contains('--species')      ? '' : '--species new_species'
     """
@@ -45,7 +47,7 @@ process BRAKER3 {
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
-    if [ "${prot_is_compressed}" == "true" ]; then
+    if [ -f "$proteins" && "${prot_is_compressed}" == "true" ]; then
         gzip -c -d ${proteins} > ${prot_fasta_name}
     fi
 
