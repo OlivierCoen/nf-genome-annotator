@@ -1,4 +1,4 @@
-process CHECK_FASTA_HEADERS {
+process CHECK_FASTA {
 
     tag "${meta.id}"
     label 'process_high'
@@ -10,19 +10,22 @@ process CHECK_FASTA_HEADERS {
 
     input:
     tuple val(meta), path(fasta)
-    val fix
+    val type
+    val fix_headers
+    val fix_sequences
 
     output:
-    tuple val(meta), path("*headers_cleaned.{fasta,fa,fas,fna,faa}.gz"), emit: fasta, optional: true
+    tuple val(meta), path("*.cleaned.{fasta,fa,fas,fna,faa}*"), emit: fasta, optional: true
     tuple val("${task.process}"), val('python'),eval("python3 --version | sed 's/Python //'"),            topic: versions
     tuple val("${task.process}"), val('Bio'),    eval('python3 -c "import Bio; print(Bio.__version__)"'), topic: versions
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}.headers_cleaned"
+    def prefix = task.ext.prefix ?: "${meta.id}.cleaned"
     def is_compressed = fasta.getExtension() == "gz" ? true : false
     def fasta_name = is_compressed ? fasta.getBaseName() : fasta.name
     def fasta_ext = fasta_name.tokenize('.')[-1]
-    def fix_arg = fix ? "--fix": ""
+    def fix_headers_arg = fix_headers ? "--fix-headers": ""
+    def fix_sequences_arg = fix_sequences ? "--fix-sequences": ""
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
@@ -30,15 +33,17 @@ process CHECK_FASTA_HEADERS {
 
     outfile=${prefix}.${fasta_ext}
 
-    check_fasta_headers.py \\
+    check_fasta.py \\
         --in $fasta_name \\
         --out \$outfile \\
-        $fix_arg
+        --type $type \\
+        $fix_headers_arg \\
+        $fix_sequences_arg
 
     if [ "${is_compressed}" == "true" ]; then
         echo "Removing ${fasta_name}"
         rm ${fasta_name}
-        if [ "${fix}" == "true" ]; then
+        if [ -f \$outfile ]; then
             echo "Compressing \$outfile"
             gzip \$outfile
         fi

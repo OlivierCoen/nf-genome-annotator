@@ -1,5 +1,5 @@
-include { CHECK_FASTA_HEADERS              } from '../../../modules/local/check_fasta_headers'
-include { SEQKIT_STATS                     } from '../../../modules/nf-core/seqkit/stats'
+include { CHECK_FASTA              } from '../../../modules/local/check_fasta'
+include { SEQKIT_STATS              } from '../../../modules/nf-core/seqkit/stats'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,10 +19,13 @@ workflow GENOME_PREPARATION {
     // CHECK HEADERS OR WHOLE PROTEIN DB AND RAISE ERROR IF UNHANDLED CHARACTERS
     // ----------------------------------------------------------
 
-    CHECK_FASTA_HEADERS(
+    CHECK_FASTA(
         ch_genome,
-        fix=false
+        type="dna",
+        fix_headers=false,
+        fix_sequences=false
     )
+
 
     // ----------------------------------------------------------
     // COMPUTE STATS ABOUT GENOME
