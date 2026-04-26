@@ -35,8 +35,13 @@ process CHECK_FASTA_HEADERS {
         --out \$outfile \\
         $fix_arg
 
-    if [ "${fix}" == "true" && "${is_compressed}" == "true" ]; then
-        gzip \$outfile
+    if [ "${is_compressed}" == "true" ]; then
+        echo "Removing ${fasta_name}"
+        rm ${fasta_name}
+        if [ "${fix}" == "true" ]; then
+            echo "Compressing \$outfile"
+            gzip \$outfile
+        fi
     fi
     """
 

@@ -37,7 +37,7 @@ process BRAKER3 {
     def bam_arg            = bam                             ? "--bam=$bam" : ''
 
     def prot_is_compressed = proteins && proteins.getExtension() == "gz" ? true : false
-    def prot_fasta_name    = proteins && prot_is_compressed              ? proteins.getBaseName() : proteins.name
+    def prot_fasta_name    = proteins && prot_is_compressed              ? proteins.getBaseName() : "fake"
     def prot_arg           = proteins ? "--prot_seq=$prot_fasta_name": ""
 
     //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
@@ -47,7 +47,7 @@ process BRAKER3 {
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
-    if [ -f "$proteins" && "${prot_is_compressed}" == "true" ]; then
+    if [ -f $proteins && "${prot_is_compressed}" == "true" ]; then
         gzip -c -d ${proteins} > ${prot_fasta_name}
     fi
 
@@ -57,16 +57,17 @@ process BRAKER3 {
     chmod -R a+w \\
         augustus_config
 
+    # keep only IDs in genome fasta header (and remove description)
     perl -p -e 's/^(>\\S+).*\$/\$1/' \\
         $fasta_name \\
         > ${prefix}.genome.masked.fasta
 
     braker.pl \\
         --genome ${prefix}.genome.masked.fasta \\
-        --species "$species" \\
         --workingdir $prefix \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
         --threads $nb_threads \\
+        $new_species \\
         $bam_arg \\
         $prot_arg \\
         $args
