@@ -47,7 +47,7 @@ process BRAKER3 {
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
-    if [ -f $proteins && "${prot_is_compressed}" == "true" ]; then
+    if [ -f $proteins -a "${prot_is_compressed}" == "true" ]; then
         gzip -c -d ${proteins} > ${prot_fasta_name}
     fi
 
