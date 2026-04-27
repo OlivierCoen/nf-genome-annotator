@@ -10,6 +10,7 @@ process BRAKER3 {
     input:
     tuple val(meta), path(fasta), path(proteins), path(bam)
     val species
+    val busco_lineage
 
     output:
     tuple val(meta), path("$prefix/braker.gtf")         , emit: gtf
@@ -66,7 +67,9 @@ process BRAKER3 {
         --genome ${prefix}.genome.masked.fasta \\
         --workingdir $prefix \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
-        --threads $nb_threads \\
+        --AUGUSTUS_ab_initio \\
+        --threads $task.cpus \\
+        --busco_lineage=$busco_lineage
         $new_species \\
         $bam_arg \\
         $prot_arg \\
