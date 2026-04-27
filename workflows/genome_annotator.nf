@@ -126,6 +126,7 @@ workflow GENOME_ANNOTATOR {
         ch_hintsfile,
         params.structural_annotator,
         params.species,
+        params.busco_lineage,
         params.clade,
         params.excluded_clades,
         params.excluded_species
