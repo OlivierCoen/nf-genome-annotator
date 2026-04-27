@@ -69,7 +69,7 @@ process BRAKER3 {
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
         --AUGUSTUS_ab_initio \\
         --threads $nb_threads \\
-        --busco_lineage=$busco_lineage
+        --busco_lineage=$busco_lineage \\
         $new_species \\
         $bam_arg \\
         $prot_arg \\
