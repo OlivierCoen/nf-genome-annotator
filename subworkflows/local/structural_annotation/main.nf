@@ -24,6 +24,7 @@ workflow STRUCTURAL_ANNOTATION {
     ch_hintsfile
     structural_annotator
     species
+    busco_lineage
     clade
     excluded_clades
     excluded_species
@@ -81,7 +82,8 @@ workflow STRUCTURAL_ANNOTATION {
         def species_arg = species ?: []
         BRAKER3(
             ch_braker_input,
-            species_arg
+            species_arg,
+            busco_lineage
         )
 
         // ----------------------------------------------------------
