@@ -68,7 +68,7 @@ process BRAKER3 {
         --workingdir $prefix \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
         --AUGUSTUS_ab_initio \\
-        --threads $task.cpus \\
+        --threads $nb_threads \\
         --busco_lineage=$busco_lineage
         $new_species \\
         $bam_arg \\
