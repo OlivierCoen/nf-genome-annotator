@@ -20,6 +20,13 @@
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|n)?a(\\.gz)?$",
                 "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
             },
+            "gff": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gtf|gff|gff3)$",
+                "errorMessage": "Existing annotation GTF file cannot contain spaces and must have extension '.gtf', '.gff' or '.gff3'"
+            },
             "rnaseq_bam": {
                 "type": "array",
                 "items": {
@@ -74,26 +81,19 @@
                 "errorMessage": "Protein Fasta file cannot contain spaces and must have extension '.fa', 'faa' or '.fasta' (possibly gzip compressed)"
               }
             },
-            "gtf": {
+            "braker_gtf": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.gtf$",
-                "errorMessage": "GTF file cannot contain spaces and must have extension '.gtf'"
+                "errorMessage": "Braker GTF file cannot contain spaces and must have extension '.gtf'"
             },
             "hintsfile": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.hintsfile.gff$",
-                "errorMessage": "Hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'"
-            },
-            "ref_gff": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gff|gtf)$",
-                "errorMessage": "Current reference annotation file cannot contain spaces and must have extension '.gff' or '.gtf'"
+                "errorMessage": "Braker hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'"
             }
         },
         "required": ["sample", "genome"]

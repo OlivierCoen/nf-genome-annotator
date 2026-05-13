@@ -31,18 +31,21 @@ workflow GENOME_ANNOTATOR {
     main:
 
     ch_input = ch_samplesheet.multiMap{
-                    meta, genome, rnaseq_bam, rnaseq_fastq, rnaseq_sra, proteins, gtf, hintsfile, ref_gff ->
+                    meta, genome, gff, rnaseq_bam, rnaseq_fastq, rnaseq_sra, proteins, braker_gtf, braker_hintsfile ->
                         genome: [ meta, genome ]
+                        gff: gff ? [ meta, gff ] : [[:], []]
                         rnaseq_bam: rnaseq_bam ? [ meta, rnaseq_bam ] : [[:], []]
                         rnaseq_fastq: rnaseq_fastq ? [ meta, rnaseq_fastq ] : [[:], []]
                         rnaseq_sra: rnaseq_sra ? [ meta, rnaseq_sra ] : [[:], []]
                         proteins: proteins ? [ meta, proteins ] : [[:], []]
-                        gtf: gtf ? [ meta, gtf ] : [[:], []]
-                        hintsfile: hintsfile ? [ meta, hintsfile ] : [[:], []]
-                        ref_gff: ref_gff ? [ meta, ref_gff ] : [[:], []]
+                        braker_gtf: braker_gtf ? [ meta, braker_gtf ] : [[:], []]
+                        braker_hintsfile: braker_hintsfile ? [ meta, braker_hintsfile ] : [[:], []]
                 }
 
     ch_genome       = ch_input.genome
+
+    ch_gff          = ch_input.gff
+                        .filter { meta, file -> file != []}
 
     ch_proteins     = ch_input.proteins
                         .transpose()
@@ -64,15 +67,13 @@ workflow GENOME_ANNOTATOR {
 
     ch_rnaseq_bam   = ch_input.rnaseq_bam
                         .transpose()
-                        .filter { meta, bam -> bam != []}
-
-    ch_gtf          = ch_input.gtf
-                        .filter { meta, gtf -> gtf != []}
-
-    ch_hintsfile    = ch_input.hintsfile
                         .filter { meta, file -> file != []}
 
-    //ch_ref_gff      = ch_input.ref_gff.filter { meta, gff -> gff != []}.ifEmpty([])
+    ch_braker_gtf   = ch_input.braker_gtf
+                        .filter { meta, file -> file != []}
+
+    ch_braker_hintsfile    = ch_input.braker_hintsfile
+                        .filter { meta, file -> file != []}
 
     ch_rnaseq_sra   = ch_input.rnaseq_sra
                         .filter { meta, sra -> sra != []}
@@ -87,74 +88,88 @@ workflow GENOME_ANNOTATOR {
     GENOME_PREPARATION ( ch_genome )
     ch_genome = GENOME_PREPARATION.out.prepared_genome
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // GENOME MASKING
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if ( !params.skip_masking ) {
-        GENOME_MASKING ( ch_genome )
-        ch_genome = GENOME_MASKING.out.masked_genome
+    if ( !params.skip_structural_annotation ) {
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // GENOME MASKING
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if ( !params.skip_masking ) {
+            GENOME_MASKING ( ch_genome )
+            ch_genome = GENOME_MASKING.out.masked_genome
+        }
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // MAP RNASEQ READS TO GENOME
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+        MAP_TO_GENOME_SORT_INDEX(
+            ch_genome,
+            ch_rnaseq_fastq,
+            ch_rnaseq_bam,
+            ch_gff,
+            params.skip_fastqc,
+            params.skip_umi_extract,
+            params.skip_trimming,
+            params.star_ignore_existing_gtf
+        )
+    
+        ch_grouped_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
+                                .groupTuple()
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // STRUCTURAL ANNOTATION
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        STRUCTURAL_ANNOTATION (
+            ch_genome,
+            ch_proteins,
+            ch_grouped_bam_bai,
+            ch_braker_gtf,
+            ch_braker_hintsfile,
+            params.structural_annotator,
+            params.species,
+            params.busco_lineage,
+            params.clade,
+            params.excluded_clades,
+            params.excluded_species
+        )
+        
+        ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
+
+        ch_versions = ch_versions
+                        .mix( STRUCTURAL_ANNOTATION.out.versions )
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if ( !params.complement_annotation ) {
+        
+            ch_branched_annotations = ch_structural_annotations
+                                        .join( ch_gff, remainder: true )
+    
+                                        .view{ v -> "after join $v"}
+                                        .branch{
+                                            meta, annotation, gff ->
+                                                to_complement: gff != null
+                                                    [ meta, gff, annotation ]
+                                                leave_me_alone: ref_gff == null
+                                                    [ meta, annotation ]
+                                        }
+    
+            COMPLEMENT_ANNOTATIONS ( ch_branched_annotations.to_complement, [] )
+        
+            ch_annotation = ch_branched_annotations.leave_me_alone
+                                .mix( COMPLEMENT_ANNOTATIONS.out.gff )
+                                
+        }
+        
+    } else {
+        ch_structural_annotations = ch_gff
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // MAP RNASEQ READS TO GENOME
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    MAP_TO_GENOME_SORT_INDEX(
-        ch_genome,
-        ch_rnaseq_fastq,
-        ch_rnaseq_bam,
-        ch_gtf,
-        params.skip_fastqc,
-        params.skip_umi_extract,
-        params.skip_trimming,
-        params.star_ignore_existing_gtf
-    )
-
-    ch_grouped_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
-                            .groupTuple()
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // STRUCTURAL ANNOTATION
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    STRUCTURAL_ANNOTATION (
-        ch_genome,
-        ch_proteins,
-        ch_grouped_bam_bai,
-        ch_gtf,
-        ch_hintsfile,
-        params.structural_annotator,
-        params.species,
-        params.busco_lineage,
-        params.clade,
-        params.excluded_clades,
-        params.excluded_species
-    )
-    ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
-
-    /*
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    ch_branched_annotations = ch_structural_annotations
-                                .join( ch_ref_gff, remainder: true )
-
-                                .view{ v -> "after join $v"}
-                                .branch{
-                                    meta, annotation, ref_gff ->
-                                        to_complement: ref_gff != null
-                                            [ meta, ref_gff, annotation ]
-                                        leave_me_alone: ref_gff == null
-                                            [ meta, annotation ]
-                                }
-
-    COMPLEMENT_ANNOTATIONS ( ch_branched_annotations.to_complement, [] )
-
-    ch_annotation = ch_branched_annotations.leave_me_alone
-                        .mix( COMPLEMENT_ANNOTATIONS.out.gff )
-    */
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -223,7 +238,6 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_versions = ch_versions
-                    .mix( STRUCTURAL_ANNOTATION.out.versions )
                     .mix( FUNCTIONAL_ANNOTATION.out.versions )
 
     REPORTING(
