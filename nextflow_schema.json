@@ -155,6 +155,11 @@
             "fa_icon": "fas fa-terminal",
             "description": "Options for structural annotation",
             "properties": {
+                "skip_structural_annotation": {
+                    "type": "boolean",
+                    "description": "Skip structural annotation.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
                 "structural_annotator": {
                     "type": "string",
                     "description": "Tool to use for structural annotation",
@@ -172,6 +177,19 @@
                     "default": null,
                     "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. If not provided, the lineage provided for BUSCO will be used here too. Incompatible with --orthodb_lineage.",
                     "help_text": "mmseqs2 lists a large number of databases, not all of which are appropriate for use with MetaEuk. MetaEuk requires protein inputs, so you should select one of the Aminoacid or Profile options."
+                }
+            }
+        },
+        "annotation_complementation_options": {
+            "title": "Options for complementation of structural annotation",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for complementation of structural annotation",
+            "properties": {
+                "complement_annotation": {
+                    "type": "boolean",
+                    "description": "Perform complementation of structural annotation using existing annotation.",
+                    "fa_icon": "fas fa-hand-scissors"
                 }
             }
         },
