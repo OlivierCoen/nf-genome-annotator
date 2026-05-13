@@ -13,7 +13,7 @@
 
 ## Introduction
 
-**genome_annotator** is a bioinformatics pipeline that ...
+**nf-genome-annotator** is a bioinformatics pipeline that performs genome annotation (structural + functional).
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
@@ -51,7 +51,7 @@ Now, you can run the pipeline using:
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
-nextflow run genome_annotator \
+nextflow run OlivierCoen/nf-genome-annotator \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR>
