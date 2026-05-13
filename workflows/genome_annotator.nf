@@ -103,7 +103,7 @@ workflow GENOME_ANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // MAP RNASEQ READS TO GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
         MAP_TO_GENOME_SORT_INDEX(
             ch_genome,
             ch_rnaseq_fastq,
@@ -114,7 +114,7 @@ workflow GENOME_ANNOTATOR {
             params.skip_trimming,
             params.star_ignore_existing_gtf
         )
-    
+
         ch_grouped_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
                                 .groupTuple()
 
@@ -135,7 +135,7 @@ workflow GENOME_ANNOTATOR {
             params.excluded_clades,
             params.excluded_species
         )
-        
+
         ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
 
         ch_versions = ch_versions
@@ -146,10 +146,10 @@ workflow GENOME_ANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if ( !params.complement_annotation ) {
-        
+
             ch_branched_annotations = ch_structural_annotations
                                         .join( ch_gff, remainder: true )
-    
+
                                         .view{ v -> "after join $v"}
                                         .branch{
                                             meta, annotation, gff ->
@@ -158,14 +158,14 @@ workflow GENOME_ANNOTATOR {
                                                 leave_me_alone: ref_gff == null
                                                     [ meta, annotation ]
                                         }
-    
+
             COMPLEMENT_ANNOTATIONS ( ch_branched_annotations.to_complement, [] )
-        
+
             ch_annotation = ch_branched_annotations.leave_me_alone
                                 .mix( COMPLEMENT_ANNOTATIONS.out.gff )
-                                
+
         }
-        
+
     } else {
         ch_structural_annotations = ch_gff
     }
@@ -214,6 +214,7 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if ( !params.skip_functional_annotation ) {
+
         FUNCTIONAL_ANNOTATION (
             ch_main_proteome,
             ch_gff,
@@ -221,6 +222,9 @@ workflow GENOME_ANNOTATOR {
             params.interproscan_db,
             params.interproscan_db_url
         )
+
+        ch_versions = ch_versions
+                        .mix( FUNCTIONAL_ANNOTATION.out.versions )
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,8 +241,7 @@ workflow GENOME_ANNOTATOR {
     // MULTIQC
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_versions = ch_versions
-                    .mix( FUNCTIONAL_ANNOTATION.out.versions )
+
 
     REPORTING(
         ch_versions,
