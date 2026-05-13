@@ -20,8 +20,8 @@ workflow STRUCTURAL_ANNOTATION {
     ch_genome
     ch_proteins
     ch_grouped_bam_bai
-    ch_gtf
-    ch_hintsfile
+    ch_braker_gtf
+    ch_braker_hintsfile
     structural_annotator
     species
     busco_lineage
@@ -93,8 +93,8 @@ workflow STRUCTURAL_ANNOTATION {
         // separate inputs that need to be merged from the rest
         ch_branched_braker_gtfs = BRAKER3.out.gtf
                                     .join ( BRAKER3.out.hintsfile )
-                                    .join( ch_gtf, remainder: true )
-                                    .join( ch_hintsfile, remainder: true )
+                                    .join( ch_braker_gtf, remainder: true )
+                                    .join( ch_braker_hintsfile, remainder: true )
                                     .subscribe {
                                         meta, braker_gtf, braker_hintsfile, gtf, hintsfile ->
                                             if ( gtf != null && hintsfile == null ) {
