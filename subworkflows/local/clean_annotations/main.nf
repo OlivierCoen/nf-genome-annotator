@@ -2,7 +2,6 @@ include { AGAT_SPFIXFEATURESLOCATIONSDUPLICATED   as AGAT_FIX_DUPLICATIONS      
 include { AGAT_SPKEEPLONGESTISOFORM               as AGAT_KEEP_LONGEST_ISOFORM                         } from '../../../modules/local/agat/spkeeplongestisoform'
 include { AGAT_SPFIXOVERLAPPINGGENES              as AGAT_FIX_OVERLAPPING_GENES                        } from '../../../modules/local/agat/spfixoverlappinggenes'
 include { AGAT_SPFILTERINCOMPLETEGENECODINGMODELS as AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS         } from '../../../modules/local/agat/spfilterincompletegenecodingmodels'
-include { AGAT_SPFIXCDSPHASES                     as AGAT_FIX_CDS_PHASES                               } from '../../../modules/local/agat/spfixcdsphases'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,12 +18,11 @@ workflow CLEAN_ANNOTATIONS {
     skip_gff_keep_longest_isoform
     skip_gff_fix_overlapping_genes
     skip_gff_filter_incomplete_gene_models
-    skip_gff_fix_cds_phases
 
     main:
 
     ch_intermediate_gffs = channel.empty()
-    
+
     ch_genome = ch_genome
                     .map{ meta, genome -> [ [id: meta.id], genome ] }
 
@@ -52,12 +50,6 @@ workflow CLEAN_ANNOTATIONS {
         AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS ( ch_gff.join( ch_genome ), [] )
         ch_gff = AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS.out.gff
         ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS.out.gff )
-    }
-
-    if ( !skip_gff_fix_cds_phases ) {
-        AGAT_FIX_CDS_PHASES ( ch_gff.join( ch_genome ), [] )
-        ch_gff = AGAT_FIX_CDS_PHASES.out.gff
-        ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_FIX_CDS_PHASES.out.gff ) // keeping it in case other cleaning steps are added afterwards
     }
 
     // removing main GFF from intermediate GFFs

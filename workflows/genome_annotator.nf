@@ -179,8 +179,7 @@ workflow GENOME_ANNOTATOR {
         ch_genome,
         params.skip_gff_keep_longest_isoform,
         params.skip_gff_fix_overlapping_genes,
-        params.skip_gff_filter_incomplete_gene_models,
-        params.skip_gff_fix_cds_phases
+        params.skip_gff_filter_incomplete_gene_models
     )
 
     ch_gff = CLEAN_ANNOTATIONS.out.gff

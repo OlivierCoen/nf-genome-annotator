@@ -213,11 +213,6 @@
                     "type": "boolean",
                     "description": "Skip processing of GFF to filter incomplete gene models",
                     "fa_icon": "fas fa-hand-scissors"
-                },
-                "skip_gff_fix_cds_phases": {
-                    "type": "boolean",
-                    "description": "Skip processing of GFF to fix CDS phases",
-                    "fa_icon": "fas fa-hand-scissors"
                 }
             }
         },
