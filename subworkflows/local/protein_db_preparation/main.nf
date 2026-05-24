@@ -17,6 +17,7 @@ workflow PROTEIN_DB_PREPARATION {
     clade
     excluded_clades
     excluded_species
+    skip_orthodb_preparation
 
     main:
 
@@ -24,20 +25,27 @@ workflow PROTEIN_DB_PREPARATION {
     // DOWNLOAD CLASE-SPECIFIC ORTHODB PROTEIN DB
     // ----------------------------------------------------------
 
-    ORTHODB_MAKECLADEDB(
-        clade,
-        excluded_clades,
-        excluded_species
-    )
+    if ( !skip_orthodb_preparation ) {
+        ORTHODB_MAKECLADEDB(
+            clade,
+            excluded_clades,
+            excluded_species
+        )
+        ch_orthodb_proteins = ORTHODB_MAKECLADEDB.out.db
+    } else {
+        ch_orthodb_proteins = channel.of( [] )
+    }
 
     // ----------------------------------------------------------
     // CONCAT ALL PROTEIN DBS INTO A SINLE ONE
     // ----------------------------------------------------------
 
     ch_to_concat = ch_proteins
-                        .combine( ORTHODB_MAKECLADEDB.out.db ) // cartesian product: add the clade orthodb protein db to each item separately
+                        .combine(  ) // cartesian product: add the clade orthodb protein db to each item separately
                         .map {
-                            meta, input_fasta_list, orthodb_data ->
+                            if ( orthodb_data == [] ) {
+                                [ meta, input_fasta_list ]
+                            } else {
                                 [ meta, input_fasta_list + [orthodb_data] ]
                         }
 

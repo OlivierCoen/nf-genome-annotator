@@ -33,6 +33,8 @@ def parse_args():
     parser.add_argument("--type", choices=["dna", "protein"])
     parser.add_argument("--fix-headers", dest="fix_headers", action="store_true")
     parser.add_argument("--fix-sequences", dest="fix_sequences", action="store_true")
+    parser.add_argument("--minlen", type=int, dest="min_sequence_length")
+
     return parser.parse_args()
 
 def check_headers_and_fix_if_needed(fasta_file: Path, fix: bool) -> list[SeqRecord]:
@@ -75,6 +77,10 @@ def check_sequences_and_fix_if_needed(records: list[SeqRecord], seq_type: str, f
     return new_records
 
 
+def filter_sequences_by_length(records: list[SeqRecord], min_length: int) -> list[SeqRecord]:
+    return [record for record in records if len(record.seq) >= min_length]
+
+
 #####################################################
 #####################################################
 # MAIN
@@ -87,6 +93,9 @@ if __name__ == "__main__":
     records = check_headers_and_fix_if_needed(args.fasta_file, args.fix_headers)
 
     records = check_sequences_and_fix_if_needed(records, args.type, args.fix_sequences)
+
+    if args.min_sequence_length:
+        records = filter_sequences_by_length(records, args.min_sequence_length)
 
     if args.fix_headers or args.fix_sequences:
         with open(args.outfile, 'w+') as fout:
