@@ -52,8 +52,8 @@ workflow STRUCTURAL_ANNOTATION {
         SAMTOOLS_MERGE( ch_branched_bam.merge_me )
 
         ch_single_bam = ch_branched_bam.leave_me_alone
-                            .mix( SAMTOOLS_MERGE.out.bam )
                             .map{ meta, bam, bai -> [ meta, bam ] }
+                            .mix( SAMTOOLS_MERGE.out.bam )
 
         // ----------------------------------------------------------
         // PREPARE PROTEIN DB FROM CLADE-SPECIFIC ORTHODB AND CUSTOM PROTEIN FASTA FILES
