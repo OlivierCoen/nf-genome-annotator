@@ -33,26 +33,35 @@ workflow PROTEIN_DB_PREPARATION {
         )
         ch_orthodb_proteins = ORTHODB_MAKECLADEDB.out.db
     } else {
-        ch_orthodb_proteins = channel.of( [] )
+        ch_orthodb_proteins = channel.of( "no_orthodb" )
     }
 
     // ----------------------------------------------------------
     // CONCAT ALL PROTEIN DBS INTO A SINLE ONE
     // ----------------------------------------------------------
 
-    ch_to_concat = ch_proteins
+    ch_all_proteins = ch_proteins
                         .combine( ch_orthodb_proteins ) // cartesian product: add the clade orthodb protein db to each item separately
                         .map {
                             meta, input_fasta_list, orthodb_data ->
-                                if ( orthodb_data == [] ) {
+                                if ( orthodb_data == "no_orthodb" ) {
                                     [ meta, input_fasta_list ]
                                 } else {
                                     [ meta, input_fasta_list + [orthodb_data] ]
                                 }
                         }
 
-    SEQKIT_CONCAT ( ch_to_concat )
-    ch_combined_proteins = SEQKIT_CONCAT.out.fastx
+    ch_branched_all_proteins = ch_all_proteins
+                                .branch {
+                                    meta, protein_list ->
+                                        to_concat: protein_list.size() > 1
+                                        leave_me_alone: protein_list.size() <= 1
+                                }
+
+    SEQKIT_CONCAT ( ch_branched_all_proteins.to_concat )
+
+    ch_all_combined_proteins = ch_branched_all_proteins.leave_me_alone
+                                .mix( SEQKIT_CONCAT.out.fastx )
 
     // ----------------------------------------------------------
     // CHECK HEADERS OR WHOLE PROTEIN DB AND FIX THEM WHEN NECESSARY
