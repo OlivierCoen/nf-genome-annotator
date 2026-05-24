@@ -41,7 +41,7 @@ workflow PROTEIN_DB_PREPARATION {
     // ----------------------------------------------------------
 
     ch_to_concat = ch_proteins
-                        .combine(  ) // cartesian product: add the clade orthodb protein db to each item separately
+                        .combine( ch_orthodb_proteins ) // cartesian product: add the clade orthodb protein db to each item separately
                         .map {
                             if ( orthodb_data == [] ) {
                                 [ meta, input_fasta_list ]
