@@ -28,6 +28,7 @@ workflow STRUCTURAL_ANNOTATION {
     clade
     excluded_clades
     excluded_species
+    skip_orthodb_preparation
 
     main:
 
@@ -62,7 +63,8 @@ workflow STRUCTURAL_ANNOTATION {
             ch_proteins,
             clade,
             excluded_clades,
-            excluded_species
+            excluded_species,
+            skip_orthodb_preparation
         )
         ch_prepared_proteins = PROTEIN_DB_PREPARATION.out.proteins
 

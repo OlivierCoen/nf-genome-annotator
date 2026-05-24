@@ -129,6 +129,11 @@
             "fa_icon": "fas fa-terminal",
             "description": "Options for genome masking",
             "properties": {
+              "skip_orthodb_preparation": {
+                  "type": "boolean",
+                  "description": "Skip preparation of OrthoDB custom protein database.",
+                  "fa_icon": "fas fa-hand-scissors"
+              },
               "clade": {
                   "type": "string",
                   "description": "Clade of interest for OrthoDB custom protein database",

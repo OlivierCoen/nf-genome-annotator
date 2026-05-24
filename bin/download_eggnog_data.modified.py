@@ -76,8 +76,8 @@ def decompress(file: Path):
     run(cmd)
 
 
-def untar_decompress(file: Path):
-    cmd = ['tar', '-xzf', str(file)]
+def untar_decompress(file: Path, target_folder: Path):
+    cmd = ['tar', '-xzf', str(file), '-C', str(target_folder)]
     run(cmd)
     file.unlink()
 
@@ -101,7 +101,7 @@ def download_taxa(data_path: Path):
     filename = 'eggnog.taxa.tar.gz'
     url = BASE_URL + '/' + filename
     download(url, data_path)
-    untar_decompress(data_path / filename)
+    untar_decompress(data_path / filename, data_path)
 
 
 ##
