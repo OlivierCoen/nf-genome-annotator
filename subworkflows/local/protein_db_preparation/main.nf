@@ -47,6 +47,7 @@ workflow PROTEIN_DB_PREPARATION {
                                 [ meta, input_fasta_list ]
                             } else {
                                 [ meta, input_fasta_list + [orthodb_data] ]
+                            }
                         }
 
     SEQKIT_CONCAT ( ch_to_concat )
