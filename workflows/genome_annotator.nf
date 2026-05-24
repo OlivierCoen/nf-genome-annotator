@@ -133,7 +133,8 @@ workflow GENOME_ANNOTATOR {
             params.busco_lineage,
             params.clade,
             params.excluded_clades,
-            params.excluded_species
+            params.excluded_species,
+            params.skip_orthodb_preparation
         )
 
         ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
