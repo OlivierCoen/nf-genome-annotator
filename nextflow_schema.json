@@ -123,8 +123,8 @@
               }
             }
         },
-        "orthodb_build_options": {
-            "title": "Options for building custom protein database from OrthoDB",
+        "protein_db_build_options": {
+            "title": "Options for building custom protein database",
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Options for genome masking",
@@ -151,7 +151,13 @@
                   "description": "Species to exclude.",
                   "fa_icon": "fas fa-database",
                   "help_text": "A comma separated set of species names to exclude. The list of recognised species can be found at https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_species.tab.gz"
-              }
+              },
+              "min_prot_db_seq_length": {
+                  "type": "integer",
+                  "description": "Minimum sequence length for protein database",
+                  "fa_icon": "fas fa-database",
+                  "help_text": "Minimum sequence length for protein database (after all protein fasta files have been concatenated)"
+              },
             }
         },
         "structural_annotation_options": {
@@ -357,7 +363,7 @@
             "$ref": "#/$defs/rnaseq_mapping_options"
         },
         {
-            "$ref": "#/$defs/orthodb_build_options"
+            "$ref": "#/$defs/protein_db_build_options"
         },
         {
             "$ref": "#/$defs/structural_annotation_options"

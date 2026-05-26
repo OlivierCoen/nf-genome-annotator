@@ -23,7 +23,8 @@ workflow GENOME_PREPARATION {
         ch_genome,
         type="dna",
         fix_headers=false,
-        fix_sequences=false
+        fix_sequences=false,
+        min_sequence_length=1
     )
 
 
