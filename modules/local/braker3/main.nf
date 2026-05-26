@@ -38,7 +38,7 @@ process BRAKER3 {
     def bam_arg            = bam                             ? "--bam=$bam" : ''
 
     def prot_is_compressed = proteins && proteins.getExtension() == "gz" ? true : false
-    def prot_fasta_name    = proteins && prot_is_compressed              ? proteins.getBaseName() : "fake"
+    def prot_fasta_name    = proteins ? ( prot_is_compressed ? proteins.getBaseName() : proteins.name ) : null
     def prot_arg           = proteins ? "--prot_seq=$prot_fasta_name": ""
 
     //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''

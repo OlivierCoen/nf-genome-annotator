@@ -134,7 +134,8 @@ workflow GENOME_ANNOTATOR {
             params.clade,
             params.excluded_clades,
             params.excluded_species,
-            params.skip_orthodb_preparation
+            params.skip_orthodb_preparation,
+            params.min_prot_db_seq_length
         )
 
         ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
