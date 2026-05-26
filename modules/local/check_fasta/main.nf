@@ -13,6 +13,7 @@ process CHECK_FASTA {
     val type
     val fix_headers
     val fix_sequences
+    val min_sequence_length
 
     output:
     tuple val(meta), path("*.cleaned.{fasta,fa,fas,fna,faa}*"), emit: fasta, optional: true
@@ -37,6 +38,7 @@ process CHECK_FASTA {
         --in $fasta_name \\
         --out \$outfile \\
         --type $type \\
+        --minlen $min_sequence_length \\
         $fix_headers_arg \\
         $fix_sequences_arg
 

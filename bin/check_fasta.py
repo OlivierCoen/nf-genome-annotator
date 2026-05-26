@@ -28,12 +28,12 @@ LETTERS = set(string.ascii_lowercase + string.ascii_uppercase)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--in', type=Path, dest='fasta_file')
-    parser.add_argument('--out', type=Path, dest='outfile')
-    parser.add_argument("--type", choices=["dna", "protein"])
+    parser.add_argument('--in', type=Path, dest='fasta_file', required=True)
+    parser.add_argument('--out', type=Path, dest='outfile', required=True)
+    parser.add_argument("--type", choices=["dna", "protein"], required=True)
     parser.add_argument("--fix-headers", dest="fix_headers", action="store_true")
     parser.add_argument("--fix-sequences", dest="fix_sequences", action="store_true")
-    parser.add_argument("--minlen", type=int, dest="min_sequence_length")
+    parser.add_argument("--minlen", type=int, dest="min_sequence_length", required=True)
 
     return parser.parse_args()
 

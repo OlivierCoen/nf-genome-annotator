@@ -18,6 +18,7 @@ workflow PROTEIN_DB_PREPARATION {
     excluded_clades
     excluded_species
     skip_orthodb_preparation
+    min_prot_db_seq_length
 
     main:
 
@@ -68,10 +69,11 @@ workflow PROTEIN_DB_PREPARATION {
     // ----------------------------------------------------------
 
     CHECK_FASTA(
-        SEQKIT_CONCAT.out.fastx,
+        ch_all_combined_proteins,
         type="protein",
         fix_headers=true,
-        fix_sequences=true
+        fix_sequences=true,
+        min_sequence_length=min_prot_db_seq_length
     )
 
     emit:
