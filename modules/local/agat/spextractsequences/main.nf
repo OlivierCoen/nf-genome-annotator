@@ -36,6 +36,7 @@ process AGAT_SPEXTRACTSEQUENCES {
         --fasta ${genome_fasta} \\
         --protein \\
         --clean_final_stop \\
+        --clean_internal_stop \\
         --codon $codon_usage_id \\
         ${config_arg} \\
         --output ${prefix}.prot.faa

@@ -99,13 +99,14 @@ workflow STRUCTURAL_ANNOTATION {
                                     .join ( BRAKER3.out.hintsfile )
                                     .join( ch_braker_gtf, remainder: true )
                                     .join( ch_braker_hintsfile, remainder: true )
-                                    .subscribe {
+                                    .map {
                                         meta, braker_gtf, braker_hintsfile, gtf, hintsfile ->
                                             if ( gtf != null && hintsfile == null ) {
                                                 log.warn("Cannot merge BRAKER output with existing gtf for sample ${meta.id} because hintsfile is absent")
                                             } else if ( gtf == null && hintsfile != null ) {
                                                 log.warn("Cannot merge BRAKER output with existing gtf for sample ${meta.id} because gtf is absent")
                                             }
+                                            [ meta, braker_gtf, braker_hintsfile, gtf, hintsfile ]
                                     }
                                     .branch {
                                         meta, braker_gtf, braker_hintsfile, gtf, hintsfile ->

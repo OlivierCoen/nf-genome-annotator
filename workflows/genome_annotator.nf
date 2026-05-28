@@ -151,13 +151,11 @@ workflow GENOME_ANNOTATOR {
 
             ch_branched_annotations = ch_structural_annotations
                                         .join( ch_gff, remainder: true )
-
-                                        .view{ v -> "after join $v"}
                                         .branch{
                                             meta, annotation, gff ->
                                                 to_complement: gff != null
                                                     [ meta, gff, annotation ]
-                                                leave_me_alone: ref_gff == null
+                                                leave_me_alone: gff == null
                                                     [ meta, annotation ]
                                         }
 
