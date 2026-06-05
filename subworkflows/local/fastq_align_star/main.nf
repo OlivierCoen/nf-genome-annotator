@@ -9,7 +9,7 @@ workflow FASTQ_ALIGN_STAR {
     ch_genome
     ch_reads
     ch_gtf
-    star_ignore_existing_gtf
+    ignore_existing_gtf_for_mapping
 
     main:
 
@@ -27,7 +27,7 @@ workflow FASTQ_ALIGN_STAR {
 
     STAR_GENOMEGENERATE(
         ch_star_genomegenerate_input,
-        star_ignore_existing_gtf
+        ignore_existing_gtf_for_mapping
     )
     ch_index = STAR_GENOMEGENERATE.out.index
 
@@ -35,7 +35,7 @@ workflow FASTQ_ALIGN_STAR {
     // MAP READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (star_ignore_existing_gtf) {
+    if (ignore_existing_gtf_for_mapping) {
         ch_star_input = ch_reads
                             .cross( ch_index ) { v -> v[0][0] } // match only on id, ignore single_end
                             .map{ meta, reads, index -> [ meta, reads, index, [] ] }
@@ -47,7 +47,7 @@ workflow FASTQ_ALIGN_STAR {
 
     STAR_ALIGN(
         ch_star_input,
-        star_ignore_existing_gtf
+        ignore_existing_gtf_for_mapping
     )
 
     emit:

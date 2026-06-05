@@ -30,6 +30,8 @@ workflow REPORTING {
     // ------------------------------------------------------------------------------------
 
     ch_multiqc_files = channel.empty()
+                        .mix( channel.topic('hisat2_summary') )
+                        .mix( channel.topic('star_log_final') )
                         .mix( channel.topic('mqc_busco_short_summaries_txt') )
                         .mix( channel.topic('mqc_mrna_with_isoforms_gff_stats') )
                         .mix( channel.topic('mqc_rna_with_isoforms_gff_stats') )
