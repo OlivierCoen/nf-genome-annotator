@@ -116,7 +116,13 @@
                   "description": "Skip trimming / cleaning (Fastp) for RNA-seq reads.",
                   "fa_icon": "fas fa-hand-scissors"
               },
-              "star_ignore_existing_gtf": {
+              "rnaseq_mapper": {
+                "type": "string",
+                "description": "Tool to use for RNA-seq read mapping.",
+                "enum": ["hisat2", "star"],
+                "default": "hisat2"
+              },
+              "ignore_existing_gtf_for_mapping": {
                   "type": "boolean",
                   "description": "Ignore existing GTF (when provided) for guiding RNA-seq read mapping.",
                   "fa_icon": "fas fa-hand-scissors"
