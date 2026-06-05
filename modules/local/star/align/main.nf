@@ -12,7 +12,7 @@ process STAR_ALIGN {
     val ignore_existing_gtf
 
     output:
-    tuple val(meta), path('*Log.final.out')   , emit: log_final
+    tuple val(meta), path('*Log.final.out')   , topic: star_log_final
     tuple val(meta), path('*Log.out')         , emit: log_out
     tuple val(meta), path('*Log.progress.out'), emit: log_progress
     tuple val("${task.process}"), val('star'), eval('STAR --version | sed "s/STAR_//"'), emit: versions_star, topic: versions

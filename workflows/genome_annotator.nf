@@ -112,7 +112,8 @@ workflow GENOME_ANNOTATOR {
             params.skip_fastqc,
             params.skip_umi_extract,
             params.skip_trimming,
-            params.star_ignore_existing_gtf
+            params.rnaseq_mapper,
+            params.ignore_existing_gtf_for_mapping
         )
 
         ch_grouped_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai

@@ -1,4 +1,5 @@
 include { FASTQ_FASTQC_UMITOOLS_FASTP    } from '../../nf-core/fastq_fastqc_umitools_fastp'
+include { FASTQ_ALIGN_HISAT2             } from '../fastq_align_hisat2'
 include { FASTQ_ALIGN_STAR               } from '../fastq_align_star'
 include { BAM_SORT_INDEX_STATS           } from '../bam_sort_index_stats'
 
@@ -20,7 +21,8 @@ workflow MAP_TO_GENOME_SORT_INDEX {
     skip_fastqc
     skip_umi_extract
     skip_trimming
-    star_ignore_existing_gtf
+    rnaseq_mapper
+    ignore_existing_gtf_for_mapping
 
     main:
 
@@ -47,15 +49,30 @@ workflow MAP_TO_GENOME_SORT_INDEX {
     // MAP READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    FASTQ_ALIGN_STAR(
-        ch_genome,
-        ch_reads,
-        ch_gtf,
-        star_ignore_existing_gtf
-    )
+    if (rnaseq_mapper == 'hisat2') {
 
-    ch_aligned_bam = FASTQ_ALIGN_STAR.out.bam
-                        .map { meta, bam -> [ [ id: meta.id ], bam ] } // keeping only meta.id in meta map
+        FASTQ_ALIGN_HISAT2(
+            ch_genome,
+            ch_reads,
+            ch_gtf,
+            ignore_existing_gtf_for_mapping
+        )
+    
+        ch_aligned_bam = FASTQ_ALIGN_HISAT2.out.bam
+    
+    } else if (rnaseq_mapper == 'star') {
+
+        FASTQ_ALIGN_STAR(
+            ch_genome,
+            ch_reads,
+            ch_gtf,
+            ignore_existing_gtf_for_mapping
+        )
+
+        ch_aligned_bam = FASTQ_ALIGN_STAR.out.bam
+                            .map { meta, bam -> [ [ id: meta.id ], bam ] } // keeping only meta.id in meta map
+
+    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAPPING STATISTICS
