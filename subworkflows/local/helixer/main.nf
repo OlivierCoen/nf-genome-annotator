@@ -9,7 +9,7 @@ include { HELIXER_POSTBIN                } from '../../../modules/local/helixer/
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-
+/*
 workflow HELIXER {
 
     take:
@@ -24,3 +24,4 @@ workflow HELIXER {
     
 
 }
+*/
