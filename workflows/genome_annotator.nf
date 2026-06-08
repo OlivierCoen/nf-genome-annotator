@@ -212,7 +212,7 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    
     if ( !params.skip_functional_annotation ) {
 
         FUNCTIONAL_ANNOTATION (

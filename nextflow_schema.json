@@ -245,10 +245,13 @@
                     "fa_icon": "fas fa-hand-scissors"
                 },
                 "functional_annotator": {
-                    "type": "string",
-                    "description": "Tool to use for functional annotation",
-                    "enum": ["eggnogmapper", "interproscan"],
-                    "default": "eggnogmapper"
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["eggnogmapper", "interproscan"]
+                    },
+                    "description": "Tool(s) to use for functional annotation. Tools should be separated by comma(s).",
+                    "default": ["eggnogmapper", "interproscan"]
                 },
                 "interproscan_db_url": {
                     "type": "string",
