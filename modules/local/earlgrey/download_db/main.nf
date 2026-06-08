@@ -21,8 +21,7 @@ process EARLGREY_DOWNLOADDB {
 
     output:
     path("*/data"), emit: db
-    //tuple val("${task.process}"), val('aria2'), eval("aria2c -v | head -1 | sed 's/aria2 version //g'"), topic: versions
-    //tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"),           topic: versions
+    path "versions.yml",  emit: versions
 
     script:
     def formatted_partitions = partitions.join(' ')
@@ -53,6 +52,12 @@ process EARLGREY_DOWNLOADDB {
     done
 
     echo "Done"
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        aria2: \$(aria2c -v | head -1 | sed 's/aria2 version //g')
+        pigz: \$(pigz --version 2>&1 | sed 's/pigz //g')
+    END_VERSIONS
     """
 
 }

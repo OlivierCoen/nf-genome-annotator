@@ -218,7 +218,7 @@ workflow GENOME_ANNOTATOR {
         FUNCTIONAL_ANNOTATION (
             ch_main_proteome,
             ch_gff,
-            params.functional_annotator,
+            params.functional_annotators,
             params.interproscan_db,
             params.interproscan_db_url
         )
