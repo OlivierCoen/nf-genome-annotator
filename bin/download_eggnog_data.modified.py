@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 
 AVAILABLE_DBS = ['diamond', 'mmseqs', 'hmmer', 'no_search', 'cache']
 
-DB_VERSION = '7.0.0'
-
-BASE_URL = f'http://eggnog5.embl.de/download/emapperdb-{DB_VERSION}'
+BASE_UNVERSIONED_URL = 'http://eggnog5.embl.de/download/emapperdb-{}'
 EGGNOG_URL = 'http://eggnog5.embl.de/download/eggnog_5.0/per_tax_level'
 EGGNOG_DOWNLOADS_URL = 'http://eggnog5.embl.de/#/app/downloads'
 
@@ -88,38 +86,38 @@ def download_and_decompress(url: str, data_path: Path):
 
 ##
 # Annotation DBs
-def download_annotations(data_path: Path):
+def download_annotations(base_url: str, data_path: Path):
     url = BASE_URL + '/eggnog.db.gz'
     download_and_decompress(url, data_path)
 
 
 ##
 # Taxa DBs
-def download_taxa(data_path: Path):
+def download_taxa(base_url: str, data_path: Path):
     filename = 'eggnog.taxa.tar.gz'
-    url = BASE_URL + '/' + filename
+    url = base_url + '/' + filename
     download(url, data_path)
     untar_decompress(data_path / filename, data_path)
 
 
 ##
 # Diamond DBs
-def download_diamond_db(data_path: Path):
-    url = BASE_URL + '/eggnog_proteins.dmnd.gz'
+def download_diamond_db(base_url: str, data_path: Path):
+    url = base_url + '/eggnog_proteins.dmnd.gz'
     download_and_decompress(url, data_path)
 
 
 ##
 # MMseqs2 DB
-def download_mmseqs_db(data_path: Path):
-    url = BASE_URL + '/mmseqs.tar.gz'
+def download_mmseqs_db(base_url: str, data_path: Path):
+    url = base_url + '/mmseqs.tar.gz'
     download_and_decompress(url, data_path)
 
 
 ##
 # PFAM DB
-def download_pfam_db(data_path: Path):
-    url = BASE_URL + '/pfam.tar.gz'
+def download_pfam_db(base_url: str, data_path: Path):
+    url = base_url + '/pfam.tar.gz'
     download_and_decompress(url, data_path)
 
 
@@ -197,6 +195,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--db', dest="database", required=True, choices=AVAILABLE_DBS,help='Database to download')
+    parser.add_argument('--db-version', dest="db_version", required=True, type=str, help='Version of the database to download')
+    
     parser.add_argument("--out", dest="data_dir", required=True, type=Path, help='Directory to use for DATA_PATH.')
     parser.add_argument('--taxid', type=str,
                         help=(
@@ -222,18 +222,19 @@ if __name__ == "__main__":
     if args.database == 'hmmer' and not args.taxid:
         raise ValueError('Must specify --taxid when downloading HMMER databases')
 
+    base_url = BASE_UNVERSIONED_URL.format(args.db_version)
     # Annotation DB
-    download_annotations(data_path)
+    download_annotations(base_url, data_path)
 
     # NCBI taxa
-    download_taxa(data_path)
+    download_taxa(base_url, data_path)
 
     match args.database:
         case 'diamond':
-            download_diamond_db(data_path)
+            download_diamond_db(base_url, data_path)
         case 'mmseqs':
             logger.info(f'Downloading MMseqs2 files " at {data_path}...')
-            download_mmseqs_db(data_path)
+            download_mmseqs_db(base_url, data_path)
         case 'hmmer':
             taxon_name = get_taxon_name(args.taxid)
             db_path = data_path / 'hmmer' / taxon_name
@@ -241,6 +242,6 @@ if __name__ == "__main__":
             logger.info('Note that this can take a long time for large taxonomic levels')
             download_hmm_database(args.taxid, db_path)
         case 'pfam':
-            download_pfam_db(data_path)
+            download_pfam_db(base_url, data_path)
 
     logger.info("Finished")
