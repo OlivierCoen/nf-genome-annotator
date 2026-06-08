@@ -4,6 +4,9 @@ include { EGGNOGMAPPER_EMAPPER                         } from '../../../modules/
 include { INTERPROSCAN_DOWNLOADDB                      } from '../../../modules/local/interproscan5/download_db'
 include { INTERPROSCAN_INTERPROSCAN as INTERPROSCAN    } from '../../../modules/local/interproscan5/interproscan'
 
+include { COMPLEMENT_GFF3_WITH_INTERPROSCAN            } from '../../../modules/local/complement_gff3_with_interproscan'
+
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -16,7 +19,7 @@ workflow FUNCTIONAL_ANNOTATION {
     take:
     ch_proteome
     ch_gff
-    functional_annotator
+    functional_annotators
     interproscan_db
     interproscan_db_url
 
@@ -24,17 +27,23 @@ workflow FUNCTIONAL_ANNOTATION {
 
     ch_versions = Channel.empty()
 
-    if ( functional_annotator == "eggnogmapper" ) {
+    ch_decorated_gff = ch_gff
+
+    if ( "eggnogmapper" in functional_annotators ) {
 
         EGGNOGMAPPER_DOWNLOADDB ( )
+        ch_eggnog_db = EGGNOGMAPPER_DOWNLOADDB.out.eggnog_data_dir
+        
         EGGNOGMAPPER_EMAPPER(
             ch_proteome.join( ch_gff ),
-            EGGNOGMAPPER_DOWNLOADDB.out.eggnog_data_dir
+            ch_eggnog_db
         )
 
-        ch_versions = ch_versions.mix( EGGNOGMAPPER_DOWNLOADDB.out.versions )
+        ch_decorated_gff = EGGNOGMAPPER_EMAPPER.out.decorated_gff
 
-    } else { // interproscan
+    }
+
+    if ( "interproscan" in functional_annotators ) {
 
         if ( interproscan_db != null ) {
 
@@ -54,10 +63,17 @@ workflow FUNCTIONAL_ANNOTATION {
         INTERPROSCAN( ch_proteome, interproscan_db )
 
         ch_versions = ch_versions.mix( INTERPROSCAN_DOWNLOADDB.out.versions )
+
+        COMPLEMENT_GFF3_WITH_INTERPROSCAN(
+            ch_decorated_gff.join( INTERPROSCAN.out.gff3 )
+        )
+        ch_decorated_gff = COMPLEMENT_GFF3_WITH_INTERPROSCAN.out.gff3
+
     }
 
 
     emit:
+    gff3             = ch_decorated_gff
     versions         = ch_versions
 
 }
