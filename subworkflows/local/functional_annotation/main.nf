@@ -1,8 +1,8 @@
 include { EGGNOGMAPPER_DOWNLOADDB                      } from '../../../modules/local/eggnogmapper/download_db'
 include { EGGNOGMAPPER_EMAPPER                         } from '../../../modules/local/eggnogmapper/emapper'
 
-include { INTERPROSCAN_DOWNLOADDB                      } from '../../../modules/local/interproscan/download_db'
-include { INTERPROSCAN_INTERPROSCAN as INTERPROSCAN    } from '../../../modules/local/interproscan/interproscan'
+include { INTERPROSCAN_DOWNLOADDB                      } from '../../../modules/local/interproscan5/download_db'
+include { INTERPROSCAN_INTERPROSCAN as INTERPROSCAN    } from '../../../modules/local/interproscan5/interproscan'
 
 
 /*
