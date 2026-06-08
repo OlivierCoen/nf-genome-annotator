@@ -17,15 +17,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-AVAILABLE_DBS = ['diamond', 'mmseqs', 'hmmer', 'no_search', 'cache', 'novel_fams']
+AVAILABLE_DBS = ['diamond', 'mmseqs', 'hmmer', 'no_search', 'cache']
 
-DB_VERSION = '5.0.2'
-NOVEL_FAMS_DB_VERSION = '1.0.1'
+DB_VERSION = '7.0.0'
 
 BASE_URL = f'http://eggnog5.embl.de/download/emapperdb-{DB_VERSION}'
 EGGNOG_URL = 'http://eggnog5.embl.de/download/eggnog_5.0/per_tax_level'
 EGGNOG_DOWNLOADS_URL = 'http://eggnog5.embl.de/#/app/downloads'
-NOVEL_FAMS_BASE_URL = f'http://eggnog5.embl.de/download/novel_fams-{NOVEL_FAMS_DB_VERSION}'
 
 NCBI_API_URL = "https://api.ncbi.nlm.nih.gov/datasets/v2/taxonomy"
 NCBI_API_HEADERS = {"accept": "application/json", "content-type": "application/json"}
@@ -108,18 +106,6 @@ def download_taxa(data_path: Path):
 # Diamond DBs
 def download_diamond_db(data_path: Path):
     url = BASE_URL + '/eggnog_proteins.dmnd.gz'
-    download_and_decompress(url, data_path)
-
-
-##
-# Novel fams diamond DBs
-def download_novel_fams_diamond_db(data_path: Path):
-    url = NOVEL_FAMS_BASE_URL + '/novel_fams.dmnd.gz'
-    download_and_decompress(url, data_path)
-
-
-def download_novel_fams_annots_db(data_path: Path):
-    url = NOVEL_FAMS_BASE_URL + '/novel_fams.pkl.gz'
     download_and_decompress(url, data_path)
 
 
@@ -245,10 +231,6 @@ if __name__ == "__main__":
     match args.database:
         case 'diamond':
             download_diamond_db(data_path)
-        case 'novel_fams':
-            logger.info(f'Downloading novel families files " at {data_path}...')
-            download_novel_fams_diamond_db(data_path)
-            download_novel_fams_annots_db(data_path)
         case 'mmseqs':
             logger.info(f'Downloading MMseqs2 files " at {data_path}...')
             download_mmseqs_db(data_path)
