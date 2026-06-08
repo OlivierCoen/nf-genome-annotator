@@ -48,6 +48,14 @@ workflow FASTQ_ALIGN_HISAT2 {
 
     ch_hisat2_input =  ch_reads
                         .cross( ch_index ) { v -> v[0][0] } // match only on id, ignore single_end
+                        .map{ // [[meta, reads], [meta2, index]]
+                            part1, part2 -> 
+                                def meta = part1[0]
+                                def reads = part1[1]
+                                def index = part2[1]
+                                [ meta, reads, index ]
+                        }
+                        .view{v -> "after map $v"}
     
     HISAT2_ALIGN( ch_hisat2_input )
 

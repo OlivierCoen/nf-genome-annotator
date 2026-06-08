@@ -26,7 +26,9 @@ process HISAT2_ALIGN {
         strandedness_arg = meta.single_end ? '--rna-strandness F' : '--rna-strandness FR'
     } else if (meta.strandedness == 'reverse') {
         strandedness_arg = meta.single_end ? '--rna-strandness R' : '--rna-strandness RF'
-    } 
+    } else {
+        strandedness_arg = ''
+    }
     
     def rg = args.contains("--rg-id") ? "" : "--rg-id ${prefix} --rg SM:${prefix}"
     if (meta.single_end) {
@@ -39,7 +41,6 @@ process HISAT2_ALIGN {
             --summary-file ${prefix}.hisat2.summary.log \\
             --threads $task.cpus \\
             $rg \\
-            $unaligned \\
             $args \\
             | samtools view -bS -F 4 -F 256 - > ${prefix}.bam
         """
@@ -54,7 +55,6 @@ process HISAT2_ALIGN {
             --summary-file ${prefix}.hisat2.summary.log \\
             --threads $task.cpus \\
             $rg \\
-            $unaligned \\
             --no-mixed \\
             --no-discordant \\
             $args \\
