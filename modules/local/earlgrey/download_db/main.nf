@@ -2,8 +2,6 @@ process EARLGREY_DOWNLOADDB {
 
     label 'process_high'
 
-    storeDir "${workflow.projectDir}/.nextflow/cache/dfam"
-
     errorStrategy = {
         if (task.exitStatus == 100) {
             log.warn("md5 checksum failed for FamDB URL ${db_url}. Please delete the local file and relaunch the pipeline.")
@@ -21,7 +19,9 @@ process EARLGREY_DOWNLOADDB {
 
     output:
     path("*/data"), emit: db
-    path "versions.yml",  emit: versions
+    tuple val("${task.process}"), val('python'), eval("python3 --version | sed 's/Python //'"),                 topic: versions
+    tuple val("${task.process}"), val('polars'), eval('python3 -c "import polars; print(polars.__version__)"'), topic: versions
+    tuple val("${task.process}"), val('pyyaml'), eval('python3 -c "import yaml; print(yaml.__version__)"'),     topic: versions
 
     script:
     def formatted_partitions = partitions.join(' ')
