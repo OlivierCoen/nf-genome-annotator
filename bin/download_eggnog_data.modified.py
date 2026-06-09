@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 AVAILABLE_DBS = ['diamond', 'mmseqs', 'hmmer', 'no_search', 'cache']
 
-BASE_UNVERSIONED_URL = 'http://eggnog5.embl.de/download/emapperdb-{}'
-EGGNOG_URL = 'http://eggnog5.embl.de/download/eggnog_5.0/per_tax_level'
+BASE_UNVERSIONED_URL = 'https://downloads.eggnogdb.org/emapper/emapperdb-5.0.2/'
+HMM_EGGNOG_URL = 'http://eggnog5.embl.de/download/eggnog_5.0/per_tax_level'
 EGGNOG_DOWNLOADS_URL = 'http://eggnog5.embl.de/#/app/downloads'
 
 NCBI_API_URL = "https://api.ncbi.nlm.nih.gov/datasets/v2/taxonomy"
@@ -87,7 +87,7 @@ def download_and_decompress(url: str, data_path: Path):
 ##
 # Annotation DBs
 def download_annotations(base_url: str, data_path: Path):
-    url = BASE_URL + '/eggnog.db.gz'
+    url = base_url + '/eggnog.db.gz'
     download_and_decompress(url, data_path)
 
 
@@ -165,7 +165,7 @@ def transform_alignment_to_fasta(level: str, dbpath: Path):
 
 
 def check_level_exists(taxid: str):
-    cmd = ["wget", f"{EGGNOG_URL}/{taxid}/"]
+    cmd = ["wget", f"{HMM_EGGNOG_URL}/{taxid}/"]
     try:
         run(cmd)
     except subprocess.CalledProcessError as e:
@@ -176,7 +176,7 @@ def check_level_exists(taxid: str):
 # HMMER mode DBs
 def download_hmm_database(level: str, db_path: Path):
 
-    baseurl = f'{EGGNOG_URL}/{level}/'
+    baseurl = f'{HMM_EGGNOG_URL}/{level}/'
 
     check_level_exists(level)
 
