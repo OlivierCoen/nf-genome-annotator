@@ -4,7 +4,7 @@ process EARLGREY_DOWNLOADDB {
 
     errorStrategy = {
         if (task.exitStatus == 100) {
-            log.warn("md5 checksum failed for FamDB URL ${db_url}. Please delete the local file and relaunch the pipeline.")
+            log.warn("md5 checksum failed for FamDB URL. Please delete the local file and relaunch the pipeline.")
             return 'retry'
         }
     }
@@ -19,9 +19,8 @@ process EARLGREY_DOWNLOADDB {
 
     output:
     path("*/data"), emit: db
-    tuple val("${task.process}"), val('python'), eval("python3 --version | sed 's/Python //'"),                 topic: versions
-    tuple val("${task.process}"), val('polars'), eval('python3 -c "import polars; print(polars.__version__)"'), topic: versions
-    tuple val("${task.process}"), val('pyyaml'), eval('python3 -c "import yaml; print(yaml.__version__)"'),     topic: versions
+    tuple val("${task.process}"), val('aria2'), eval("aria2c -v | head -1 | sed 's/aria2 version //g'"), topic: versions
+    tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"),           topic: versions
 
     script:
     def formatted_partitions = partitions.join(' ')
@@ -39,6 +38,8 @@ process EARLGREY_DOWNLOADDB {
             --max-tries=10 \\
             --retry-wait=30 \\
             --timeout=60 \\
+            --optimize-concurrent-downloads \\
+            --check-integrity \\
             \$url \\
             -o \$outfile
 
@@ -52,12 +53,6 @@ process EARLGREY_DOWNLOADDB {
     done
 
     echo "Done"
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        aria2: \$(aria2c -v | head -1 | sed 's/aria2 version //g')
-        pigz: \$(pigz --version 2>&1 | sed 's/pigz //g')
-    END_VERSIONS
     """
 
 }
