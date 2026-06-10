@@ -19,10 +19,19 @@ workflow FASTQ_ALIGN_HISAT2 {
 
     if ( !ignore_existing_gtf_for_mapping ) {
 
-        HISAT2_EXTRACTSPLICESITES( ch_gtf )
+        ch_gtf_to_extract = ch_reads
+                                .cross( ch_gtf ) { v -> v[0][0] } // match only on id
+                                .map{ // [[meta, reads], [meta2, index]]
+                                    read_part, gtf_part -> 
+                                        def meta = gtf_part[0]
+                                        def gtf = gtf_part[1]
+                                        [ meta, gtf ]
+                                }
+
+        HISAT2_EXTRACTSPLICESITES( ch_gtf_to_extract )
         ch_splicessites = HISAT2_EXTRACTSPLICESITES.out.txt
         
-        HISAT2_EXTRACTEXONS( ch_gtf )
+        HISAT2_EXTRACTEXONS( ch_gtf_to_extract )
         ch_exons = HISAT2_EXTRACTEXONS.out.txt
         
     } else {
@@ -49,13 +58,12 @@ workflow FASTQ_ALIGN_HISAT2 {
     ch_hisat2_input =  ch_reads
                         .cross( ch_index ) { v -> v[0][0] } // match only on id, ignore single_end
                         .map{ // [[meta, reads], [meta2, index]]
-                            part1, part2 -> 
-                                def meta = part1[0]
-                                def reads = part1[1]
-                                def index = part2[1]
+                            read_part, index_part -> 
+                                def meta = read_part[0]
+                                def reads = read_part[1]
+                                def index = index_part[1]
                                 [ meta, reads, index ]
                         }
-                        .view{v -> "after map $v"}
     
     HISAT2_ALIGN( ch_hisat2_input )
 
