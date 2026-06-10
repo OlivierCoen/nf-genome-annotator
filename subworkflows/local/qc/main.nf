@@ -2,6 +2,8 @@ include { BUSCO_BUSCO as BUSCO_GENOME                       } from '../../../mod
 include { BUSCO_BUSCO as BUSCO_PROTEOME                     } from '../../../modules/local/busco/busco'
 include { AGAT_SPSTATISTICS as AGAT_GTF_STATISTICS          } from '../../../modules/local/agat/spstatistics'
 
+include { OMARK                                             } from '../omark'
+
 
 
 /*
@@ -16,7 +18,10 @@ workflow QUALITY_CONTROLS {
     take:
     ch_genome
     ch_all_annotations
-    ch_proteome
+    ch_main_proteome
+    ch_all_proteomes
+    ch_gff
+    omamer_db_url
 
     main:
 
@@ -38,12 +43,22 @@ workflow QUALITY_CONTROLS {
     )
 
     BUSCO_PROTEOME (
-        ch_proteome,
+        ch_all_proteomes,
         'proteins',
         params.busco_lineage,
         busco_lineages_path,
         busco_config_file,
         busco_clean_intermediates
+    )
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ASSESSMENT OF ANNOTATION QUALITY WITH OMARK
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    OMARK(
+        ch_main_proteome,
+        ch_gff,
+        omamer_db_url
     )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
