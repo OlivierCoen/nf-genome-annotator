@@ -52,46 +52,6 @@ ATTRIBUTES_TO_PRESERVE = [
 
 # ── GFF3 helpers ──────────────────────────────────────────────────────────────
 
-def parse_gff3(file: Path) -> pl.LazyFrame:
-    return pl.scan_csv(
-        file, 
-        separator="\t", 
-        comment_prefix="#", 
-        has_header=False, 
-        new_columns=GFF_COLUMNS
-    )
-
-def parse_attrs(s: str) -> dict:
-    attrs = {}
-    for field in s.strip().split(";"):
-        field = field.strip()
-        if not field:
-            continue
-        if "=" in field:
-            k, v = field.split("=", 1)
-            attrs[k] = v
-        else:
-            attrs[field] = ""
-    return attrs
-
-def format_attrs(attrs):
-    return ";".join(
-        f"{k}={v}" if v != "" else k
-        for k, v in attrs.items()
-    )
-
-def read_gff3_header(path):
-    """Return header lines from GFF3"""
-    header = []
-    with open(path) as fh:
-        for raw in fh:
-            line = raw.rstrip("\n")
-            if line.startswith("#"):
-                header.append(line)
-            else:
-                break
-    return header
-
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -114,6 +74,29 @@ def parse_args():
         help="Output GFF3"
     )
     return parser.parse_args()
+
+
+def parse_gff3(file: Path) -> pl.LazyFrame:
+    return pl.scan_csv(
+        file, 
+        separator="\t", 
+        comment_prefix="#", 
+        has_header=False, 
+        new_columns=GFF_COLUMNS
+    )
+
+
+def read_gff3_header(path):
+    """Return header lines from GFF3"""
+    header = []
+    with open(path) as fh:
+        for raw in fh:
+            line = raw.rstrip("\n")
+            if line.startswith("#"):
+                header.append(line)
+            else:
+                break
+    return header
 
 
 def get_nb_rows(lf: pl.LazyFrame) -> int:
@@ -166,7 +149,7 @@ def get_name_and_aliases(name_set: set) -> dict[str, str | list[str]] | None:
 
 
 def get_names_and_aliases(parsed_attr_df: pd.DataFrame) -> pd.DataFrame:
-    pfam_names = parsed_attr_df[pd.col("source") in ["Pfam"]].groupby("seqname")["Name"].apply(set)
+    pfam_names = parsed_attr_df[pd.col("source") == "Pfam"].groupby("seqname")["Name"].apply(set)
     seqname_to_names_and_aliases = pfam_names.apply(lambda x: get_name_and_aliases(x))
     seqname_to_names_and_aliases_records = [
         {"seqname": seqname, "Name": d["name"], "Alias": d["aliases"]}
@@ -255,10 +238,13 @@ def merge_new_attributes(transcript_attr_lf: pl.LazyFrame, formated_ipr_attr_df:
                 merged_lf = (
                     merged_lf
                     .with_columns(
-                        pl.concat_list([pl.col(col), pl.col(ipr_col)]).alias(col)
-                    )
-                    .with_columns(
-                        pl.col(col).list.join(",")
+                        pl.concat_list([pl.col(col), pl.col(ipr_col)])
+                        .list.drop_nulls()
+                        .list.join(",")
+                        .str.split(",")
+                        .list.unique()
+                        .list.join(",")
+                        .alias(col)
                     )
                     .drop(ipr_col)
                 )
@@ -357,9 +343,6 @@ def main():
     # renaming specific columns to match the official names
     transcript_attr_lf = transcript_attr_lf.rename(ATTRIBUTE_TRANSLATION)
 
-    print(transcript_attr_lf.head().collect())
-    print(transcript_attr_lf.collect_schema().names())
-
     ####################################################################
     # PARSING INTERPROSCAN OUTPUT
     ####################################################################
@@ -377,7 +360,7 @@ def main():
     ipr_lf = ipr_lf.with_columns(pl.col("source").replace(TO_REPLACE))
 
     ipr_lf = complement_interproscan_attributes(ipr_lf)
-
+    
     # parsing each list of attributes (one list per original row) into a dictionary
     ipr_attr_df = parse_attributes_as_dicts(ipr_lf)
 
@@ -389,7 +372,7 @@ def main():
     for col in EXPECTED_COLUMNS:
         if col not in ipr_attr_df.columns:
             ipr_attr_df[col] = pd.NA
-
+    
     # Names and aliases
     logger.info("Processing Names and Aliases...")
     seqname_names_aliases_df = get_names_and_aliases(ipr_attr_df)
@@ -417,7 +400,7 @@ def main():
 
     logger.info("Merging original attributes with InterProScan attributes...")
     merged_lf = merge_new_attributes(transcript_attr_lf, formated_ipr_attr_df)
-
+    
     logger.info("Merging original annotation with table containing new attributes...")
     final_annot_lf = add_new_attributes_to_annotation(annot_lf, merged_lf)
 
