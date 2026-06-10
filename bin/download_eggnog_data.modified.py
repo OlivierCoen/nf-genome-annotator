@@ -169,7 +169,7 @@ def check_level_exists(taxid: str):
     try:
         run(cmd)
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Provided taxid {taxid} does not correspond to a valid HMM level. Please check available levels at {EGGNOG_URL}")
+        raise RuntimeError(f"Provided taxid {taxid} does not correspond to a valid HMM level. Please check available levels at {HMM_EGGNOG_URL}")
 
 
 ##
