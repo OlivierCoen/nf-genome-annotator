@@ -1,6 +1,6 @@
 include { ORTHODB_MAKECLADEDB                                   } from '../../../modules/local/orthodb/make_clade_db'
 include { SEQKIT_CONCAT                                         } from '../../../modules/local/seqkit/concat'
-include { CHECK_FASTA                                           } from '../../../modules/local/check_fasta'
+include { CHECK_PROTEIN_FASTA                                   } from '../../../modules/local/check_protein_fasta'
 
 
 /*
@@ -70,14 +70,11 @@ workflow ORTHODB_PREPARATION {
     // CHECK HEADERS OR WHOLE PROTEIN DB AND FIX THEM WHEN NECESSARY
     // ----------------------------------------------------------
 
-    CHECK_FASTA(
+    CHECK_PROTEIN_FASTA(
         ch_all_combined_proteins,
-        type="protein",
-        fix_headers=true,
-        fix_sequences=true,
         min_sequence_length=min_prot_db_seq_length
     )
 
     emit:
-    proteins  = CHECK_FASTA.out.fasta
+    proteins  = CHECK_PROTEIN_FASTA.out.fasta
 }
