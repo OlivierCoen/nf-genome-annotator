@@ -16,11 +16,11 @@ workflow OMARK {
     take:
     ch_proteome
     ch_gff
-    omark_db_url
+    omamer_db_url
 
     main:
 
-    OMARK_DOWNLOADDB( omark_db_url )
+    OMARK_DOWNLOADDB( omamer_db_url )
     ch_omark_db = OMARK_DOWNLOADDB.out.db.collect()
     
     OMARK_OMAMERSEARCH(
