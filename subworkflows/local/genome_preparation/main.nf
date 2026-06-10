@@ -1,4 +1,4 @@
-include { CHECK_FASTA              } from '../../../modules/local/check_fasta'
+include { CHECK_GENOME              } from '../../../modules/local/check_genome'
 include { SEQKIT_STATS              } from '../../../modules/nf-core/seqkit/stats'
 
 /*
@@ -19,14 +19,8 @@ workflow GENOME_PREPARATION {
     // CHECK HEADERS OR WHOLE PROTEIN DB AND RAISE ERROR IF UNHANDLED CHARACTERS
     // ----------------------------------------------------------
 
-    CHECK_FASTA(
-        ch_genome,
-        type="dna",
-        fix_headers=false,
-        fix_sequences=false,
-        min_sequence_length=1
-    )
-
+    CHECK_GENOME( ch_genome )
+    ch_genome = CHECK_GENOME.out.fasta
 
     // ----------------------------------------------------------
     // COMPUTE STATS ABOUT GENOME
