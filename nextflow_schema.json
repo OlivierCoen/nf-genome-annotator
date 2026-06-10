@@ -395,6 +395,9 @@
             "$ref": "#/$defs/functional_annotation_options"
         },
         {
+            "$ref": "#/$defs/quality_control_options"
+        },
+        {
             "$ref": "#/$defs/dev_options"
         },
         {

@@ -49,7 +49,7 @@ workflow STRUCTURAL_ANNOTATION {
             clade,
             excluded_clades,
             excluded_species,
-            skip_orthodb_preparation,
+            skip_orthodb_download,
             min_prot_db_seq_length
         )
         ch_prepared_proteins = ORTHODB_PREPARATION.out.proteins
