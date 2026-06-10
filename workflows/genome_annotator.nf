@@ -9,6 +9,7 @@ include { AGAT_SPCOMPLEMENTANNOTATIONS as COMPLEMENT_ANNOTATIONS        } from '
 
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
+include { DOWNLOAD_READS                                                } from '../subworkflows/local/download_reads'
 include { MAP_TO_GENOME_SORT_INDEX                                      } from '../subworkflows/local/map_to_genome_sort_index'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
@@ -31,13 +32,13 @@ workflow GENOME_ANNOTATOR {
     main:
 
     ch_input = ch_samplesheet.multiMap{
-                    meta, genome, gff, rnaseq_bam, rnaseq_fastq, rnaseq_sra, proteins, braker_gtf, braker_hintsfile ->
+                    meta, genome, gff, rnaseq_bam, rnaseq_fastq, rnaseq_ids, proteins, braker_gtf, braker_hintsfile ->
                         genome: [ meta, genome ]
                         gff: gff ? [ meta, gff ] : [[:], []]
                         rnaseq_bam: rnaseq_bam ? [ meta, rnaseq_bam ] : [[:], []]
                         rnaseq_fastq: rnaseq_fastq ? [ meta, rnaseq_fastq ] : [[:], []]
-                        rnaseq_sra: rnaseq_sra ? [ meta, rnaseq_sra ] : [[:], []]
-                        proteins: proteins ? [ meta, proteins ] : [[:], []]
+                        rnaseq_id: rnaseq_ids ? [ meta, rnaseq_ids ] : [[:], []]
+                        protein: proteins ? [ meta, proteins ] : [[:], []]
                         braker_gtf: braker_gtf ? [ meta, braker_gtf ] : [[:], []]
                         braker_hintsfile: braker_hintsfile ? [ meta, braker_hintsfile ] : [[:], []]
                 }
@@ -47,23 +48,23 @@ workflow GENOME_ANNOTATOR {
     ch_gff          = ch_input.gff
                         .filter { meta, file -> file != []}
 
-    ch_proteins     = ch_input.proteins
+    ch_proteins     = ch_input.protein
                         .transpose()
                         .filter { meta, fasta -> fasta != [] }
                         .groupTuple()
 
-    ch_rnaseq_fastq = ch_input.rnaseq_fastq
-                        .transpose()
-                        .filter { meta, reads -> reads != []}
-                        .map { meta, reads ->
-                            fastq_1 = reads[0]
-                            fastq_2 = reads[1]
-                            if ( fastq_2 ) {
-                                [ meta + [ single_end: false ], [ fastq_1, fastq_2 ] ]
-                            } else {
-                                [ meta + [ single_end: true ], fastq_1 ]
-                            }
-                        }
+    ch_provided_rnaseq_fastq = ch_input.rnaseq_fastq
+                                .transpose()
+                                .filter { meta, reads -> reads != []}
+                                .map { meta, reads ->
+                                    fastq_1 = reads[0]
+                                    fastq_2 = reads[1]
+                                    if ( fastq_2 ) {
+                                        [ meta + [ single_end: false ], [ fastq_1, fastq_2 ] ]
+                                    } else {
+                                        [ meta + [ single_end: true ], fastq_1 ]
+                                    }
+                                }
 
     ch_rnaseq_bam   = ch_input.rnaseq_bam
                         .transpose()
@@ -75,8 +76,8 @@ workflow GENOME_ANNOTATOR {
     ch_braker_hintsfile    = ch_input.braker_hintsfile
                         .filter { meta, file -> file != []}
 
-    ch_rnaseq_sra   = ch_input.rnaseq_sra
-                        .filter { meta, sra -> sra != []}
+    ch_rnaseq_id   = ch_input.rnaseq_id
+                        .filter { meta, id -> id != []}
 
 
     ch_versions = channel.empty()
@@ -101,9 +102,18 @@ workflow GENOME_ANNOTATOR {
         }
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // DOWNLOAD READS FROM SRA / ENA IF NEEDED
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        DOWNLOAD_READS( ch_rnaseq_id )
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // MAP RNASEQ READS TO GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        ch_rnaseq_fastq = ch_provided_rnaseq_fastq
+                            .mix( DOWNLOAD_READS.out.reads )
+        
         MAP_TO_GENOME_SORT_INDEX(
             ch_genome,
             ch_rnaseq_fastq,
@@ -230,20 +240,21 @@ workflow GENOME_ANNOTATOR {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // QUALITY CONTROLS
+    // VARIOUS QUALITY CONTROLS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     QUALITY_CONTROLS (
         ch_genome,
         ch_all_annotations,
-        ch_proteomes
+        ch_main_proteome,
+        ch_proteomes,
+        ch_gff,
+        params.omamer_db_url
     )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // MULTIQC
+    // MULTIQC & OTHER REPORTING
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 
     REPORTING(
         ch_versions,
