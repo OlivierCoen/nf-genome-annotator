@@ -38,12 +38,6 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
-                },
-                "busco_lineage": {
-                    "type": "string",
-                    "description": "Busco lineage to use.",
-                    "default": "auto",
-                    "help": "Example: arthropoda_odb10. See list of lineages at https://busco.ezlab.org/list_of_lineages.html. Otherwise, choose auto / auto_prok / auto_euk to et Busco automatically detect which lineage to use."
                 }
             }
         },
@@ -265,6 +259,25 @@
                     "description": "Path to pre-downloaded InterProScan database.",
                     "fa_icon": "fas fa-database"
                 }
+            }
+        },
+        "quality_control_options": {
+            "title": "Options for quality control",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for quality control",
+            "properties": {
+              "busco_lineage": {
+                  "type": "string",
+                  "description": "Busco lineage to use.",
+                  "default": "auto",
+                  "help": "Example: arthropoda_odb12. See list of lineages at https://busco.ezlab.org/list_of_lineages.html. Otherwise, choose auto / auto_prok / auto_euk to et Busco automatically detect which lineage to use."
+              },
+              "omamer_db_url": {
+                  "type": "string",
+                  "description": "OMAMER database URL.",
+                  "help": "Example: https://omabrowser.org/All/LUCA.h5"
+              }
             }
         },
         "dev_options": {
