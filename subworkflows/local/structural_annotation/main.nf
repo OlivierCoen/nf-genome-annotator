@@ -4,7 +4,8 @@ include { SAMTOOLS_INDEX                                        } from '../../..
 include { SAMTOOLS_MERGE                                        } from '../../../modules/local/samtools/merge'
 include { METAEUK_EASYPREDICT                                   } from '../../../modules/local/metaeuk/easypredict'
 
-include { PROTEIN_DB_PREPARATION                                } from '../protein_db_preparation'
+include { ORTHODB_PREPARATION                                   } from '../orthodb_preparation'
+include { MMSEQS_DB_PREPARATION                                 } from '../mmseqs_db_preparation'
 
 
 /*
@@ -28,7 +29,9 @@ workflow STRUCTURAL_ANNOTATION {
     clade
     excluded_clades
     excluded_species
-    skip_orthodb_preparation
+    mmseqs_db
+    skip_orthodb_download
+    skip_mmseqs_db_download
     min_prot_db_seq_length
 
     main:
@@ -36,6 +39,20 @@ workflow STRUCTURAL_ANNOTATION {
     ch_versions = channel.empty()
 
     if ( structural_annotator == "braker3" ) {
+
+        // ----------------------------------------------------------
+        // PREPARE ORTHODB PROTEIN DB FROM CLADE-SPECIFIC ORTHODB AND CUSTOM PROTEIN FASTA FILES
+        // ----------------------------------------------------------
+    
+        ORTHODB_PREPARATION(
+            ch_proteins,
+            clade,
+            excluded_clades,
+            excluded_species,
+            skip_orthodb_preparation,
+            min_prot_db_seq_length
+        )
+        ch_prepared_proteins = ORTHODB_PREPARATION.out.proteins
 
         // ----------------------------------------------------------
         // MERGE MULTIPLE BAM FILES
@@ -55,20 +72,6 @@ workflow STRUCTURAL_ANNOTATION {
         ch_single_bam = ch_branched_bam.leave_me_alone
                             .map{ meta, bam, bai -> [ meta, bam ] }
                             .mix( SAMTOOLS_MERGE.out.bam )
-
-        // ----------------------------------------------------------
-        // PREPARE PROTEIN DB FROM CLADE-SPECIFIC ORTHODB AND CUSTOM PROTEIN FASTA FILES
-        // ----------------------------------------------------------
-
-        PROTEIN_DB_PREPARATION(
-            ch_proteins,
-            clade,
-            excluded_clades,
-            excluded_species,
-            skip_orthodb_preparation,
-            min_prot_db_seq_length
-        )
-        ch_prepared_proteins = PROTEIN_DB_PREPARATION.out.proteins
 
         // ----------------------------------------------------------
         // RUN BRAKER3
@@ -126,13 +129,27 @@ workflow STRUCTURAL_ANNOTATION {
         ch_annotations = ch_branched_braker_gtfs.not_to_merge
                             .mix( TSEBRA.out.merged_gtf )
 
-    } else {
+    } else if ( structural_annotator == "metaeuk" ) {
+
+        // ----------------------------------------------------------
+        // PREPARE MMSEQS PROTEIN DB FROM THE CHOSEN MMSEQS DB AND CUSTOM PROTEIN FASTA FILES
+        // ----------------------------------------------------------
+    
+        MMSEQS_DB_PREPARATION(
+            ch_proteins,
+            mmseqs_db,
+            skip_mmseqs_db_download,
+            min_prot_db_seq_length
+        )
+        ch_mmseqs_db = MMSEQS_DB_PREPARATION.out.proteins
 
         // ----------------------------------------------------------
         // RUN METAEUK
         // ----------------------------------------------------------
 
-        METAEUK_EASYPREDICT( ch_to_annotate )
+        METAEUK_EASYPREDICT( 
+            ch_genome.join( ch_mmseqs_db )
+        )
         ch_annotations = METAEUK_EASYPREDICT.out.gff
 
     }

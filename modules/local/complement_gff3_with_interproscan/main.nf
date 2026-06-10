@@ -5,8 +5,8 @@ process COMPLEMENT_GFF3_WITH_INTERPROSCAN {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/05/05c5125a49a760aba907426a447aaeafe2ce4ed98d7b73393c9e01cb771f5576/data':
-        'community.wave.seqera.io/library/pandas_polars_python:252b2f674b0e228a' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/45/456dbad6a07daee9c47503388d128762d334d96e0574ea149bb3a2abcc0337ee/data':
+        'community.wave.seqera.io/library/pandas_polars_pyarrow_python:603d6d02549d908e' }"
 
     input:
     tuple val(meta), path(gff3), path(iprscan)
