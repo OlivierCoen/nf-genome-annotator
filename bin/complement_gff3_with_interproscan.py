@@ -24,6 +24,10 @@ GFF_COLUMNS = [
     'attribute'
 ]
 
+ATTRIBUTE_TRANSLATION = {
+    "em_GOs": "Ontology_term"
+}
+
 COMMON_ATTRIBUTE_KEYS = [
     'ID',
     'Name',
@@ -161,6 +165,18 @@ def get_name_and_aliases(name_set: set) -> dict[str, str | list[str]] | None:
     return {"name": real_name, "aliases": aliases}
 
 
+def get_names_and_aliases(parsed_attr_df: pd.DataFrame) -> pd.DataFrame:
+    pfam_names = parsed_attr_df[pd.col("source") in ["Pfam"]].groupby("seqname")["Name"].apply(set)
+    seqname_to_names_and_aliases = pfam_names.apply(lambda x: get_name_and_aliases(x))
+    seqname_to_names_and_aliases_records = [
+        {"seqname": seqname, "Name": d["name"], "Alias": d["aliases"]}
+        for seqname, d in seqname_to_names_and_aliases.to_dict().items()
+    ]
+    seqname_names_aliases_df = pd.DataFrame.from_records(seqname_to_names_and_aliases_records)
+    seqname_names_aliases_df["Alias"] = seqname_names_aliases_df["Alias"].apply(','.join)
+    return seqname_names_aliases_df
+
+
 def parse_attributes_as_dicts(ipr_lf: pl.LazyFrame) -> pd.DataFrame:
     # parsing each list of attributes (one list per original row) into a dictionary
     parsed_attributes = [
@@ -187,18 +203,6 @@ def get_grouped_set_dataframe(parsed_attr_df: pd.DataFrame, xref_col: str) -> pd
     df = pd.DataFrame(s).reset_index()
     df["seqname"] = df["seqname"].astype(str)
     return df
-
-
-def get_names_and_aliases(parsed_attr_df: pd.DataFrame) -> pd.DataFrame:
-    pfam_names = parsed_attr_df[pd.col("source") == "Pfam"].groupby("seqname")["Name"].apply(set)
-    seqname_to_names_and_aliases = pfam_names.apply(lambda x: get_name_and_aliases(x))
-    seqname_to_names_and_aliases_records = [
-        {"seqname": seqname, "Name": d["name"], "Alias": d["aliases"]}
-        for seqname, d in seqname_to_names_and_aliases.to_dict().items()
-    ]
-    seqname_names_aliases_df = pd.DataFrame.from_records(seqname_to_names_and_aliases_records)
-    seqname_names_aliases_df["Alias"] = seqname_names_aliases_df["Alias"].apply(','.join)
-    return seqname_names_aliases_df
 
 
 def get_all_dbxrefs(parsed_attr_df: pd.DataFrame):
@@ -309,7 +313,7 @@ def main():
     
     args = parse_args()
 
-    annot_header = read_gff3_header(args.annot_file)
+    annot_header_lines = read_gff3_header(args.annot_file)
     annot_lf = parse_gff3(args.annot_file)
     logger.info(f"Loaded {get_nb_rows(annot_lf)} structural features")
     ipr_lf = parse_gff3(args.iprscan_file)
@@ -349,6 +353,12 @@ def main():
         )
         .select(["index"] + unique_attribute_keys)
     )
+
+    # renaming specific columns to match the official names
+    transcript_attr_lf = transcript_attr_lf.rename(ATTRIBUTE_TRANSLATION)
+
+    print(transcript_attr_lf.head().collect())
+    print(transcript_attr_lf.collect_schema().names())
 
     ####################################################################
     # PARSING INTERPROSCAN OUTPUT
@@ -414,7 +424,7 @@ def main():
     logger.info(f"Writing final annotation to {args.outfile}")
     # write final annotation to output file
     with open(args.outfile, "w") as fout:
-        fout.writelines(annot_header)
+        fout.writelines([line + "\n" for line in annot_header_lines])
         final_annot_lf.sink_csv(fout, separator="\t", include_header=False)
 
     logger.info("Done")

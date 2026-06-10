@@ -4,8 +4,8 @@ process AGAT_SPMANAGEIDS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/d0/d0194019d3fcefea0875ce4703df12dd2244cf9b8932b935197e9063cbc118ae/data':
-        'community.wave.seqera.io/library/agat:1.6.1--d39db4f54af12afb' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ab/abfa03eb1d5ee9a8f9aa056751126647577ee62ffac6a6ab84ca7a2184007380/data':
+        'community.wave.seqera.io/library/agat:1.7.0--9487e22276dbaaca' }"
 
     input:
     tuple val(meta), path(gff)
