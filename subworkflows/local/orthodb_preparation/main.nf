@@ -10,14 +10,14 @@ include { CHECK_FASTA                                           } from '../../..
 */
 
 
-workflow PROTEIN_DB_PREPARATION {
+workflow ORTHODB_PREPARATION {
 
     take:
     ch_proteins
     clade
     excluded_clades
     excluded_species
-    skip_orthodb_preparation
+    skip_orthodb_download
     min_prot_db_seq_length
 
     main:
@@ -26,15 +26,17 @@ workflow PROTEIN_DB_PREPARATION {
     // DOWNLOAD CLASE-SPECIFIC ORTHODB PROTEIN DB
     // ----------------------------------------------------------
 
-    if ( !skip_orthodb_preparation ) {
+    if ( !skip_orthodb_download ) {
+
         ORTHODB_MAKECLADEDB(
             clade,
             excluded_clades,
             excluded_species
         )
         ch_orthodb_proteins = ORTHODB_MAKECLADEDB.out.db
+        
     } else {
-        ch_orthodb_proteins = channel.of( "no_orthodb" )
+        ch_orthodb_proteins = channel.of( "no_db" )
     }
 
     // ----------------------------------------------------------
@@ -42,13 +44,13 @@ workflow PROTEIN_DB_PREPARATION {
     // ----------------------------------------------------------
 
     ch_all_proteins = ch_proteins
-                        .combine( ch_orthodb_proteins ) // cartesian product: add the clade orthodb protein db to each item separately
+                        .combine( ch_orthodb_proteins ) // cartesian product: add the public protein db to each item separately
                         .map {
-                            meta, input_fasta_list, orthodb_data ->
-                                if ( orthodb_data == "no_orthodb" ) {
+                            meta, input_fasta_list, public_data ->
+                                if ( public_data == "no_db" ) {
                                     [ meta, input_fasta_list ]
                                 } else {
-                                    [ meta, input_fasta_list + [orthodb_data] ]
+                                    [ meta, input_fasta_list + [public_data] ]
                                 }
                         }
 

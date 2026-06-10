@@ -1,8 +1,6 @@
 process EGGNOGMAPPER_DOWNLOADDB {
     label 'process_medium'
 
-    storeDir "${workflow.projectDir}/.nextflow/cache/eggnogmapper"
-
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/6b/6b514ff051f837a2f06ab62a9a16592b0a2171917f1c7b11bbfef84c632e99f3/data':
@@ -22,6 +20,7 @@ process EGGNOGMAPPER_DOWNLOADDB {
 
     download_eggnog_data.modified.py \\
         --db diamond \\
+        --db-version 7.0.0 \\
         --out data
     """
 }

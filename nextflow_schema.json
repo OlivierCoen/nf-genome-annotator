@@ -135,9 +135,14 @@
             "fa_icon": "fas fa-terminal",
             "description": "Options for genome masking",
             "properties": {
-              "skip_orthodb_preparation": {
+              "skip_orthodb_download": {
                   "type": "boolean",
-                  "description": "Skip preparation of OrthoDB custom protein database.",
+                  "description": "Skip download of OrthoDB protein database.",
+                  "fa_icon": "fas fa-hand-scissors"
+              },
+              "skip_mmseqs_db_download": {
+                  "type": "boolean",
+                  "description": "Skip download of MMseqs2 protein database.",
                   "fa_icon": "fas fa-hand-scissors"
               },
               "clade": {
@@ -158,12 +163,18 @@
                   "fa_icon": "fas fa-database",
                   "help_text": "A comma separated set of species names to exclude. The list of recognised species can be found at https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_species.tab.gz"
               },
+              "mmseqs_db": {
+                  "type": "string",
+                  "default": null,
+                  "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. Set to `UniRef50` by default.",
+                  "help_text": "mmseqs2 lists a large number of databases, not all of which are appropriate for use with MetaEuk. MetaEuk requires protein inputs, so you should select one of the Aminoacid or Profile options."
+              },
               "min_prot_db_seq_length": {
                   "type": "integer",
                   "description": "Minimum sequence length for protein database",
                   "fa_icon": "fas fa-database",
                   "help_text": "Minimum sequence length for protein database (after all protein fasta files have been concatenated)"
-              },
+              }
             }
         },
         "structural_annotation_options": {
@@ -182,18 +193,6 @@
                     "description": "Tool to use for structural annotation",
                     "enum": ["braker3", "metaeuk"],
                     "default": "braker3"
-                },
-                "genome_max_size_auto_metaeuk": {
-                    "type": "integer",
-                    "description": "Maximum genome size for automatically using MetaEuk.",
-                    "default": 1e7,
-                    "help": "Under a certain genome size, genome annotation may fail with Braker3. If the genome size is smaller than the specified threshold, MetaEuk will be used instead."
-                },
-                "mmseqs_db": {
-                    "type": "string",
-                    "default": null,
-                    "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. If not provided, the lineage provided for BUSCO will be used here too. Incompatible with --orthodb_lineage.",
-                    "help_text": "mmseqs2 lists a large number of databases, not all of which are appropriate for use with MetaEuk. MetaEuk requires protein inputs, so you should select one of the Aminoacid or Profile options."
                 }
             }
         },

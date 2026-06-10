@@ -26,6 +26,16 @@ workflow MAP_TO_GENOME_SORT_INDEX {
 
     main:
 
+    // get only genomes that need to be built (genomes for which there are reads)
+    ch_genome_for_mapping = ch_reads
+                            .cross( ch_genome ) { v -> v[0][0] } // match only on id
+                            .map{ // [[meta, reads], [meta2, index]]
+                                part1, genome_part -> 
+                                    def meta = genome_part[0]
+                                    def genome = genome_part[1]
+                                    [ meta, genome ]
+                            }
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FASTQC & FASTP
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,7 +62,7 @@ workflow MAP_TO_GENOME_SORT_INDEX {
     if (rnaseq_mapper == 'hisat2') {
 
         FASTQ_ALIGN_HISAT2(
-            ch_genome,
+            ch_genome_for_mapping,
             ch_reads,
             ch_gtf,
             ignore_existing_gtf_for_mapping
@@ -63,7 +73,7 @@ workflow MAP_TO_GENOME_SORT_INDEX {
     } else if (rnaseq_mapper == 'star') {
 
         FASTQ_ALIGN_STAR(
-            ch_genome,
+            ch_genome_for_mapping,
             ch_reads,
             ch_gtf,
             ignore_existing_gtf_for_mapping
@@ -80,7 +90,7 @@ workflow MAP_TO_GENOME_SORT_INDEX {
 
     BAM_SORT_INDEX_STATS(
         ch_bam.mix( ch_aligned_bam ),
-        ch_genome
+        ch_genome_for_mapping
     )
 
 

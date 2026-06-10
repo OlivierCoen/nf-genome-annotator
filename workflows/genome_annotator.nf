@@ -135,7 +135,9 @@ workflow GENOME_ANNOTATOR {
             params.clade,
             params.excluded_clades,
             params.excluded_species,
-            params.skip_orthodb_preparation,
+            params.mmseqs_db,
+            params.skip_orthodb_download,
+            params.skip_mmseqs_db_download,
             params.min_prot_db_seq_length
         )
 
