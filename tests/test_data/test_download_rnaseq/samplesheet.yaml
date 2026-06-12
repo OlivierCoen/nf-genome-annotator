@@ -1,5 +1,6 @@
 - sample: sra
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
   rnaseq_public_id: 
-    - SRX039647
+    - SRX30583970 # paired-end
+    - DRX552466 # single-end
   

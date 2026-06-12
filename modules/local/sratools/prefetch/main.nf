@@ -1,5 +1,5 @@
 process SRATOOLS_PREFETCH {
-    tag "${meta.taxid} :: ${sra_id}"
+    tag "${sra_id}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"

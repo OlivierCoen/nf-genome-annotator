@@ -1,5 +1,5 @@
 process SRATOOLS_FASTERQDUMP {
-    tag "${meta.taxid} :: ${sra.name}"
+    tag "${sra.name}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
