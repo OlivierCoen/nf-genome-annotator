@@ -69,7 +69,7 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "pattern": "^(SR|ER)[A-Z0-9]+$",
+                "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
                 "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
               }
             },

@@ -33,6 +33,10 @@ workflow DOWNLOAD_READS {
     
     ch_downloaded_reads = DOWNLOAD_SRA.out.reads
                             .mix ( DOWNLOAD_ENA.out.reads )
+                            .map{ meta, reads ->
+                                def single_end_state = reads instanceof Path ? true : false
+                                [ meta + [ single_end: single_end_state ], reads ]
+                            }
     
     
     emit:
