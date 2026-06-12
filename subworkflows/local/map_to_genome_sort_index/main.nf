@@ -80,9 +80,11 @@ workflow MAP_TO_GENOME_SORT_INDEX {
         )
 
         ch_aligned_bam = FASTQ_ALIGN_STAR.out.bam
-                            .map { meta, bam -> [ [ id: meta.id ], bam ] } // keeping only meta.id in meta map
 
     }
+
+    ch_aligned_bam = ch_aligned_bam
+                        .map { meta, bam -> [ [ id: meta.id ], bam ] } // keeping only meta.id in meta map
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAPPING STATISTICS

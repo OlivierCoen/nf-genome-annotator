@@ -77,6 +77,7 @@ workflow GENOME_ANNOTATOR {
                         .filter { meta, file -> file != []}
 
     ch_rnaseq_id   = ch_input.rnaseq_id
+                        .transpose()
                         .filter { meta, id -> id != []}
 
 

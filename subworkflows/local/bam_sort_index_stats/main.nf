@@ -21,7 +21,7 @@ workflow BAM_SORT_INDEX_STATS {
     SAMTOOLS_STATS(
         ch_bam_bai.join( ch_fasta_fai )
     )
-
+    
     SAMTOOLS_FLAGSTAT(ch_bam_bai)
 
     SAMTOOLS_IDXSTATS(ch_bam_bai)
