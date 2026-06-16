@@ -21,6 +21,7 @@ workflow QUALITY_CONTROLS {
     ch_main_proteome
     ch_all_proteomes
     ch_gff
+    skip_omark
     omamer_db_url
 
     main:
@@ -55,11 +56,15 @@ workflow QUALITY_CONTROLS {
     // ASSESSMENT OF ANNOTATION QUALITY WITH OMARK
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    OMARK(
-        ch_main_proteome,
-        ch_gff,
-        omamer_db_url
-    )
+    if ( !skip_omark ) {
+
+        OMARK(
+            ch_main_proteome,
+            ch_gff,
+            omamer_db_url
+        )
+
+    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // QUALITY CONTROLS OF GTF
