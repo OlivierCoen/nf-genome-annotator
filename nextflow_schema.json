@@ -273,6 +273,11 @@
                   "default": "auto",
                   "help": "Example: arthropoda_odb12. See list of lineages at https://busco.ezlab.org/list_of_lineages.html. Otherwise, choose auto / auto_prok / auto_euk to et Busco automatically detect which lineage to use."
               },
+              "skip_omark": {
+                  "type": "boolean",
+                  "description": "Skip OMArk",
+                  "fa_icon": "fas fa-hand-scissors"
+              },
               "omamer_db_url": {
                   "type": "string",
                   "description": "OMAMER database URL.",
