@@ -114,7 +114,7 @@ workflow GENOME_ANNOTATOR {
 
         ch_rnaseq_fastq = ch_provided_rnaseq_fastq
                             .mix( DOWNLOAD_READS.out.reads )
-        
+
         MAP_TO_GENOME_SORT_INDEX(
             ch_genome,
             ch_rnaseq_fastq,
@@ -225,7 +225,7 @@ workflow GENOME_ANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     if ( !params.skip_functional_annotation ) {
 
         FUNCTIONAL_ANNOTATION (
@@ -250,6 +250,7 @@ workflow GENOME_ANNOTATOR {
         ch_main_proteome,
         ch_proteomes,
         ch_gff,
+        params.skip_omark,
         params.omamer_db_url
     )
 
