@@ -236,8 +236,12 @@ workflow GENOME_ANNOTATOR {
             params.interproscan_db_url
         )
 
+        ch_functional_annotation = FUNCTIONAL_ANNOTATION.out.gff
+
         ch_versions = ch_versions
                         .mix( FUNCTIONAL_ANNOTATION.out.versions )
+    } else {
+        ch_functional_annotation = channel.empty()
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,6 +254,7 @@ workflow GENOME_ANNOTATOR {
         ch_main_proteome,
         ch_proteomes,
         ch_gff,
+        ch_functional_annotation,
         params.skip_omark,
         params.omamer_db_url
     )
