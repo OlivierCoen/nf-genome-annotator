@@ -191,7 +191,8 @@ workflow GENOME_ANNOTATOR {
     CLEAN_ANNOTATIONS (
         ch_structural_annotations,
         ch_genome,
-        params.skip_gff_keep_longest_isoform,
+        params.gff_fix_feature_locations_duplicated,
+        params.gff_keep_longest_isoform,
         params.skip_gff_fix_overlapping_genes,
         params.skip_gff_filter_incomplete_gene_models
     )
