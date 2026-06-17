@@ -11,23 +11,16 @@ process AGAT_CONVERTSPGXF2GXF {
     tuple val(meta), path(gff)
 
     output:
-    tuple val(meta), path("*.agat.gtf"), emit: output_gtf
+    tuple val(meta), path("*.cleaned.gff"), emit: gff
     tuple val("${task.process}"), val('agat'), eval("agat_convert_sp_gxf2gxf.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
     def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}.cleaned"
     """
     agat_convert_sp_gxf2gxf.pl \\
         --gff ${gff} \\
-        --output ${prefix}.agat.gtf \\
+        --output ${prefix}.gtf \\
         ${args}
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}.agat.gtf
-    touch ${gff}.agat.log
     """
 }
