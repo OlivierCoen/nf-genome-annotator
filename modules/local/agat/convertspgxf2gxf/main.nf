@@ -20,7 +20,7 @@ process AGAT_CONVERTSPGXF2GXF {
     """
     agat_convert_sp_gxf2gxf.pl \\
         --gff ${gff} \\
-        --output ${prefix}.gtf \\
+        --output ${prefix}.gff \\
         ${args}
     """
 }
