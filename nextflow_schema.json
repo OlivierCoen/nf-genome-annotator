@@ -214,11 +214,6 @@
                     "description": "Fix feature locations duplicated in structural annotation",
                     "fa_icon": "fas fa-hand-scissors"
                 },
-                "gff_keep_longest_isoform": {
-                    "type": "boolean",
-                    "description": "Only keep longest isoforms in structural annotation",
-                    "fa_icon": "fas fa-hand-scissors"
-                },
                 "skip_gff_fix_overlapping_genes": {
                     "type": "boolean",
                     "description": "Skip processing of GFF to fix overlapping genes",

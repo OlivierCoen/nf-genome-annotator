@@ -25,7 +25,6 @@ process INTERPROSCAN_DOWNLOADDB {
     aria2c \\
         -s ${task.cpus} \\
         -x ${task.cpus} \\
-        -c \\
         --max-tries=10 \\
         --retry-wait=30 \\
         --timeout=60 \\
