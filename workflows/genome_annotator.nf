@@ -13,6 +13,7 @@ include { DOWNLOAD_READS                                                } from '
 include { MAP_TO_GENOME_SORT_INDEX                                      } from '../subworkflows/local/map_to_genome_sort_index'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
+include { ALTERNATIVE_ANNOTATIONS                                       } from '../subworkflows/local/alternative_annotation'
 include { GET_PROTEOMES                                                 } from '../subworkflows/local/get_proteomes'
 include { FUNCTIONAL_ANNOTATION                                         } from '../subworkflows/local/functional_annotation'
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
@@ -192,10 +193,19 @@ workflow GENOME_ANNOTATOR {
         ch_structural_annotations,
         ch_genome,
         params.gff_fix_feature_locations_duplicated,
-        params.gff_keep_longest_isoform,
         params.skip_gff_fix_overlapping_genes,
         params.skip_gff_filter_incomplete_gene_models
     )
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // MAKE ALTERNATIVE ANNOTATIONS (LONGEST ISOFORMS ONLY, ...)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ALTERNATIVE_ANNOTATIONS( ch_gff )
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ORGANISE ANNOTATIONS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_gff = CLEAN_ANNOTATIONS.out.gff
                 .map {
@@ -208,7 +218,14 @@ workflow GENOME_ANNOTATOR {
                                         meta, file -> [ meta + [final_annotation: false], file ]
                                     }
 
-    ch_all_annotations = ch_gff.mix( ch_intermediate_annotations )
+    ch_alternative_annotations = ALTERNATIVE_ANNOTATIONS.out.longest_isoforms_gff
+                                    .map {
+                                        meta, file -> [ meta + [final_annotation: false], file ]
+                                    }
+
+    ch_all_annotations = ch_gff
+                            .mix( ch_intermediate_annotations )
+                            .mix( ch_alternative_annotations )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
@@ -221,7 +238,8 @@ workflow GENOME_ANNOTATOR {
     )
 
     ch_proteomes = GET_PROTEOMES.out.proteomes
-    ch_main_proteome = ch_proteomes.filter{ meta, file -> meta.final_annotation == true }
+    ch_main_proteome = ch_proteomes
+                        .filter{ meta, file -> meta.final_annotation == true }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION

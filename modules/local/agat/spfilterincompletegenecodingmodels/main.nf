@@ -9,7 +9,6 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
 
     input:
     tuple val(meta), path(gff), path(genome)
-    path config
 
     output:
     tuple val(meta), path("*_incomplete_gene_models_fixed.gff"), emit: gff
@@ -18,7 +17,6 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
     script:
     def args         = task.ext.args   ?: ''
     def prefix       = task.ext.prefix ?: "${meta.id}"
-    def config_param = config ? "--config ${config}" : ''
     def is_compressed = genome.getExtension() == "gz" ? true : false
     def genome_fasta = is_compressed ? genome.getBaseName() : genome
     """
@@ -30,7 +28,6 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
         --gff $gff \\
         --fasta $genome_fasta \\
         --add_flag \\
-        ${config_param} \\
        ${args} \\
         --output ${prefix}_incomplete_gene_models_fixed.gff
     """
