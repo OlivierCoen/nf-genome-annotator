@@ -12,25 +12,19 @@ process AGAT_SPFIXFEATURESLOCATIONSDUPLICATED {
     path config
 
     output:
-    tuple val(meta), path("*_duplicated_locations_fixed.gff"), emit: gff
+    tuple val(meta), path("*.duplicated_locations_fixed.gff"), emit: gff
     tuple val("${task.process}"), val('agat'), eval("agat_sp_fix_features_locations_duplicated.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
     def args         = task.ext.args   ?: ''
-    def prefix       = task.ext.prefix ?: "${meta.id}"
+    def prefix       = task.ext.prefix ?: "${meta.id}.duplicated_locations_fixed"
     def config_param = config ? "--config ${config}" : ''
     """
     agat_sp_fix_features_locations_duplicated.pl \\
         --gff $gff \\
         ${config_param} \\
         ${args} \\
-        --output ${prefix}_duplicated_locations_fixed.gff
+        --output ${prefix}.gff
 
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}_duplicated_locations_fixed.gff
     """
 }
