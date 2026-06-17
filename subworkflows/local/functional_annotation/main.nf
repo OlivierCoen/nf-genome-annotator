@@ -33,7 +33,7 @@ workflow FUNCTIONAL_ANNOTATION {
 
         EGGNOGMAPPER_DOWNLOADDB ( )
         ch_eggnog_db = EGGNOGMAPPER_DOWNLOADDB.out.eggnog_data_dir
-        
+
         EGGNOGMAPPER_EMAPPER(
             ch_proteome.join( ch_gff ),
             ch_eggnog_db
@@ -73,7 +73,7 @@ workflow FUNCTIONAL_ANNOTATION {
 
 
     emit:
-    gff3             = ch_decorated_gff
+    gff              = ch_decorated_gff
     versions         = ch_versions
 
 }
