@@ -1,4 +1,4 @@
-include { AGAT_CONVERTSPGXF2GXF                   as AGAT_CONVERT_TO_GFF                           } from '../../../modules/local/agat/spfixfeatureslocationsduplicated'
+include { AGAT_CONVERTSPGXF2GXF                   as AGAT_CONVERT_TO_GFF                               } from '../../../modules/local/agat/convertspgxf2gxf'
 include { AGAT_SPFIXFEATURESLOCATIONSDUPLICATED   as AGAT_FIX_FEATURE_LOCATIONS_DUPLICATIONS           } from '../../../modules/local/agat/spfixfeatureslocationsduplicated'
 include { AGAT_SPKEEPLONGESTISOFORM               as AGAT_KEEP_LONGEST_ISOFORM                         } from '../../../modules/local/agat/spkeeplongestisoform'
 include { AGAT_SPFIXOVERLAPPINGGENES              as AGAT_FIX_OVERLAPPING_GENES                        } from '../../../modules/local/agat/spfixoverlappinggenes'
@@ -29,7 +29,7 @@ workflow CLEAN_ANNOTATIONS {
                     .map{ meta, genome -> [ [id: meta.id], genome ] }
 
     // remove redundant entries and convert all GTFs / GFFs to GFFs
-    AGAT_CONVERT_TO_GFF ( ch_annotation, [] )
+    AGAT_CONVERT_TO_GFF ( ch_annotation )
     ch_gff = AGAT_CONVERT_TO_GFF.out.gff
 
     ch_intermediate_gffs = ch_intermediate_gffs

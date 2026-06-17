@@ -1,4 +1,4 @@
-process AGAT_SPFUNCTIONALSTATISTCS {
+process AGAT_SPFUNCTIONALSTATISTICS {
     tag "$meta.id"
     label 'process_single'
 
@@ -9,7 +9,6 @@ process AGAT_SPFUNCTIONALSTATISTCS {
 
     input:
     tuple val(meta), path(gxf)
-    path config
 
     output:
     tuple val(meta), path("${output}"), emit: gff
