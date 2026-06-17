@@ -11,7 +11,7 @@ process AGAT_SPKEEPLONGESTISOFORM {
     tuple val(meta), path(gxf)
 
     output:
-    tuple val(meta), path("${output}"), emit: gff
+    tuple val(meta), path("*.longest_transcript_isoforms.gff"), emit: gff
     tuple val("${task.process}"), val('agat'), eval("agat_sp_keep_longest_isoform.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
 
     script:
@@ -22,13 +22,5 @@ process AGAT_SPKEEPLONGESTISOFORM {
         --gff ${gxf} \\
         --out "${prefix}.longest_transcript_isoforms.gff" \\
         ${args}
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    output     = "${prefix}.longest.gff"
-    """
-    touch ${output}
-    touch ${gxf}.agat.log
     """
 }
