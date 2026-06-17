@@ -9,7 +9,6 @@ process AGAT_SPFIXFEATURESLOCATIONSDUPLICATED {
 
     input:
     tuple val(meta), path(gff)
-    path config
 
     output:
     tuple val(meta), path("*.duplicated_locations_fixed.gff"), emit: gff
@@ -18,11 +17,9 @@ process AGAT_SPFIXFEATURESLOCATIONSDUPLICATED {
     script:
     def args         = task.ext.args   ?: ''
     def prefix       = task.ext.prefix ?: "${meta.id}.duplicated_locations_fixed"
-    def config_param = config ? "--config ${config}" : ''
     """
     agat_sp_fix_features_locations_duplicated.pl \\
         --gff $gff \\
-        ${config_param} \\
         ${args} \\
         --output ${prefix}.gff
 

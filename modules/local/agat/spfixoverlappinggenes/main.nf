@@ -9,7 +9,6 @@ process AGAT_SPFIXOVERLAPPINGGENES {
 
     input:
     tuple val(meta), path(gff)
-    path config
 
     output:
     tuple val(meta), path("*_overlaps_fixed.gff"), emit: gff
@@ -18,11 +17,9 @@ process AGAT_SPFIXOVERLAPPINGGENES {
     script:
     def args         = task.ext.args   ?: ''
     def prefix       = task.ext.prefix ?: "${meta.id}"
-    def config_param = config ? "--config ${config}" : ''
     """
     agat_sp_fix_overlaping_genes.pl \\
         --gff $gff \\
-        ${config_param} \\
        ${args} \\
         --output ${prefix}_overlaps_fixed.gff
     """
