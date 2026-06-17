@@ -1,4 +1,5 @@
-include { AGAT_SPFIXFEATURESLOCATIONSDUPLICATED   as AGAT_FIX_DUPLICATIONS                             } from '../../../modules/local/agat/spfixfeatureslocationsduplicated'
+include { AGAT_CONVERTSPGXF2GXF                   as AGAT_CONVERT_TO_GFF                           } from '../../../modules/local/agat/spfixfeatureslocationsduplicated'
+include { AGAT_SPFIXFEATURESLOCATIONSDUPLICATED   as AGAT_FIX_FEATURE_LOCATIONS_DUPLICATIONS           } from '../../../modules/local/agat/spfixfeatureslocationsduplicated'
 include { AGAT_SPKEEPLONGESTISOFORM               as AGAT_KEEP_LONGEST_ISOFORM                         } from '../../../modules/local/agat/spkeeplongestisoform'
 include { AGAT_SPFIXOVERLAPPINGGENES              as AGAT_FIX_OVERLAPPING_GENES                        } from '../../../modules/local/agat/spfixoverlappinggenes'
 include { AGAT_SPFILTERINCOMPLETEGENECODINGMODELS as AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS         } from '../../../modules/local/agat/spfilterincompletegenecodingmodels'
@@ -15,7 +16,8 @@ workflow CLEAN_ANNOTATIONS {
     take:
     ch_annotation
     ch_genome
-    skip_gff_keep_longest_isoform
+    gff_fix_feature_locations_duplicated
+    gff_keep_longest_isoform
     skip_gff_fix_overlapping_genes
     skip_gff_filter_incomplete_gene_models
 
@@ -27,14 +29,20 @@ workflow CLEAN_ANNOTATIONS {
                     .map{ meta, genome -> [ [id: meta.id], genome ] }
 
     // remove redundant entries and convert all GTFs / GFFs to GFFs
-    AGAT_FIX_DUPLICATIONS ( ch_annotation, [] )
-    ch_gff = AGAT_FIX_DUPLICATIONS.out.gff
+    AGAT_CONVERT_TO_GFF ( ch_annotation, [] )
+    ch_gff = AGAT_CONVERT_TO_GFF.out.gff
 
     ch_intermediate_gffs = ch_intermediate_gffs
                                 .mix( ch_annotation )
-                                .mix( AGAT_FIX_DUPLICATIONS.out.gff )
+                                .mix( AGAT_CONVERT_TO_GFF.out.gff )
 
-    if ( !skip_gff_keep_longest_isoform ) {
+    if ( gff_fix_feature_locations_duplicated ) {
+        AGAT_FIX_FEATURE_LOCATIONS_DUPLICATIONS ( ch_gff, [] )
+        ch_gff = AGAT_FIX_FEATURE_LOCATIONS_DUPLICATIONS.out.gff
+        ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_FIX_FEATURE_LOCATIONS_DUPLICATIONS.out.gff )
+    }
+
+    if ( gff_keep_longest_isoform ) {
         AGAT_KEEP_LONGEST_ISOFORM ( ch_gff, [] )
         ch_gff = AGAT_KEEP_LONGEST_ISOFORM.out.gff
         ch_intermediate_gffs = ch_intermediate_gffs.mix( AGAT_KEEP_LONGEST_ISOFORM.out.gff )
