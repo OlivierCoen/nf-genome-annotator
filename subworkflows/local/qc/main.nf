@@ -1,8 +1,9 @@
-include { BUSCO_BUSCO as BUSCO_GENOME                       } from '../../../modules/local/busco/busco'
-include { BUSCO_BUSCO as BUSCO_PROTEOME                     } from '../../../modules/local/busco/busco'
-include { AGAT_SPSTATISTICS as AGAT_GTF_STATISTICS          } from '../../../modules/local/agat/spstatistics'
+include { BUSCO_BUSCO as BUSCO_GENOME                                 } from '../../../modules/local/busco/busco'
+include { BUSCO_BUSCO as BUSCO_PROTEOME                               } from '../../../modules/local/busco/busco'
+include { AGAT_SPSTATISTICS as AGAT_GTF_STATISTICS                    } from '../../../modules/local/agat/spstatistics'
+include { AGAT_SPFUNCTIONALSTATISTICS as AGAT_FUNCTIONAL_STATISTICS   } from '../../../modules/local/agat/spstatistics'
 
-include { OMARK                                             } from '../omark'
+include { OMARK                                                       } from '../omark'
 
 
 
@@ -21,6 +22,7 @@ workflow QUALITY_CONTROLS {
     ch_main_proteome
     ch_all_proteomes
     ch_gff
+    ch_functional_annotation
     skip_omark
     omamer_db_url
 
@@ -67,9 +69,15 @@ workflow QUALITY_CONTROLS {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // QUALITY CONTROLS OF GTF
+    // METRICS OF STRUCTURAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     AGAT_GTF_STATISTICS ( ch_all_annotations )
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // METRICS OF FUNCTIONAL ANNOTATION
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    AGAT_FUNCTIONAL_STATISTICS( ch_functional_annotation )
 
 }
