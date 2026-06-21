@@ -32,6 +32,8 @@ def _():
 
 @app.cell
 def _(GODag):
+    # wget http://purl.obolibrary.org/obo/go/go.obo
+    # wget http://current.geneontology.org/ontology/subsets/goslim_generic.obo
     #godag = GODag("go-basic.obo")
     godag = GODag("go.obo")
     slim_dag  = GODag("goslim_generic.obo")
@@ -77,7 +79,7 @@ def _(GFF_COLUMNS, Path, pl):
             )
             .collect()
             .to_series().to_list()
-        
+
         )
         """
         gives:
@@ -143,7 +145,6 @@ def _(GOEnrichmentStudy, gene2go, godag):
 
     results = goeaobj.run_study(study_genes)
     print(results)
-
     return (study_genes,)
 
 
