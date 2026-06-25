@@ -216,6 +216,9 @@ def get_go_terms(parsed_attr_df: pd.DataFrame):
 
 
 def merge_new_attributes(transcript_attr_lf: pl.LazyFrame, formated_ipr_attr_df: pl.DataFrame) -> pl.LazyFrame:
+
+    base_cols = transcript_attr_lf.collect_schema().names()
+    
     merged_lf = transcript_attr_lf.join(
         formated_ipr_attr_df.lazy(), 
         left_on="ID",
@@ -224,16 +227,18 @@ def merge_new_attributes(transcript_attr_lf: pl.LazyFrame, formated_ipr_attr_df:
         suffix="_ipr",
     )
 
-    attribute_cols = [
-        col for col in merged_lf.collect_schema().names()
-        if col != "index" and not col.endswith("_ipr")
-    ]
+    all_cols = merged_lf.collect_schema().names()
     
+    attribute_cols = [col for col in base_cols if col != "index" ]
+   
     # merging original values and InterProScan values
     for col in attribute_cols:
         ipr_col = f'{col}_ipr'
-        if ipr_col in attribute_cols:
+        if ipr_col in all_cols:
             if col in ATTRIBUTES_TO_PRESERVE:
+                logger.info(f"Dropping {ipr_col}...")
+                merged_lf = merged_lf.drop(ipr_col)
+            else:
                 logger.info(f"Merging values for {col}...")
                 merged_lf = (
                     merged_lf
@@ -248,10 +253,7 @@ def merge_new_attributes(transcript_attr_lf: pl.LazyFrame, formated_ipr_attr_df:
                     )
                     .drop(ipr_col)
                 )
-            else:
-                logger.info(f"Dropping {ipr_col}...")
-                merged_lf = merged_lf.drop(ipr_col)
-
+                
     # making list of attribute columns in order of COMMON_ATTRIBUTE_KEYS followed by any remaining columns
     final_attribute_cols = [
         col for col in COMMON_ATTRIBUTE_KEYS if col in attribute_cols
@@ -403,6 +405,9 @@ def main():
     
     logger.info("Merging original annotation with table containing new attributes...")
     final_annot_lf = add_new_attributes_to_annotation(annot_lf, merged_lf)
+
+    # keep only the columns we need
+    final_annot_lf = final_annot_lf.select(GFF_COLUMNS)
 
     logger.info(f"Writing final annotation to {args.outfile}")
     # write final annotation to output file

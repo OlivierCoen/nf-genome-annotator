@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.9"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium")
 
 
@@ -16,8 +16,9 @@ def _():
     import polars as pl
     from collections import Counter
     import matplotlib.pyplot as plt
+    from pathlib import Path
 
-    return Counter, pl, plt
+    return Counter, Path, pl, plt
 
 
 @app.cell
@@ -119,18 +120,25 @@ def _(GFF_COLUMNS, Path, pl):
 
 
 @app.cell
-def _(get_gene_to_go, parse_gff3):
-    gff3 = "fake.gff3"
-    gff3_lf = parse_gff3(gff3)
-    gene2go = get_gene_to_go(gff3_lf)
-    return (gene2go,)
+def _():
+    gff3 = "/home/olivier/repositories/nf-genome-annotator/data/anasatum.final.gff3"
+    gene_ids_file = "/home/olivier/repositories/nf-variant-calling/data/sex_location/distance/strict_with_poolseq/genes_of_interest.txt"
+    #gene_ids_file = "/home/olivier/repositories/nf-variant-calling/data/resistance_on_minimum_depth/distance/strict/dominant/genes_of_interest.txt"
+    #gene_ids_file = "/home/olivier/repositories/nf-variant-calling/data/resistance_on_minimum_depth/distance/strict/recessive/genes_of_interest.txt"
+    return gene_ids_file, gff3
 
 
 @app.cell
-def _(GOEnrichmentStudy, gene2go, godag):
-    with open("genes_of_interest.txt") as f:
+def _(gene_ids_file, get_gene_to_go, gff3, parse_gff3):
+    gff3_lf = parse_gff3(gff3)
+    gene2go = get_gene_to_go(gff3_lf)
+    with open(gene_ids_file) as f:
         study_genes = set(line.strip() for line in f)
+    return gene2go, study_genes
 
+
+@app.cell
+def _(GOEnrichmentStudy, gene2go, godag, study_genes):
     population_genes = set(gene2go.keys())
 
     # Run enrichment (Fisher's exact test + FDR correction)
@@ -144,8 +152,29 @@ def _(GOEnrichmentStudy, gene2go, godag):
     )
 
     results = goeaobj.run_study(study_genes)
-    print(results)
-    return (study_genes,)
+    return (results,)
+
+
+@app.cell
+def _(results):
+    go2pvalue_uncorrected = {res.GO: res.p_uncorrected for res in results}
+    go2pvalue_fdr_bh = {res.GO: res.p_fdr_bh for res in results}
+    return go2pvalue_fdr_bh, go2pvalue_uncorrected
+
+
+@app.cell
+def _(go2pvalue_fdr_bh):
+    { k: v for k, v in go2pvalue_fdr_bh.items() if v < 1}
+    return
+
+
+@app.cell
+def _(gene_ids_file, go2pvalue_uncorrected):
+    outfile = gene_ids_file.replace(".txt", ".go2p_value.txt")
+    with open(outfile, 'w') as fout:
+        for go, pvalue in go2pvalue_uncorrected.items():
+            fout.write(f"{go}\t{pvalue}\n")
+    return
 
 
 @app.cell
@@ -191,6 +220,7 @@ def _(Counter, gene2goslim, plt, study_genes):
 
 @app.cell
 def _():
+    0
     return
 
 
