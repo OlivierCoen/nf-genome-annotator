@@ -282,6 +282,12 @@
                   "type": "string",
                   "description": "OMAMER database URL.",
                   "help": "Example: https://omabrowser.org/All/LUCA.h5"
+              },
+              "omamer_db": {
+                  "type": "string",
+                  "format": "file-path",
+                  "exists": true,
+                  "description": "Path to the OMAMER database."
               }
             }
         },

@@ -25,6 +25,7 @@ workflow QUALITY_CONTROLS {
     ch_functional_annotation
     skip_omark
     omamer_db_url
+    omamer_db
 
     main:
 
@@ -63,7 +64,8 @@ workflow QUALITY_CONTROLS {
         OMARK(
             ch_main_proteome,
             ch_gff,
-            omamer_db_url
+            omamer_db_url,
+            omamer_db
         )
 
     }

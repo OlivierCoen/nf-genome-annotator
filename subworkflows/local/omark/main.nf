@@ -17,11 +17,17 @@ workflow OMARK {
     ch_proteome
     ch_gff
     omamer_db_url
+    omamer_db
 
     main:
 
-    OMARK_DOWNLOADDB( omamer_db_url )
-    ch_omark_db = OMARK_DOWNLOADDB.out.db.collect()
+    if ( omamer_db ) {
+        log.info "Using the provided OMAMER database: ${omamer_db}"
+        ch_omark_db = omamer_db
+    } else {
+        OMARK_DOWNLOADDB( omamer_db_url )
+        ch_omark_db = OMARK_DOWNLOADDB.out.db.collect()
+    }
     
     OMARK_OMAMERSEARCH(
         ch_proteome,
