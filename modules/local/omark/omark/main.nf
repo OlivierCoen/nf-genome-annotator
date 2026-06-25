@@ -12,20 +12,25 @@ process OMARK_OMARK {
     path omamer_db
     
     output:
-    tuple val(meta), path("${meta.id}.omamer"), emit: omamer
+    tuple val(meta), path("*_omark_out/"), emit: omamer
     // TODO: when done on OMArk's side, add dynamic retrieval of version
     // https://github.com/DessimozLab/OMArk/issues/52
-    tuple val("${task.process}"), val('omark'), eval('0.4.1'), topic: versions
+    tuple val("${task.process}"), val('omark'), val('0.4.1'), topic: versions
 
     script:
     def args = task.ext.args ?: ''
+    def prefix = meta.id
     """
+    # for matplotlib
+    export MPLCONFIGDIR=\${PWD}
+    
     omark \\
         --file ${omamer_file} \\
         --database ${omamer_db} \\
+        --ete_ncbi_db \${PWD}/.etetoolkit \\
         --isoform_file ${isoform_file} \\
         --og_fasta ${protome_fasta} \\
-        --outputFolder omark_out \\
+        --outputFolder ${prefix}_omark_out \\
         ${args}
     """
 
