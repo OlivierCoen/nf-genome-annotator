@@ -275,7 +275,8 @@ workflow GENOME_ANNOTATOR {
         ch_gff,
         ch_functional_annotation,
         params.skip_omark,
-        params.omamer_db_url
+        params.omamer_db_url,
+        params.omamer_db
     )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,5 +1,7 @@
 process OMARK_DOWNLOADDB {
 
+    errorStrategy 'ignore'
+
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"

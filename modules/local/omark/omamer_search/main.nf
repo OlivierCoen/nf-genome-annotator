@@ -15,7 +15,7 @@ process OMARK_OMAMERSEARCH {
     tuple val(meta), path("${meta.id}.omamer"), emit: omamer
     // TODO: when done on OMArk's side, add dynamic retrieval of version
     // https://github.com/DessimozLab/OMArk/issues/52
-    tuple val("${task.process}"), val('omark'), eval('0.4.1'), topic: versions
+    tuple val("${task.process}"), val('omark'), val('0.4.1'), topic: versions
 
     script:
     def args = task.ext.args ?: ''
