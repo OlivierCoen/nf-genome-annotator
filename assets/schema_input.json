@@ -20,6 +20,13 @@
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|n)?a(\\.gz)?$",
                 "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
             },
+            "species": {
+                "type": "string",
+                "description": "Scientifc species name (genus and species)",
+                "pattern": "^([a-zA-Z]+)[_ ]([a-zA-Z]+)[_ a-zA-Z]*$",
+                "meta": ["species"],
+                "help_text": "At least genus and species name should be supplied. Words should be separated by ` ` or `_`. Note that character case is ignored. Examples: `Arabidopsis thaliana`, `--species homo_sapiens` or `--species MARMOTA_MARMOTA_MARMOTA`."
+            },
             "gff": {
                 "type": "string",
                 "format": "file-path",
@@ -46,6 +53,7 @@
                         "type": "string",
                         "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                         "format": "file-path",
+                        "exists": true,
                         "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
                     },
                     "fastq_2": {
@@ -54,7 +62,8 @@
                             {
                                 "type": "string",
                                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                                "format": "file-path"
+                                "format": "file-path",
+                                "exists": true
                             },
                             {
                                 "type": "string",
