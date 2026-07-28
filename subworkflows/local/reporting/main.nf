@@ -82,22 +82,45 @@ workflow REPORTING {
                             .mix( ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml') )
                             .mix( ch_collated_versions )
                             .mix( ch_methods_description.collectFile( name: 'methods_description_mqc.yaml', sort: true ) )
+                            
+    // ------------------------------------------------------------------------------------
+    // ADDING KEY TO JOIN ON
+    // ------------------------------------------------------------------------------------
 
+    ch_multiqc_file_list = ch_multiqc_files
+                            .mix( ch_collated_versions )
+                            .mix(
+                                ch_methods_description.collectFile(
+                                    name: 'methods_description_mqc.yaml',
+                                    sort: true
+                                )
+                            )
+                            .flatten()
+                            .toSortedList()
+                            .map{ list -> [ [id: 'Final report'], list ] }
+
+    ch_multiqc_config_list = ch_multiqc_config
+                                .mix( ch_multiqc_custom_config )
+                                .toSortedList()
+                                .map{ list -> [ [id: 'Final report'], list ] }
+
+    ch_multiqc_logo = ch_multiqc_logo.map{ file -> [ [id: 'Final report'], file ] }
 
     // ------------------------------------------------------------------------------------
-    // LAUNCH MULTIQC
+    // MULTIQC
     // ------------------------------------------------------------------------------------
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
-
+    ch_multiqc_input = ch_multiqc_file_list
+                        .join( ch_multiqc_config_list )
+                        .join( ch_multiqc_logo )
+                        .map { meta, files, configs, logo -> [ meta, files, configs, logo , [], [] ] }
+                        
+    
+    
+    MULTIQC ( ch_multiqc_input )
+    
 
     emit:
-    report = MULTIQC.out.report
+    //report = MULTIQC.out.report
+    report = channel.empty()
 }

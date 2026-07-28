@@ -24,7 +24,7 @@ process BUSCO_BUSCO {
     output:
     tuple val(meta), path("*-busco.batch_summary.txt"), emit: batch_summary
     tuple val(meta), path("*-busco.log"),               emit: log, optional: true
-    path("short_summaries/*.txt"),                      topic: mqc_busco_short_summaries_txt
+    tuple val(meta),path("short_summaries/*.txt"),                      topic: mqc_busco_short_summaries_txt
     tuple val("${task.process}"), val('busco'), eval('busco --version | sed "s/^BUSCO //"'),    topic: versions
 
 
