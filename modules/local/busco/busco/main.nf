@@ -4,22 +4,15 @@ process BUSCO_BUSCO {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/41/4137d65ab5b90d2ae4fa9d3e0e8294ddccc287e53ca653bb3c63b8fdb03e882f/data'
-        : 'community.wave.seqera.io/library/busco:6.0.0--a9a1426105f81165'}"
+            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/96/963bad66c10646cf0adb1967cc462ad04d02789ddbfae4fbb94182291dbddf8c/data'
+            : 'community.wave.seqera.io/library/busco:6.1.0--6d1f7006d91892b3'}"
     // Note: one test had to be disabled when switching to Busco 6.0.0, cf https://github.com/nf-core/modules/pull/8781/files
     // Try to restore it when upgrading Busco to a later version
 
     input:
-    tuple val(meta), path(fasta, stageAs: 'tmp_input/*')
-    // Required:    One of genome, proteins, or transcriptome
+    tuple val(meta), path(fasta, stageAs: 'tmp_input/*'), path(busco_lineages_path)
+    // One of genome, proteins, or transcriptome
     val mode
-    // Required:    lineage for checking against, or "auto/auto_prok/auto_euk" for enabling auto-lineage
-    val lineage
-    // Recommended: BUSCO lineages file - downloads if not set
-    path busco_lineages_path
-    // Optional:    BUSCO configuration file
-    path config_file
-    val clean_intermediates
 
     output:
     tuple val(meta), path("*-busco.batch_summary.txt"), emit: batch_summary
@@ -29,23 +22,20 @@ process BUSCO_BUSCO {
 
 
     script:
-    if (mode !in ['genome', 'proteins', 'transcriptome']) {
-        error("Mode must be one of 'genome', 'proteins', or 'transcriptome'.")
-    }
     def args = task.ext.args ?: ''
     def prefix = mode == 'genome' ? "${meta.id}.genome" : meta.final_annotation ? "${meta.id}.final_proteome" : "${fasta.baseName}.intermediate_proteome"
-    def busco_config = config_file ? "--config ${config_file}" : ''
-    def busco_lineage = lineage in ['auto', 'auto_prok', 'auto_euk']
-        ? lineage.replaceFirst('auto', '--auto-lineage').replaceAll('_', '-')
-        : "--lineage_dataset ${lineage}"
-    def busco_lineage_dir = busco_lineages_path ? "--download_path ${busco_lineages_path}" : ''
     def intermediate_files = [
         './*-busco/*/auto_lineage',
         './*-busco/*/**/{miniprot,hmmer,.bbtools}_output',
         './*-busco/*/prodigal_output/predicted_genes/tmp/',
     ]
-    def clean_cmd = clean_intermediates ? "rm -fr ${intermediate_files.join(' ')}" : ''
+
+    def bbtools_memory_preferred = task.memory * 0.25
+    def bbtools_memory_minimum = 120.Mb
+    def bbtools_memory = bbtools_memory_preferred > bbtools_memory_minimum ? "${bbtools_memory_preferred.toGiga()}g" : "${bbtools_memory_minimum.toMega()}m"
     """
+    export BUSCO_BBTOOLS_MEMORY=${bbtools_memory}
+    
     # Fix Augustus for Apptainer
     ENV_AUGUSTUS=/opt/conda/etc/conda/activate.d/augustus.sh
     set +u
@@ -81,14 +71,13 @@ process BUSCO_BUSCO {
         --in "\$INPUT_SEQS" \\
         --out ${prefix}-busco \\
         --mode ${mode} \\
-        ${busco_lineage} \\
-        ${busco_lineage_dir} \\
-        ${busco_config} \\
+        --download_path ${busco_lineages_path} \\
         ${args}
 
     # clean up
     rm -rf "\$INPUT_SEQS"
-    ${clean_cmd}
+    rm -fr ${intermediate_files.join(' ')}
+    
     # find and remove broken symlinks from the cleanup
     find . -xtype l -delete
 

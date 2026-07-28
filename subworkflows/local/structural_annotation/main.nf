@@ -24,8 +24,6 @@ workflow STRUCTURAL_ANNOTATION {
     ch_braker_gtf
     ch_braker_hintsfile
     structural_annotator
-    species
-    busco_lineage
     clade
     excluded_clades
     excluded_species
@@ -85,8 +83,7 @@ workflow STRUCTURAL_ANNOTATION {
                                 meta, genome, prot, bam ->
                                     [ meta, genome, prot?: [], bam?: [] ]
                             }
-
-        def species_arg = species ?: []
+ch_braker_input.view()
         BRAKER3(
             ch_braker_input,
             species_arg,

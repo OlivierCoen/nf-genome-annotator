@@ -1,6 +1,6 @@
 process ORTHODB_MAKECLADEDB {
 
-    label 'process_high'
+    label 'process_download_db'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
@@ -35,16 +35,10 @@ process ORTHODB_MAKECLADEDB {
         outfile=\$(basename \$url)
 
         echo "Downloading \$url to \$outfile"
-        aria2c \\
-            --split $nb_splits \\
-            --max-connection-per-server $nb_max_connections \\
-            --optimize-concurrent-downloads \\
-            --check-integrity=true \\
-            --max-tries=10 \\
-            --retry-wait=30 \\
-            --timeout=60 \\
-            \$url \\
-            -o \$outfile
+        axel \\
+            -n ${task.cpus} \\
+            -o \$outfile \\
+            \$url
 
         echo "Decompressing \$outfile"
         pigz -d \$outfile
