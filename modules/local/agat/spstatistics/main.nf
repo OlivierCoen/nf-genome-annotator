@@ -13,12 +13,12 @@ process AGAT_SPSTATISTICS {
     output:
     tuple val(meta), path("*.txt"),                       emit: stats_txt
     tuple val(meta), path("*.yaml"),                      emit: stats_yaml
-    path("*_with_isoforms_mrna_gff_stats.csv"),          topic: mqc_mrna_with_isoforms_gff_stats,          optional: true
-    path("*_with_isoforms_rna_gff_stats.csv"),           topic: mqc_rna_with_isoforms_gff_stats,           optional: true
-    path("*_with_isoforms_transcript_gff_stats.csv"),    topic: mqc_transcript_with_isoforms_gff_stats,    optional: true
-    path("*_without_isoforms_mrna_gff_stats.csv"),       topic: mqc_mrna_without_isoforms_gff_stats,       optional: true
-    path("*_without_isoforms_rna_gff_stats.csv"),        topic: mqc_rna_without_isoforms_gff_stats,        optional: true
-    path("*_without_isoforms_transcript_gff_stats.csv"), topic: mqc_transcript_without_isoforms_gff_stats, optional: true
+    tuple val(meta), path("*_with_isoforms_mrna_gff_stats.csv"),          topic: mqc_mrna_with_isoforms_gff_stats,          optional: true
+    tuple val(meta), path("*_with_isoforms_rna_gff_stats.csv"),           topic: mqc_rna_with_isoforms_gff_stats,           optional: true
+    tuple val(meta), path("*_with_isoforms_transcript_gff_stats.csv"),    topic: mqc_transcript_with_isoforms_gff_stats,    optional: true
+    tuple val(meta), path("*_without_isoforms_mrna_gff_stats.csv"),       topic: mqc_mrna_without_isoforms_gff_stats,       optional: true
+    tuple val(meta), path("*_without_isoforms_rna_gff_stats.csv"),        topic: mqc_rna_without_isoforms_gff_stats,        optional: true
+    tuple val(meta), path("*_without_isoforms_transcript_gff_stats.csv"), topic: mqc_transcript_without_isoforms_gff_stats, optional: true
     tuple val("${task.process}"), val('agat'), eval("agat_sp_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"), topic: versions
 
     script:

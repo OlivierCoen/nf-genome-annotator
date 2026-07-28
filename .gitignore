@@ -8,4 +8,7 @@ testing*
 *.pyc
 null/
 .idea/
-'!{ncbi_settings}'
+*ncbi_settings*
+notebooks/
+**.fasta
+**fasta.gz

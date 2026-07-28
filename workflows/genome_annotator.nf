@@ -8,6 +8,7 @@ include { AGAT_SPCOMPLEMENTANNOTATIONS as COMPLEMENT_ANNOTATIONS        } from '
 
 
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
+include { TAXONOMY_INFO                                                 } from '../subworkflows/local/taxonomy_info'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { DOWNLOAD_READS                                                } from '../subworkflows/local/download_reads'
 include { MAP_TO_GENOME_SORT_INDEX                                      } from '../subworkflows/local/map_to_genome_sort_index'
@@ -45,6 +46,8 @@ workflow GENOME_ANNOTATOR {
                 }
 
     ch_genome       = ch_input.genome
+
+    ch_species      = ch_genome.map{ meta, file -> [ meta, meta.species ] }
 
     ch_gff          = ch_input.gff
                         .filter { meta, file -> file != []}
@@ -91,6 +94,13 @@ workflow GENOME_ANNOTATOR {
     GENOME_PREPARATION ( ch_genome )
     ch_genome = GENOME_PREPARATION.out.prepared_genome
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    TAXONOMY_INFO( ch_species )
+    ch_busco_dataset = TAXONOMY_INFO.out.busco_dataset
+    ch_orthodb_clade = TAXONOMY_INFO.out.orthodb_clade
 
     if ( !params.skip_structural_annotation ) {
 
