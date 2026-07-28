@@ -107,6 +107,6 @@
                 "errorMessage": "Braker hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'"
             }
         },
-        "required": ["sample", "genome"]
+        "required": ["sample", "genome", "species"]
     }
 }

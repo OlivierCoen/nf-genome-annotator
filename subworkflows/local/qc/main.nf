@@ -1,3 +1,4 @@
+include { BUSCO_DOWNLOAD                                              } from '../../../modules/local/busco/download'
 include { BUSCO_BUSCO as BUSCO_GENOME                                 } from '../../../modules/local/busco/busco'
 include { BUSCO_BUSCO as BUSCO_PROTEOME                               } from '../../../modules/local/busco/busco'
 include { AGAT_SPSTATISTICS as AGAT_GTF_STATISTICS                    } from '../../../modules/local/agat/spstatistics'
@@ -18,6 +19,7 @@ workflow QUALITY_CONTROLS {
 
     take:
     ch_genome
+    ch_busco_lineage
     ch_all_annotations
     ch_main_proteome
     ch_all_proteomes
@@ -30,29 +32,30 @@ workflow QUALITY_CONTROLS {
     main:
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // DOWNLOAD NECESSARY BUSCO DATASETS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    BUSCO_DOWNLOAD( 
+        ch_busco_lineage.map{ meta, lineage -> lineage }.unique()
+    )
+
+    ch_busco_download = ch_busco_lineage
+                            .combine( BUSCO_DOWNLOAD.out.download_dir )
+                            .filter { meta, lineage1, lineage2, busco_downloads -> lineage1 == lineage2 }
+                            .map { meta, lineage1, lineage2, busco_downloads -> [ meta, busco_downloads ] }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // BUSCO
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def busco_lineages_path = []
-    def busco_config_file = []
-    def busco_clean_intermediates = true
-
     BUSCO_GENOME (
-        ch_genome,
-        'genome',
-        params.busco_lineage,
-        busco_lineages_path,
-        busco_config_file,
-        busco_clean_intermediates
+        ch_genome.join( ch_busco_download ),
+        'genome'
     )
 
     BUSCO_PROTEOME (
-        ch_all_proteomes,
-        'proteins',
-        params.busco_lineage,
-        busco_lineages_path,
-        busco_config_file,
-        busco_clean_intermediates
+        ch_all_proteomes.join( ch_busco_download ),
+        'proteins'
     )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

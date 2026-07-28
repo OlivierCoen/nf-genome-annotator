@@ -12,3 +12,4 @@ null/
 notebooks/
 **.fasta
 **fasta.gz
+**.tab.gz

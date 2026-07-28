@@ -20,6 +20,7 @@ include { FUNCTIONAL_ANNOTATION                                         } from '
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { REPORTING                                                     } from '../subworkflows/local/reporting'
 
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -46,8 +47,6 @@ workflow GENOME_ANNOTATOR {
                 }
 
     ch_genome       = ch_input.genome
-
-    ch_species      = ch_genome.map{ meta, file -> [ meta, meta.species ] }
 
     ch_gff          = ch_input.gff
                         .filter { meta, file -> file != []}
@@ -98,9 +97,9 @@ workflow GENOME_ANNOTATOR {
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TAXONOMY_INFO( ch_species )
-    ch_busco_dataset = TAXONOMY_INFO.out.busco_dataset
-    ch_orthodb_clade = TAXONOMY_INFO.out.orthodb_clade
+    TAXONOMY_INFO( ch_genome )
+    ch_busco_lineage = TAXONOMY_INFO.out.busco_lineages
+    ch_orthodb_clade  = TAXONOMY_INFO.out.orthodb_clade
 
     if ( !params.skip_structural_annotation ) {
 
@@ -152,8 +151,6 @@ workflow GENOME_ANNOTATOR {
             ch_braker_gtf,
             ch_braker_hintsfile,
             params.structural_annotator,
-            params.species,
-            params.busco_lineage,
             params.clade,
             params.excluded_clades,
             params.excluded_species,
@@ -279,6 +276,7 @@ workflow GENOME_ANNOTATOR {
 
     QUALITY_CONTROLS (
         ch_genome,
+        ch_busco_lineage,
         ch_all_annotations,
         ch_main_proteome,
         ch_proteomes,

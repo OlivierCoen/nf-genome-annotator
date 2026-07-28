@@ -15,7 +15,7 @@ process ORTHODB_GETCLADES {
 
     script:
     """
-    wget https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz
+    wget --tries 10 https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz
     """
 
 }

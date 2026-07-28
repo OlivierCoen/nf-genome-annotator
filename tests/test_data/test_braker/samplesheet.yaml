@@ -1,5 +1,6 @@
 - sample: braker_bam
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  species: arabidopsis thaliana
   rnaseq_bam:
     - http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
   rnaseq_fastq:
@@ -9,6 +10,7 @@
 
 - sample: braker_proteins
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  species: arabidopsis_thaliana
   proteins:
     - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
   rnaseq_fastq:
