@@ -2,8 +2,6 @@
 // Subworkflow with functionality specific to the genome_annotator pipeline
 //
 
-import org.yaml.snakeyaml.Yaml
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS
@@ -13,9 +11,11 @@ import org.yaml.snakeyaml.Yaml
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { samplesheetToList         } from 'plugin/nf-schema'
+include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +32,9 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
-    busco_lineage     //  string: BUSCO lineage
+    help              // boolean: Display help message and exit
+    help_full         // boolean: Show the full help message
+    show_hidden       // boolean: Show hidden parameters in the help message
 
     main:
 
@@ -46,9 +48,45 @@ workflow PIPELINE_INITIALISATION {
         workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1
     )
 
+    //
+    // Validate parameters and generate parameter summary to stdout
+    //
+
+    def before_text = ""
+    def after_text = ""
+    before_text = """
+-\033[2m----------------------------------------------------\033[0m-
+                                        \033[0;32m,--.\033[0;30m/\033[0;32m,-.\033[0m
+\033[0;34m        ___     __   __   __   ___     \033[0;32m/,-._.--~\'\033[0m
+\033[0;34m  |\\ | |__  __ /  ` /  \\ |__) |__         \033[0;33m}  {\033[0m
+\033[0;34m  | \\| |       \\__, \\__/ |  \\ |___     \033[0;32m\\`-._,-`-,\033[0m
+                                        \033[0;32m`._,._,\'\033[0m
+\033[0;35m  nf-core/genomeannotator ${workflow.manifest.version}\033[0m
+-\033[2m----------------------------------------------------\033[0m-
+"""
+    after_text = """${workflow.manifest.doi ? "\n* The pipeline\n" : ""}${workflow.manifest.doi.tokenize(",").collect { doi -> "    https://doi.org/${doi.trim().replace('https://doi.org/','')}"}.join("\n")}${workflow.manifest.doi ? "\n" : ""}
+* The nf-core framework
+    https://doi.org/10.1038/s41587-020-0439-x
+
+* Software dependencies
+    https://github.com/nf-core/genomeannotator/blob/main/CITATIONS.md
+"""
+    if (monochrome_logs) {
+        before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
+    }
+
+    command = "nextflow run ${workflow.manifest.name} -profile <docker/apptainer/singularity/.../institute> --input <samplesheet> --outdir <OUTDIR>"
+
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
         validate_params,
+        null,
+        help,
+        help_full,
+        show_hidden,
+        before_text,
+        after_text,
+        command,
         null
     )
 
@@ -67,6 +105,7 @@ workflow PIPELINE_INITIALISATION {
 
     emit:
     samplesheet = ch_samplesheet
+
 }
 
 /*
@@ -78,6 +117,9 @@ workflow PIPELINE_INITIALISATION {
 workflow PIPELINE_COMPLETION {
 
     take:
+    email           //  string: email address
+    email_on_fail   //  string: email address sent on pipeline failure
+    plaintext_email // boolean: Send plain-text email instead of HTML
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
     multiqc_report  //  string: Path to MultiQC report
@@ -85,19 +127,32 @@ workflow PIPELINE_COMPLETION {
     main:
     summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     def multiqc_reports = multiqc_report.toList()
-
     //
     // Completion email and summary
     //
+
     workflow.onComplete {
+        if (email || email_on_fail) {
+            completionEmail(
+                summary_params,
+                email,
+                email_on_fail,
+                plaintext_email,
+                outdir,
+                monochrome_logs,
+                multiqc_reports.getVal(),
+            )
+        }
 
         completionSummary(monochrome_logs)
+
     }
 
     workflow.onError {
-        log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
+        log.error "Pipeline failed. Please refer to troubleshooting docs for common issues: https://nf-co.re/docs/running/troubleshooting"
     }
 }
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -170,56 +225,23 @@ def methodsDescriptionText(mqc_methods_yaml) {
 }
 
 
+/*
+========================================================================================
+    FUNCTION FOR FORMATING OUTPUT FOLDERS
+========================================================================================
+*/
 
-//
-// Get channel of software versions used in pipeline in YAML format
-// temporary replacements of the native softwareVersionsToYAML
-//
-def formatVersionsToYAML( ch_versions ) {
-    return ch_versions
-            .unique()
-            .map {
-                name, tool, version -> [ name.tokenize(':').last(), [ tool, version ] ]
-            }
-            .groupTuple()
-            .map {
-                processName, toolInfo ->
-                    def toolVersions = toolInfo.collect { tool, version -> "    ${tool}: ${version}" }.join('\n')
-                    "${processName}:\n${toolVersions}\n"
-            }
-            .unique()
+def getOutputFolder(meta, subfolder) {
+    def normalised_status = meta.normalised ? "normalised" : "raw"
+    def subfoldername = subfolder ? "${subfolder}/" : ""
+    return "datasets/${meta.platform}/${normalised_status}/${meta.dataset}/${subfoldername}"
 }
 
 
 
-//
-// Get software versions for pipeline
-// temporary replacements of the native processVersionsFromYAML
-//
-def customProcessVersionsFromYAML(yaml_file) {
-    Yaml yaml = new Yaml()
-    versions = yaml.load(yaml_file)
-    return yaml.dumpAsMap(versions).trim()
-}
 
-//
-// Get channel of software versions used in pipeline in YAML format
-// temporary replacements of the native softwareVersionsToYAML
-//
-def customSoftwareVersionsToYAML(versions) {
-    return Channel.of(workflowVersionToYAML())
-            .concat(
-                versions
-                .unique()
-                .map {
-                    name, tool, version -> [ name.tokenize(':').last(), [ tool, version ] ]
-                }
-                .groupTuple()
-                .map {
-                    processName, toolInfo ->
-                        def toolVersions = toolInfo.collect { tool, version -> "    ${tool}: ${version}" }.join('\n')
-                        "${processName}:\n${toolVersions}\n"
-                }
-                .map { customProcessVersionsFromYAML(it) }
-            )
-}
+
+
+
+
+

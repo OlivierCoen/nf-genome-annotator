@@ -15,10 +15,10 @@ process BUSCO_BUSCO {
     val mode
 
     output:
-    tuple val(meta), path("*-busco.batch_summary.txt"), emit: batch_summary
-    tuple val(meta), path("*-busco.log"),               emit: log, optional: true
-    tuple val(meta),path("short_summaries/*.txt"),                      topic: mqc_busco_short_summaries_txt
-    tuple val("${task.process}"), val('busco'), eval('busco --version | sed "s/^BUSCO //"'),    topic: versions
+    tuple val(meta), path("*-busco.batch_summary.txt"),                                      emit: batch_summary
+    tuple val(meta), path("*-busco.log"),                                                    emit: log, optional: true
+    tuple val(meta),path("short_summaries/*.txt"),                                           topic: mqc_busco_short_summaries_txt
+    tuple val("${task.process}"), val('busco'), eval('busco --version | sed "s/^BUSCO //"'), topic: versions
 
 
     script:
@@ -94,13 +94,5 @@ process BUSCO_BUSCO {
         echo "Busco run failed"
         exit 1
     fi
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}-${lineage}"
-    def fasta_name = files(fasta).first().name - '.gz'
-    """
-    touch ${prefix}-busco.batch_summary.txt
-    mkdir -p ${prefix}-busco/${fasta_name}/run_${lineage}/busco_sequences
     """
 }
