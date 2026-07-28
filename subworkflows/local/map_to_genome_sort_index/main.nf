@@ -40,16 +40,22 @@ workflow MAP_TO_GENOME_SORT_INDEX {
     // FASTQC & FASTP
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def with_umi = true
+    def umi_discard_read = 0
+    def save_trimmed_fail = false
+    def save_merged = false
+    def min_trimmed_reads = 0
+
     FASTQ_FASTQC_UMITOOLS_FASTP(
         ch_reads.map{ meta, reads -> [ meta, reads, [] ] }, // add empty spot for adapter
         skip_fastqc,
-        with_umi=true,
+        with_umi,
         skip_umi_extract,
-        umi_discard_read=0,
+        umi_discard_read,
         skip_trimming,
-        save_trimmed_fail=false,
-        save_merged=false,
-        min_trimmed_reads=0
+        save_trimmed_fail,
+        save_merged,
+        min_trimmed_reads
 
     )
 

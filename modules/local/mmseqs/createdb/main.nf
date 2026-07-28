@@ -8,7 +8,7 @@ process MMSEQS_CREATEDB {
         : 'community.wave.seqera.io/library/mmseqs2:18.8cc5c--af05c9a98d9f6139'}"
 
     input:
-    tuple val(meta), path(sequences, stageAs: "?/*")
+    tuple val(meta), path(sequences, stageAs: "tmp_input/*")
 
     output:
     tuple val(meta), path("${prefix}/"), emit: db
@@ -21,31 +21,27 @@ process MMSEQS_CREATEDB {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
+    # Ensure the input is uncompressed
+    mkdir input_seqs
+    cd input_seqs
+    for FASTA in ../tmp_input/*; do
+        if [ "\${FASTA##*.}" == 'gz' ]; then
+            gzip -cdf "\$FASTA" > \$( basename "\$FASTA" .gz )
+        else
+            ln -s "\$FASTA" .
+        fi
+    done
+    cd ..
+
+    prepared_sequences=\$(ls -1 input_seqs | tr '\n' ' ')
+
     mkdir -p ${prefix}
 
     mmseqs \\
         createdb \\
-        ${prepared_sequences} \\
+        \${prepared_sequences} \\
         ${prefix}/${prefix} \\
         ${args}
-
-    """
-
-    stub:
-    def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    echo ${args}
-    mkdir -p ${prefix}
-
-    touch ${prefix}/${prefix}
-    touch ${prefix}/${prefix}.dbtype
-    touch ${prefix}/${prefix}.index
-    touch ${prefix}/${prefix}.lookup
-    touch ${prefix}/${prefix}.source
-    touch ${prefix}/${prefix}_h
-    touch ${prefix}/${prefix}_h.dbtype
-    touch ${prefix}/${prefix}_h.index
 
     """
 }

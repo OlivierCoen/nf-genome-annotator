@@ -20,7 +20,7 @@ process SRATOOLS_PREFETCH {
     args = task.ext.args ?: ''
     two_first_letters = sra_id[0..1]
     """
-    export NCBI_SETTINGS="$PWD/!{ncbi_settings}"
+    export NCBI_SETTINGS="\$PWD/!{ncbi_settings}"
 
     prefetch $args $sra_id
 

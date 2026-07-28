@@ -48,10 +48,10 @@ workflow MMSEQS_DB_PREPARATION {
                         .combine( ch_mmseqs_public_db ) // cartesian product: add the public protein db to each item separately
                         .map {
                             meta, custom_db, public_db ->
-                                if ( public_data == "no_db" ) {
+                                if ( public_db == "no_db" ) {
                                     [ meta, custom_db ]
                                 } else {
-                                    [ meta, input_fasta_list + [public_data] ]
+                                    [ meta, custom_db + [public_db] ]
                                 }
                         }
 

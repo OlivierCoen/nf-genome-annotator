@@ -60,8 +60,8 @@ workflow GENOME_ANNOTATOR {
                                 .transpose()
                                 .filter { meta, reads -> reads != []}
                                 .map { meta, reads ->
-                                    fastq_1 = reads[0]
-                                    fastq_2 = reads[1]
+                                    def fastq_1 = reads[0]
+                                    def fastq_2 = reads[1]
                                     if ( fastq_2 ) {
                                         [ meta + [ single_end: false ], [ fastq_1, fastq_2 ] ]
                                     } else {

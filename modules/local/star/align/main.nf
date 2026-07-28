@@ -52,8 +52,6 @@ process STAR_ALIGN {
         $gtf_arg \\
         $args
 
-    $mv_unsorted_bam
-
     if [ -f ${prefix}.Unmapped.out.mate1 ]; then
         mv ${prefix}.Unmapped.out.mate1 ${prefix}.unmapped_1.fastq
         gzip ${prefix}.unmapped_1.fastq

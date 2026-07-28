@@ -14,8 +14,8 @@
 */
 
 include { GENOME_ANNOTATOR  } from './workflows/genome_annotator'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genome_annotator_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genome_annotator_pipeline'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -42,7 +42,9 @@ workflow {
         args,
         params.outdir,
         params.input,
-        params.busco_lineage
+        params.help,
+        params.help_full,
+        params.show_hidden
     )
 
     //
@@ -55,10 +57,14 @@ workflow {
     // SUBWORKFLOW: Run completion tasks
     //
     PIPELINE_COMPLETION (
+        params.email,
+        params.email_on_fail,
+        params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
         GENOME_ANNOTATOR.out.multiqc_report
     )
+    
 }
 
 /*

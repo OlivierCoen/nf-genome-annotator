@@ -70,9 +70,11 @@ workflow ORTHODB_PREPARATION {
     // CHECK HEADERS OR WHOLE PROTEIN DB AND FIX THEM WHEN NECESSARY
     // ----------------------------------------------------------
 
+    def min_sequence_length = min_prot_db_seq_length
+    
     CHECK_PROTEIN_FASTA(
         ch_all_combined_proteins,
-        min_sequence_length=min_prot_db_seq_length
+        min_sequence_length
     )
 
     emit:
