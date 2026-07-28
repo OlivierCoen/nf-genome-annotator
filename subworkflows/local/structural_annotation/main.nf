@@ -56,6 +56,7 @@ workflow STRUCTURAL_ANNOTATION {
         // MERGE MULTIPLE BAM FILES
         // ----------------------------------------------------------
 
+        // we need to merge multiple bam files into a single bam
         ch_branched_bam = ch_grouped_bam_bai
                             .branch{
                                 meta, bams, bais ->
@@ -64,7 +65,7 @@ workflow STRUCTURAL_ANNOTATION {
                                     merge_me: bams.size() > 1
                                         [ meta, bams, bais ]
                             }
-
+        
         SAMTOOLS_MERGE( ch_branched_bam.merge_me )
 
         ch_single_bam = ch_branched_bam.leave_me_alone
@@ -83,11 +84,10 @@ workflow STRUCTURAL_ANNOTATION {
                                 meta, genome, prot, bam ->
                                     [ meta, genome, prot?: [], bam?: [] ]
                             }
-ch_braker_input.view()
+
         BRAKER3(
             ch_braker_input,
-            species_arg,
-            busco_lineage
+            "species"
         )
 
         // ----------------------------------------------------------

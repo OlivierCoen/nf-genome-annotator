@@ -10,7 +10,6 @@ process BRAKER3 {
     input:
     tuple val(meta), path(fasta), path(proteins), path(bam)
     val species
-    val busco_lineage
 
     output:
     tuple val(meta), path("$prefix/braker.gtf")         , emit: gtf
@@ -63,7 +62,6 @@ process BRAKER3 {
         $fasta_name \\
         > ${prefix}.genome.masked.fasta
 
-    # --busco_lineage=$busco_lineage
     braker.pl \\
         --genome ${prefix}.genome.masked.fasta \\
         --workingdir $prefix \\
