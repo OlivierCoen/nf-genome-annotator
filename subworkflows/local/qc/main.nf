@@ -44,7 +44,7 @@ workflow QUALITY_CONTROLS {
     ch_busco_download = ch_busco_lineage
                             .combine( BUSCO_DOWNLOAD.out.download_dir )
                             .filter { meta, lineage1, lineage2, busco_downloads -> lineage1 == lineage2 }
-                            .map { meta, lineage1, lineage2, busco_downloads -> [ meta, busco_downloads ] }
+                            .map { meta, lineage1, lineage2, busco_downloads -> [ meta, lineage1, busco_downloads ] }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // BUSCO

@@ -10,7 +10,7 @@ process BUSCO_BUSCO {
     // Try to restore it when upgrading Busco to a later version
 
     input:
-    tuple val(meta), path(fasta, stageAs: 'tmp_input/*'), path(busco_lineages_path)
+    tuple val(meta), path(fasta, stageAs: 'tmp_input/*'), val(lineage), path(busco_lineages_path)
     // One of genome, proteins, or transcriptome
     val mode
 
