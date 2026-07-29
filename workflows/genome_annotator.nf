@@ -27,7 +27,7 @@ include { REPORTING                                                     } from '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow GENOME_ANNOTATOR {
+workflow GENOMEANNOTATOR {
 
     take:
     ch_samplesheet

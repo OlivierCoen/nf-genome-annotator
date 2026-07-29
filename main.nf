@@ -3,7 +3,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     genome_annotator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/OlivierCoen/genome_annotator
+    Github : https://github.com/nf-core/genome_annotator
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,14 +13,34 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { GENOME_ANNOTATOR  } from './workflows/genome_annotator'
+include { GENOMEANNOTATOR         } from './workflows/genome_annotator'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+//
+// WORKFLOW: Run main analysis pipeline depending on type of input
+//
+workflow NFCORE_GENOMEANNOTATOR {
+
+    take:
+    samplesheet
+
+    main:
+
+    //
+    // WORKFLOW: Run pipeline
+    //
+    GENOMEANNOTATOR( samplesheet )
+
+    emit:
+    multiqc_report                        = GENOMEANNOTATOR.out.multiqc_report
+}
 
 
 /*
@@ -50,7 +70,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    GENOME_ANNOTATOR (
+    NFCORE_GENOMEANNOTATOR (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
@@ -62,13 +82,26 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        GENOME_ANNOTATOR.out.multiqc_report
+        NFCORE_GENOMEANNOTATOR.out.multiqc_report
     )
+
+    publish:
+    multiqc_report                        = NFCORE_GENOMEANNOTATOR.out.multiqc_report
     
 }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    THE END
+OUTPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+output {
+
+    multiqc_report {
+        path { file ->
+            file >> "reporting/"
+        }
+    }
+
+}

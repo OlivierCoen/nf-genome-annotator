@@ -21,11 +21,10 @@
                 "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
             },
             "species": {
-                "type": "string",
-                "description": "Scientifc species name (genus and species)",
-                "pattern": "^([a-zA-Z]+)[_ ]([a-zA-Z]+)[_ a-zA-Z]*$",
+              "type": ["string", "integer"],
+                "description": "Scientifc species name (genus and species) or NCBI Taxid",
                 "meta": ["species"],
-                "help_text": "At least genus and species name should be supplied. Words should be separated by ` ` or `_`. Note that character case is ignored. Examples: `Arabidopsis thaliana`, `--species homo_sapiens` or `--species MARMOTA_MARMOTA_MARMOTA`."
+                "help_text": "Genus and species can be separated by a '_'. Example: `'Arabidopsis thaliana'`,  `'armadillidium_nasatum'` or `3702`."
             },
             "gff": {
                 "type": "string",
