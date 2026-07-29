@@ -44,4 +44,7 @@ workflow OMARK {
         ch_omark_input,
         ch_omark_db
     )
+
+    emit:
+    results = OMARK_OMARK.out.results
 }

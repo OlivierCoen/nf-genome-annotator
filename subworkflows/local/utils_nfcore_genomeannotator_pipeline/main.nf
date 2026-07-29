@@ -223,25 +223,3 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
-
-
-/*
-========================================================================================
-    FUNCTION FOR FORMATING OUTPUT FOLDERS
-========================================================================================
-*/
-
-def getOutputFolder(meta, subfolder) {
-    def normalised_status = meta.normalised ? "normalised" : "raw"
-    def subfoldername = subfolder ? "${subfolder}/" : ""
-    return "datasets/${meta.platform}/${normalised_status}/${meta.dataset}/${subfoldername}"
-}
-
-
-
-
-
-
-
-
-
