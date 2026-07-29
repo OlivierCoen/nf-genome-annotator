@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    genome_annotator
+    genomeannotator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/genome_annotator
+    Github : https://github.com/nf-core/genomeannotator
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,7 +13,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { GENOMEANNOTATOR         } from './workflows/genome_annotator'
+include { GENOMEANNOTATOR         } from './workflows/genomeannotator'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 
@@ -39,7 +39,22 @@ workflow NFCORE_GENOMEANNOTATOR {
     GENOMEANNOTATOR( samplesheet )
 
     emit:
-    multiqc_report                        = GENOMEANNOTATOR.out.multiqc_report
+    final_annotation            = GENOMEANNOTATOR.out.final_annotation
+    genome_stats                = GENOMEANNOTATOR.out.genome_stats
+    masked_genome               = GENOMEANNOTATOR.out.masked_genome
+    downloaded_reads            = GENOMEANNOTATOR.out.downloaded_reads
+    mapping                     = GENOMEANNOTATOR.out.mapping
+    structural_annotation       = GENOMEANNOTATOR.out.structural_annotation
+    intermediate_annotations    = GENOMEANNOTATOR.out.intermediate_annotations
+    alternative_annotations     = GENOMEANNOTATOR.out.alternative_annotations
+    proteome                    = GENOMEANNOTATOR.out.proteome
+    eggnogmapper_output         = GENOMEANNOTATOR.out.eggnogmapper_output
+    interproscan_output         = GENOMEANNOTATOR.out.interproscan_output
+    functional_annotation       = GENOMEANNOTATOR.out.functional_annotation
+    structural_annotation_stats = GENOMEANNOTATOR.out.structural_annotation_stats
+    functional_annotation_stats = GENOMEANNOTATOR.out.functional_annotation_stats
+    omark_results               = GENOMEANNOTATOR.out.omark_results
+    multiqc_report              = GENOMEANNOTATOR.out.multiqc_report
 }
 
 
@@ -86,7 +101,23 @@ workflow {
     )
 
     publish:
-    multiqc_report                        = NFCORE_GENOMEANNOTATOR.out.multiqc_report
+    final_annotation            = NFCORE_GENOMEANNOTATOR.out.final_annotation
+    genome_stats                = NFCORE_GENOMEANNOTATOR.out.genome_stats
+    masked_genome               = NFCORE_GENOMEANNOTATOR.out.masked_genome
+    downloaded_reads            = NFCORE_GENOMEANNOTATOR.out.downloaded_reads
+    mapping                     = NFCORE_GENOMEANNOTATOR.out.mapping
+    structural_annotation       = NFCORE_GENOMEANNOTATOR.out.structural_annotation
+    intermediate_annotations    = NFCORE_GENOMEANNOTATOR.out.intermediate_annotations
+    alternative_annotations     = NFCORE_GENOMEANNOTATOR.out.alternative_annotations
+    proteome                    = NFCORE_GENOMEANNOTATOR.out.proteome
+    eggnogmapper_output         = NFCORE_GENOMEANNOTATOR.out.eggnogmapper_output
+    interproscan_output         = NFCORE_GENOMEANNOTATOR.out.interproscan_output
+    functional_annotation       = NFCORE_GENOMEANNOTATOR.out.functional_annotation
+    structural_annotation_stats = NFCORE_GENOMEANNOTATOR.out.structural_annotation_stats
+    functional_annotation_stats = NFCORE_GENOMEANNOTATOR.out.functional_annotation_stats
+    omark_results               = NFCORE_GENOMEANNOTATOR.out.omark_results
+    multiqc_report              = NFCORE_GENOMEANNOTATOR.out.multiqc_report
+
     
 }
 
@@ -97,6 +128,105 @@ OUTPUTS
 */
 
 output {
+
+    final_annotation {
+        path { meta, file ->
+            file >> "${meta.id}/final/${meta.id}.annotation.gff3"
+        }
+    }
+
+    proteome {
+        path { meta, file ->
+            file >> "${meta.id}/final/${meta.id}.proteome.faa"
+        }
+    }
+
+    masked_genome {
+        path { meta, file ->
+            file >> "${meta.id}/final/${meta.id}.masked_genome.fna"
+        }
+    }
+
+
+    
+    downloaded_reads {
+        path { meta, file ->
+            file >> "${meta.id}/structural_annotations/mappings/downloaded_reads/"
+        }
+    }
+
+    mapping {
+        path { meta, bam, bai ->
+            bam >> "${meta.id}/structural_annotations/mappings/"
+            bai >> "${meta.id}/structural_annotations/mappings/"
+        }
+    }
+
+    structural_annotation {
+        path { meta, file ->
+            file >> "${meta.id}/structural_annotations/final/"
+        }
+    }
+
+    intermediate_annotations {
+        path { meta, file ->
+            file >> "${meta.id}/structural_annotations/partially_cleaned/"
+        }
+    }
+
+    alternative_annotations {
+        path { meta, file ->
+            file >> "${meta.id}/structural_annotations/alternative/"
+        }
+    }
+
+    
+
+    eggnogmapper_output {
+        path { meta, file ->
+            file >> "${meta.id}/functional_annotations/eggnog_mapper/"
+        }
+    }
+
+    interproscan_output {
+        path { meta, file ->
+            file >> "${meta.id}/functional_annotations/interproscan/"
+        }
+    }
+
+    functional_annotation {
+        path { meta, file ->
+            file >> "${meta.id}/functional_annotations/"
+        }
+    }
+
+
+    
+
+    genome_stats {
+        path { meta, file ->
+            file >> "${meta.id}/quality_controls/${meta.id}.genome_stats.${file.extension}"
+        }
+    }
+
+
+    structural_annotation_stats {
+        path { meta, file ->
+            file >> "${meta.id}/quality_controls/${meta.id}.structural_annotation_stats.${file.extension}"
+        }
+    }
+
+    functional_annotation_stats {
+        path { meta, file ->
+            file >> "${meta.id}/quality_controls/${meta.id}.functional_annotation_stats.${file.extension}"
+        }
+    }
+
+    omark_results {
+        path { meta, file ->
+            file >> "${meta.id}/quality_controls/"
+        }
+    }
 
     multiqc_report {
         path { file ->

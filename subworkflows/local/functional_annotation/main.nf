@@ -25,7 +25,9 @@ workflow FUNCTIONAL_ANNOTATION {
 
     main:
 
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
+    ch_eggnogmapper_output_to_publish = channel.empty()
+    ch_interproscan_output_to_publish = channel.empty()
 
     ch_decorated_gff = ch_gff
 
@@ -40,6 +42,14 @@ workflow FUNCTIONAL_ANNOTATION {
         )
 
         ch_decorated_gff = EGGNOGMAPPER_EMAPPER.out.decorated_gff
+
+        // putting together all output data to publish
+        ch_eggnogmapper_output_to_publish = ch_eggnogmapper_output_to_publish
+                                                .mix( EGGNOGMAPPER_EMAPPER.out.decorated_gff )
+                                                .mix( EGGNOGMAPPER_EMAPPER.out.annotations )
+                                                .mix( EGGNOGMAPPER_EMAPPER.out.orthhologs )
+                                                .mix( EGGNOGMAPPER_EMAPPER.out.seed_orthlogs )
+                                                .mix( EGGNOGMAPPER_EMAPPER.out.hits )
 
     }
 
@@ -74,6 +84,8 @@ workflow FUNCTIONAL_ANNOTATION {
 
     emit:
     gff              = ch_decorated_gff
+    eggnogmapper_output = ch_eggnogmapper_output_to_publish
+    interproscan_output = ch_interproscan_output_to_publish
     versions         = ch_versions
 
 }

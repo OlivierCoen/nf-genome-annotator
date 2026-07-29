@@ -27,9 +27,10 @@ workflow GENOME_PREPARATION {
     // ----------------------------------------------------------
 
     SEQKIT_STATS ( ch_genome )
+    ch_stats = SEQKIT_STATS.out.stats
 
     ch_prepared_genome = ch_genome
-                            .join( SEQKIT_STATS.out.stats )
+                            .join( ch_stats )
                             .map {
                                 meta, genome, stats ->
                                     def csv = stats.splitCsv( header: true, sep: '\t', limit: 1 ).collect()
@@ -39,5 +40,6 @@ workflow GENOME_PREPARATION {
 
     emit:
     prepared_genome     = ch_prepared_genome
+    stats               = ch_stats
 
 }

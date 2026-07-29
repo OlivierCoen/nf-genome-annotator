@@ -84,14 +84,23 @@ workflow GENOMEANNOTATOR {
                         .filter { meta, id -> id != []}
 
 
-    ch_versions = channel.empty()
+    ch_versions            = channel.empty()
+
+    ch_masked_genome         = channel.empty()
+    ch_downloaded_reads      = channel.empty()
+    ch_bam_bai               = channel.empty()
+    ch_eggnogmapper_output   = channel.empty()
+    ch_interproscan_output   = channel.empty()
+    ch_functional_annotation = channel.empty()
+    ch_final_annotation      = channel.empty()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME PREPARATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GENOME_PREPARATION ( ch_genome )
-    ch_genome = GENOME_PREPARATION.out.prepared_genome
+    ch_genome        = GENOME_PREPARATION.out.prepared_genome
+    ch_genome_stats  = GENOME_PREPARATION.out.stats
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
@@ -109,7 +118,8 @@ workflow GENOMEANNOTATOR {
 
         if ( !params.skip_masking ) {
             GENOME_MASKING ( ch_genome )
-            ch_genome = GENOME_MASKING.out.masked_genome
+            ch_masked_genome = GENOME_MASKING.out.masked_genome
+            ch_genome = ch_masked_genome
         }
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,13 +127,14 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         DOWNLOAD_READS( ch_rnaseq_id )
+        ch_downloaded_reads = DOWNLOAD_READS.out.reads
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // MAP RNASEQ READS TO GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         ch_rnaseq_fastq = ch_provided_rnaseq_fastq
-                            .mix( DOWNLOAD_READS.out.reads )
+                            .mix( ch_downloaded_reads )
 
         MAP_TO_GENOME_SORT_INDEX(
             ch_genome,
@@ -137,9 +148,8 @@ workflow GENOMEANNOTATOR {
             params.ignore_existing_gtf_for_mapping
         )
 
-        ch_grouped_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
-                                .groupTuple()
-
+        ch_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
+                               
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // STRUCTURAL ANNOTATION
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -147,7 +157,7 @@ workflow GENOMEANNOTATOR {
         STRUCTURAL_ANNOTATION (
             ch_genome,
             ch_proteins,
-            ch_grouped_bam_bai,
+            ch_bam_bai.groupTuple(),
             ch_braker_gtf,
             ch_braker_hintsfile,
             params.structural_annotator,
@@ -214,10 +224,14 @@ workflow GENOMEANNOTATOR {
     // ORGANISE ANNOTATIONS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_gff = CLEAN_ANNOTATIONS.out.gff
-                .map {
-                    meta, file -> [ meta + [final_annotation: true], file ]
-                }
+    ch_structural_annotation = CLEAN_ANNOTATIONS.out.gff
+                            .map {
+                                meta, file -> [ meta + [final_annotation: true], file ]
+                            }
+
+    // for now, the final annotation is set to the structural annotation
+    // is will be set to the functional annotation if it is not skipped
+    ch_final_annotation = ch_structural_annotation
 
     ch_intermediate_annotations = ch_structural_annotations
                                     .mix( CLEAN_ANNOTATIONS.out.intermediate_gffs )
@@ -230,7 +244,7 @@ workflow GENOMEANNOTATOR {
                                         meta, file -> [ meta + [final_annotation: false], file ]
                                     }
 
-    ch_all_annotations = ch_gff
+    ch_all_annotations = ch_structural_annotation
                             .mix( ch_intermediate_annotations )
                             .mix( ch_alternative_annotations )
 
@@ -256,18 +270,17 @@ workflow GENOMEANNOTATOR {
 
         FUNCTIONAL_ANNOTATION (
             ch_main_proteome,
-            ch_gff,
+            ch_structural_annotation,
             params.functional_annotators,
             params.interproscan_db,
             params.interproscan_db_url
         )
 
         ch_functional_annotation = FUNCTIONAL_ANNOTATION.out.gff
+        ch_final_annotation      = ch_functional_annotation
 
         ch_versions = ch_versions
                         .mix( FUNCTIONAL_ANNOTATION.out.versions )
-    } else {
-        ch_functional_annotation = channel.empty()
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -280,7 +293,7 @@ workflow GENOMEANNOTATOR {
         ch_all_annotations,
         ch_main_proteome,
         ch_proteomes,
-        ch_gff,
+        ch_structural_annotation,
         ch_functional_annotation,
         params.skip_omark,
         params.omamer_db_url,
@@ -301,8 +314,22 @@ workflow GENOMEANNOTATOR {
 
 
     emit:
-    multiqc_report = REPORTING.out.report.toList()
-    versions       = ch_versions
+    final_annotation            = ch_final_annotation
+    genome_stats                = ch_genome_stats
+    masked_genome               = ch_masked_genome
+    downloaded_reads            = ch_downloaded_reads
+    mapping                     = ch_bam_bai
+    structural_annotation       = ch_structural_annotation
+    intermediate_annotations    = ch_intermediate_annotations
+    alternative_annotations     = ch_alternative_annotations
+    proteome                    = ch_main_proteome
+    eggnogmapper_output         = ch_eggnogmapper_output
+    interproscan_output         = ch_interproscan_output
+    functional_annotation       = ch_functional_annotation
+    structural_annotation_stats = QUALITY_CONTROLS.out.structural_annotation_stats
+    functional_annotation_stats = QUALITY_CONTROLS.out.functional_annotation_stats
+    omark_results               = QUALITY_CONTROLS.out.omark_results
+    multiqc_report              = REPORTING.out.report.toList()
 
 }
 

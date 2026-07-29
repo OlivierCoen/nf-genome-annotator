@@ -23,13 +23,15 @@ workflow QUALITY_CONTROLS {
     ch_all_annotations
     ch_main_proteome
     ch_all_proteomes
-    ch_gff
+    ch_structural_annotation
     ch_functional_annotation
     skip_omark
     omamer_db_url
     omamer_db
 
     main:
+
+    ch_omark_results = channel.empty()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // DOWNLOAD NECESSARY BUSCO DATASETS
@@ -66,10 +68,12 @@ workflow QUALITY_CONTROLS {
 
         OMARK(
             ch_main_proteome,
-            ch_gff,
+            ch_structural_annotation,
             omamer_db_url,
             omamer_db
         )
+
+        ch_omark_results = OMARK.out.results
 
     }
 
@@ -84,5 +88,10 @@ workflow QUALITY_CONTROLS {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     AGAT_FUNCTIONAL_STATISTICS( ch_functional_annotation )
+
+    emit:
+    structural_annotation_stats = AGAT_GTF_STATISTICS.out.stats_yaml
+    functional_annotation_stats = AGAT_FUNCTIONAL_STATISTICS.out.stats_yaml
+    omark_results               = ch_omark_results
 
 }
