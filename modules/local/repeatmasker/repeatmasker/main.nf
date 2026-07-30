@@ -1,47 +1,60 @@
+nextflow.enable.types = true
+
 process REPEATMASKER_REPEATMASKER {
-    tag "$meta.id"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/eb/eb2c806e7a34fc52eabb8809fa9f4e0e34117e397162a516cbb80454e50b2e72/data':
-        'community.wave.seqera.io/library/repeatmasker:4.2.1--94dd45a91fa85e83' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/9f/9f55b93073469a6e7aea3b0db14cf8c7181528ccecfca7fc06a10ae16818cf47/data':
+        'community.wave.seqera.io/library/repeatmasker:4.2.4--eb5ce0b75f3001ca' }"
 
     input:
-    tuple val(meta), path(fasta), path(lib)
+        record(
+            id: String, 
+            fasta: Path, 
+            lib: Path
+        )
 
     output:
-    tuple val(meta), path("${prefix}.masked"),                                                                        emit: masked
-    tuple val(meta), path("${prefix}.out"),                                                                           emit: out
-    tuple val(meta), path("${prefix}.tbl"),                                                                           emit: tbl
-    tuple val(meta), path("${prefix}.gff"),                                                                           emit: gff, optional: true
-    tuple val("${task.process}"), val('repeatmasker'), eval("RepeatMasker -v | sed 's/RepeatMasker version //1'"),    topic: versions
+        record(
+            id: id, 
+            softmasked: file("*.masked"), 
+            repeats_gff: file("*.gff", optional: true)
+        )
+   
+    topic:
+        tuple('repeatmasker', file("*.tbl"))                 >> 'additional_results'
+        tuple('repeatmasker', file("*.out"))                 >> 'logs'
+        tuple("${task.process}", 'repeatmasker', eval("RepeatMasker -v | sed 's/RepeatMasker version //1'")) >>  'versions'
 
     script:
     def args    = task.ext.args     ?: ''
-    prefix      = task.ext.prefix   ?: "${meta.id}"
+    def prefix  = task.ext.prefix   ?: "${id}"
     def lib_arg = lib               ? "-lib $lib"   : ''
-
-    def out_fasta    = fasta.getBaseName(fasta.name.endsWith('.gz') ? 1 : 0)
-    def fasta_gz_cmd = fasta.name.endsWith('.gz') ? "gunzip -c ${fasta} > ${out_fasta}" : ""
-
+    
+    def is_compressed  = fasta.getExtension() == "gz" ? true : false
+    def fasta_name     = is_compressed                ? fasta.getBaseName() : fasta.name
     """
-    ${fasta_gz_cmd}
+    if [ "${is_compressed}" == "true" ]; then
+        gzip -c -d ${fasta} > ${fasta_name}
+    fi
+    
     RepeatMasker \\
         $lib_arg \\
         -pa ${task.cpus} \\
         -dir ${prefix} \\
         ${args} \\
-        ${out_fasta}
+        ${fasta_name}
 
-    mv $prefix/${out_fasta}.masked  ${prefix}.masked
-    mv $prefix/${out_fasta}.out     ${prefix}.out
-    mv $prefix/${out_fasta}.tbl     ${prefix}.tbl
-    mv $prefix/${out_fasta}.out.gff ${prefix}.gff       || echo "GFF is not produced"
+    mv $prefix/${fasta_name}.masked  ${prefix}.masked
+    mv $prefix/${fasta_name}.out     ${prefix}.out
+    mv $prefix/${fasta_name}.tbl     ${prefix}.tbl
+    mv $prefix/${fasta_name}.out.gff ${prefix}.gff       || echo "GFF is not produced"
     """
 
     stub:
-    prefix          = task.ext.prefix       ?: "${meta.id}"
+    def prefix      = task.ext.prefix       ?: "${id}"
     def args        = task.ext.args         ?: ''
     def touch_gff   = args.contains('-gff') ? "touch ${prefix}.gff" : ''
 
