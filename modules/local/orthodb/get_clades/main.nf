@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process ORTHODB_GETCLADES {
 
     label 'process_single'
@@ -8,8 +10,10 @@ process ORTHODB_GETCLADES {
         'community.wave.seqera.io/library/wget:1.25.0--817c089a96769e94' }"
 
     output:
-    path("odb12v2_levels.tab.gz"), emit: clades
-    tuple val("${task.process}"), val('wget'), eval("wget -h 2>&1 | head -1 | cut -d' ' -f3 | sed 's/,//g'"), topic: versions
+        clades: Path = file("odb12v2_levels.tab.gz")
+
+    topic:
+        tuple( "${task.process}", 'wget', eval("wget -h 2>&1 | head -1 | cut -d' ' -f3 | sed 's/,//g'") ) >> 'versions'
 
     script:
     """
