@@ -22,14 +22,17 @@ include { FUNCTIONAL_ANNOTATION                                         } from '
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { REPORTING                                                     } from '../subworkflows/local/reporting'
 
-include { Samplesheet; Genome } from '../subworkflows/local/utils_nfcore_genomeannotator_pipeline'
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+record Samplesheet {
+    meta: Map
+    genome: Path
+}
 
 workflow GENOMEANNOTATOR {
 
@@ -42,7 +45,7 @@ workflow GENOMEANNOTATOR {
                 .map{ meta, genome ->
                     record(
                         id: meta.id,
-                        genome_fasta: genome,
+                        fasta: genome,
                         species: meta.species,
                         gff: meta.gff ?: [],
                         rnaseq_bam: meta.rnaseq_bam ?: [],
@@ -93,38 +96,31 @@ workflow GENOMEANNOTATOR {
                         .filter { meta, id -> id != []}
 */
 
-    ch_versions            = channel.empty()
-
-    ch_masked_genome         = channel.empty()
-    ch_downloaded_reads      = channel.empty()
-    ch_bam_bai               = channel.empty()
-    ch_eggnogmapper_output   = channel.empty()
-    ch_interproscan_output   = channel.empty()
-    ch_functional_annotation = channel.empty()
-    ch_final_annotation      = channel.empty()
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME PREPARATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GENOME_PREPARATION ( ch_main )
-    ch_main         = GENOME_PREPARATION.out.prepared
-    ch_genome_stats = GENOME_PREPARATION.out.stats
-
+    GENOME_PREPARATION ( 
+        ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) }
+    )
+    ch_main = ch_main.join(GENOME_PREPARATION.out.prepared, by: 'id')
+    
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TAXONOMY_INFO( ch_main )
-    ch_main = TAXONOMY_INFO.out.enriched_with_taxonomy
+    TAXONOMY_INFO( 
+        ch_main.map{ rec -> rec.species }.unique()
+    )
+    ch_main = ch_main.join(TAXONOMY_INFO.out.taxonomy, by: 'species')
     ch_main.view()
-/*
+
     if ( !params.skip_structural_annotation ) {
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // GENOME MASKING
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+/*
         if ( !params.skip_masking ) {
             GENOME_MASKING ( ch_input )
             ch_masked_genome = GENOME_MASKING.out.masked_genome
@@ -210,11 +206,11 @@ workflow GENOMEANNOTATOR {
     } else {
         ch_structural_annotations = ch_gff
     }
-
+*/
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+/*
     CLEAN_ANNOTATIONS (
         ch_structural_annotations,
         ch_genome,
@@ -323,37 +319,10 @@ workflow GENOMEANNOTATOR {
 
 */
 
-ch_structural_annotation = channel.empty()
-ch_intermediate_annotations = channel.empty()
-
-ch_alternative_annotations = channel.empty()
-ch_main_proteome = channel.empty()
-
-
+}
     emit:
-    final_annotation            = ch_final_annotation
-    genome_stats                = ch_genome_stats
-    masked_genome               = ch_masked_genome
-    downloaded_reads            = ch_downloaded_reads
-    mapping                     = ch_bam_bai
-    structural_annotation       = ch_structural_annotation
-    intermediate_annotations    = ch_intermediate_annotations
-    alternative_annotations     = ch_alternative_annotations
-    proteome                    = ch_main_proteome
-    eggnogmapper_output         = ch_eggnogmapper_output
-    interproscan_output         = ch_interproscan_output
-    functional_annotation       = ch_functional_annotation
-
-    structural_annotation_stats = channel.empty()
-    functional_annotation_stats = channel.empty()
-    omark_results               = channel.empty()
-    multiqc_report              = channel.empty()
+    results = ch_main
     
-    //structural_annotation_stats = QUALITY_CONTROLS.out.structural_annotation_stats
-    //functional_annotation_stats = QUALITY_CONTROLS.out.functional_annotation_stats
-    //omark_results               = QUALITY_CONTROLS.out.omark_results
-    //multiqc_report              = REPORTING.out.report.toList()
-
 }
 
 /*
