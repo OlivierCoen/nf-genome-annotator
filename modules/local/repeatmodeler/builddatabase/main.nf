@@ -1,21 +1,25 @@
+nextflow.enable.types = true
+
 process REPEATMODELER_BUILDDATABASE {
-    tag "$meta.id"
+    tag "$id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/6b/6b9637a9d4d72993f80c5014ece53d39161871c94845f420a5313a31a7ae5d2a/data':
-        'community.wave.seqera.io/library/repeatmodeler:2.0.7--136d59ab97ab30de' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/46/4618e2da2755ead8794cee7e6fe99de4ef739a97364e08ba9fa8b2988cdba123/data':
+        'community.wave.seqera.io/library/repeatmodeler:2.0.9--7529329ebd736619' }"
 
     input:
-    tuple val(meta), path(fasta)
+        record(id: String, fasta: Path)
 
     output:
-    tuple val(meta), path("${prefix}.*")    , emit: db
-    tuple val("${task.process}"), val('repeatmodeler'), eval("RepeatModeler --version | sed 's/RepeatModeler version //'"), topic: versions
-
+        record(id: id, db: files("${prefix}.*"))
+    
+    topic:
+        tuple( "${task.process}", 'repeatmodeler', eval("RepeatModeler --version | sed 's/RepeatModeler version //'") ) >> 'versions'
+        
     script:
-    prefix = task.ext.prefix ?: "${meta.id}"
+    prefix = task.ext.prefix ?: "${id}"
     """
     BuildDatabase \\
         -name $prefix \\
@@ -23,7 +27,7 @@ process REPEATMODELER_BUILDDATABASE {
     """
 
     stub:
-    prefix = task.ext.prefix ?: "${meta.id}"
+    prefix = task.ext.prefix ?: "${id}"
     """
     touch ${prefix}.nhr
     touch ${prefix}.nin
