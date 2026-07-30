@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process SEQKIT_STATS {
-    tag "${id}"
+    tag "$id"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
@@ -10,15 +10,13 @@ process SEQKIT_STATS {
             : 'community.wave.seqera.io/library/seqkit:2.13.0--05c0a96bf9fb2751'}"
 
     input:
-        record(id: String, genome_fasta: Path)
+        record(id: String, fasta: Path)
 
     output:
-         stats = record(id: id, genome_stats: file("*.tsv"))
+         record(id: id, stats: file("*.tsv"))
 
     topic:
          tuple( "${task.process}", 'seqkit', eval("seqkit version | sed 's/^.*v//'") ) >> 'versions'
-
-   
 
     script:
     def args = task.ext.args ?: '--all'
@@ -28,7 +26,7 @@ process SEQKIT_STATS {
         --tabular \\
         --threads ${task.cpus} \\
         ${args} \\
-        ${genome_fasta} > '${prefix}.tsv'
+        ${fasta} > '${prefix}.tsv'
     """
 
     stub:

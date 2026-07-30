@@ -232,23 +232,7 @@ def methodsDescriptionText(mqc_methods_yaml) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-record Samplesheet {
-    meta: Map
-    genome: Path
-}
 
-record Genome {
-    id: String
-    genome_fasta: Path
-    species: String
-    gff: Path
-    rnaseq_bam: Bag<Path>
-    rnaseq_fastq: Bag<Path>
-    rnaseq_public_id: Bag<String>
-    proteins: Bag<Path>
-    braker_gtf: Path
-    hintsfile: Path
-}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,6 +240,11 @@ record Genome {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def renameField(ch1, oldField, newField) {
+def getField(ch: Channel, field: String) {
+    // implicitely add 'id' field
+    return ch.map{ rec -> rec.subMap(['id', field]) }
+}
+
+def renameField(ch1: Channel, oldField: String, newField: String) {
      return ch1.map{ rec -> rec.subMap(rec.keySet() - [oldField]) + record(newField: rec[oldField]) }
 }
