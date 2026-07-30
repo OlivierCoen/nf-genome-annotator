@@ -28,7 +28,7 @@ NCBI_API_HEADERS = {"accept": "application/json", "content-type": "application/j
 STOP_RETRY_AFTER_DELAY = 120
 
 TAXID_OUTFILE = "found_taxid.txt"
-BUSCO_DATASET_OUTFILE = "found_busco_dataset.txt"
+BUSCO_LINEAGE_OUTFILE = "found_busco_lineage.txt"
 ORTHODB_CLADES_OUTFILE = "found_orthodb_clade.txt"
 
 #####################################################
@@ -237,7 +237,7 @@ if __name__ == "__main__":
         fout.write(str(taxonomy.taxid))
 
     if taxonomy.busco_dataset:
-        with open(BUSCO_DATASET_OUTFILE, "w") as fout:
+        with open(BUSCO_LINEAGE_OUTFILE, "w") as fout:
             fout.write(taxonomy.busco_dataset)
 
     if taxonomy.orthodb_clade:
