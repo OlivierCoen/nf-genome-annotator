@@ -113,20 +113,20 @@ workflow GENOMEANNOTATOR {
         ch_main.map{ rec -> rec.species }.unique()
     )
     ch_main = ch_main.join(TAXONOMY_INFO.out.taxonomy, by: 'species')
-    ch_main.view()
 
     if ( !params.skip_structural_annotation ) {
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // GENOME MASKING
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/*
-        if ( !params.skip_masking ) {
-            GENOME_MASKING ( ch_input )
-            ch_masked_genome = GENOME_MASKING.out.masked_genome
-            ch_genome = ch_masked_genome
-        }
 
+        if ( !params.skip_masking ) {
+            GENOME_MASKING ( 
+                ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) }
+            )
+            ch_main = ch_main.join(GENOME_MASKING.out.masked, by: 'id')
+        }
+/*
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // DOWNLOAD READS FROM SRA / ENA IF NEEDED
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
