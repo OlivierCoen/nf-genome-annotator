@@ -9,6 +9,9 @@ process ORTHODB_GETCLADES {
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ef/efdbe0b1f00aeb72d474fd6dc2bab29103586eb97decbd010092f36d58837cd6/data':
         'community.wave.seqera.io/library/wget:1.25.0--817c089a96769e94' }"
 
+    input:
+        _s: List // only used to enable caching
+        
     output:
         clades: Path = file("odb12v2_levels.tab.gz")
 
