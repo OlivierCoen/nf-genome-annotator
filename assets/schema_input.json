@@ -21,89 +21,96 @@
                 "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
             },
             "species": {
-              "type": ["string", "integer"],
+                "type": ["string", "integer"],
                 "description": "Scientifc species name (genus and species) or NCBI Taxid",
-                "meta": ["species"],
-                "help_text": "Genus and species can be separated by a '_'. Example: `'Arabidopsis thaliana'`,  `'armadillidium_nasatum'` or `3702`."
+                "help_text": "Genus and species can be separated by a '_'. Example: `'Arabidopsis thaliana'`,  `'armadillidium_nasatum'` or `3702`.",
+                "meta": ["species"]
             },
             "gff": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gtf|gff|gff3)$",
-                "errorMessage": "Existing annotation GTF file cannot contain spaces and must have extension '.gtf', '.gff' or '.gff3'"
+                "errorMessage": "Existing annotation GTF file cannot contain spaces and must have extension '.gtf', '.gff' or '.gff3'",
+                "meta": ["gff"]
             },
             "rnaseq_bam": {
                 "type": "array",
                 "items": {
-                  "type": "string",
-                  "format": "file-path",
-                  "exists": true,
-                  "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
-                  "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'"
-                }
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
+                    "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'"
+                },
+                "meta": ["rnaseq_bam"]
             },
             "rnaseq_fastq": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "properties": {
-                    "fastq_1": {
-                        "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                        "format": "file-path",
-                        "exists": true,
-                        "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
-                    },
-                    "fastq_2": {
-                        "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                                "format": "file-path",
-                                "exists": true
-                            },
-                            {
-                                "type": "string",
-                                "maxLength": 0
-                            }
-                        ]
+                    "type": "object",
+                    "properties": {
+                        "fastq_1": {
+                            "type": "string",
+                            "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                            "format": "file-path",
+                            "exists": true,
+                            "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                        },
+                        "fastq_2": {
+                            "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                                    "format": "file-path",
+                                    "exists": true
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 0
+                                }
+                            ]
+                        }
                     }
-                  }
-                }
+                },
+                "meta": ["rnaseq_fastq"]
             },
             "rnaseq_public_id": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
-                "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
-              }
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
+                    "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
+                },
+                "meta": ["rnaseq_public_id"]
             },
             "proteins": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|a)?a(\\.gz)?$",
-                "errorMessage": "Protein Fasta file cannot contain spaces and must have extension '.fa', 'faa' or '.fasta' (possibly gzip compressed)"
-              }
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|a)?a(\\.gz)?$",
+                    "errorMessage": "Protein Fasta file cannot contain spaces and must have extension '.fa', 'faa' or '.fasta' (possibly gzip compressed)"
+                },
+                "meta": ["proteins"]
             },
             "braker_gtf": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.gtf$",
-                "errorMessage": "Braker GTF file cannot contain spaces and must have extension '.gtf'"
+                "errorMessage": "Braker GTF file cannot contain spaces and must have extension '.gtf'",
+                "meta": ["braker_gtf"]
             },
             "hintsfile": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.hintsfile.gff$",
-                "errorMessage": "Braker hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'"
+                "errorMessage": "Braker hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'",
+                "meta": ["hintsfile"]
             }
         },
         "required": ["sample", "genome", "species"]

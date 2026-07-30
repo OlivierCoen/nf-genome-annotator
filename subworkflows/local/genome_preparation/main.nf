@@ -1,4 +1,6 @@
-include { CHECK_GENOME              } from '../../../modules/local/check_genome'
+nextflow.enable.types = true
+
+include { CHECK_GENOME              } from '../../../modules/local/check/genome'
 include { SEQKIT_STATS              } from '../../../modules/nf-core/seqkit/stats'
 
 /*
@@ -11,25 +13,26 @@ include { SEQKIT_STATS              } from '../../../modules/nf-core/seqkit/stat
 workflow GENOME_PREPARATION {
 
     take:
-    ch_genome
+    ch_input
 
     main:
-
+ch_input.view{ v -> "1 $v"}
     // ----------------------------------------------------------
     // CHECK HEADERS OR WHOLE PROTEIN DB AND RAISE ERROR IF UNHANDLED CHARACTERS
     // ----------------------------------------------------------
 
-    CHECK_GENOME( ch_genome )
-    ch_genome = CHECK_GENOME.out.fasta
+    CHECK_GENOME( ch_input )
+    ch_input = ch_input.join(CHECK_GENOME.out.checked, by: 'id')
+    
 
     // ----------------------------------------------------------
     // COMPUTE STATS ABOUT GENOME
     // ----------------------------------------------------------
 
-    SEQKIT_STATS ( ch_genome )
+    SEQKIT_STATS ( ch_input )
     ch_stats = SEQKIT_STATS.out.stats
 
-    ch_prepared_genome = ch_genome
+    ch_prepared_genome = ch_input
                             .join( ch_stats )
                             .map {
                                 meta, genome, stats ->
@@ -39,7 +42,8 @@ workflow GENOME_PREPARATION {
                             }
 
     emit:
-    prepared_genome     = ch_prepared_genome
-    stats               = ch_stats
+    prepared_genome     = channel.empty()
+    stats = channel.empty()
+    //stats               = ch_stats
 
 }
