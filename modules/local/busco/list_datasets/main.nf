@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process BUSCO_LISTDATASETS {
 
     label 'process_single'
@@ -8,9 +10,10 @@ process BUSCO_LISTDATASETS {
             : 'community.wave.seqera.io/library/busco:6.1.0--6d1f7006d91892b3'}"
 
     output:
-    path("busco_datasets.yaml"), emit: datasets
-    tuple val("${task.process}"), val('busco'), eval('busco --version | sed "s/^BUSCO //"'),    topic: versions
+        datasets: Path = file("busco_datasets.yaml")
 
+    topic:
+        tuple( "${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"') ) >> 'versions'
 
     script:
     """
