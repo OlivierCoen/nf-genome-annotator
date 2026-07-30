@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 include { CHECK_GENOME              } from '../../../modules/local/check/genome'
-include { SEQKIT_STATS              } from '../../../modules/nf-core/seqkit/stats'
+include { SEQKIT_STATS              } from '../../../modules/local/seqkit/stats'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -16,7 +16,7 @@ workflow GENOME_PREPARATION {
     ch_input
 
     main:
-ch_input.view{ v -> "1 $v"}
+
     // ----------------------------------------------------------
     // CHECK HEADERS OR WHOLE PROTEIN DB AND RAISE ERROR IF UNHANDLED CHARACTERS
     // ----------------------------------------------------------
@@ -24,7 +24,6 @@ ch_input.view{ v -> "1 $v"}
     CHECK_GENOME( ch_input )
     ch_input = ch_input.join(CHECK_GENOME.out.checked, by: 'id')
     
-
     // ----------------------------------------------------------
     // COMPUTE STATS ABOUT GENOME
     // ----------------------------------------------------------
@@ -33,17 +32,15 @@ ch_input.view{ v -> "1 $v"}
     ch_stats = SEQKIT_STATS.out.stats
 
     ch_prepared_genome = ch_input
-                            .join( ch_stats )
+                            .join(ch_stats, by: 'id')
                             .map {
-                                meta, genome, stats ->
-                                    def csv = stats.splitCsv( header: true, sep: '\t', limit: 1 ).collect()
-                                    def stat_row = csv[0]
-                                    [ meta + [ genome_size: stat_row.sum_len ], genome]
+                                rec ->
+                                    def csv = rec.genome_stats.splitCsv( header: true, sep: '\t', limit: 1 ).collect()
+                                    rec + record(genome_size: csv[0].sum_len.toInteger())
                             }
 
     emit:
-    prepared_genome     = channel.empty()
-    stats = channel.empty()
-    //stats               = ch_stats
+    prepared_genome     = ch_prepared_genome
+    stats               = ch_stats
 
 }

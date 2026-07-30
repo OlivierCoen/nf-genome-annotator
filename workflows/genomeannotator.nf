@@ -110,7 +110,7 @@ workflow GENOMEANNOTATOR {
     GENOME_PREPARATION ( ch_input )
     ch_genome        = GENOME_PREPARATION.out.prepared_genome
     ch_genome_stats  = GENOME_PREPARATION.out.stats
-/*
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -118,7 +118,7 @@ workflow GENOMEANNOTATOR {
     TAXONOMY_INFO( ch_input )
     ch_busco_lineage = TAXONOMY_INFO.out.busco_lineages
     ch_orthodb_clade  = TAXONOMY_INFO.out.orthodb_clade
-
+/*
     if ( !params.skip_structural_annotation ) {
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

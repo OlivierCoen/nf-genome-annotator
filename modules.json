@@ -60,11 +60,6 @@
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["bam_sort_stats_samtools", "modules"]
                     },
-                    "seqkit/stats": {
-                        "branch": "master",
-                        "git_sha": "21e4662ae927fdbc5fc04eec9bde38b0689d4954",
-                        "installed_by": ["modules"]
-                    },
                     "umitools/extract": {
                         "branch": "master",
                         "git_sha": "bd6d730b3f32742f402189113ba9480006a3350f",
