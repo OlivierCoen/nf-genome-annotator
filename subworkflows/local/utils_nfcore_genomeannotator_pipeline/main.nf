@@ -256,6 +256,6 @@ record Genome {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def mergeRecords(ch1, ch2, true_left_join = false) {
-     return ch1.join( ch2, by: 'id', remainder: true_left_join )
+def renameField(ch1, oldField, newField) {
+     return ch1.map{ rec -> rec.subMap(rec.keySet() - [oldField]) + record(newField: rec[oldField]) }
 }
