@@ -1,6 +1,6 @@
 include { ORTHODB_MAKECLADEDB                                   } from '../../../modules/local/orthodb/make_clade_db'
 include { SEQKIT_CONCAT                                         } from '../../../modules/local/seqkit/concat'
-include { CHECK_PROTEIN_FASTA                                   } from '../../../modules/local/check_protein_fasta'
+include { CHECK_PROTEIN_FASTA                                   } from '../../../modules/local/check/protein_fasta'
 
 
 /*

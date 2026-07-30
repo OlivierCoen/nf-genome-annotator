@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 //
 // Subworkflow with functionality specific to the genome_annotator pipeline
 //
@@ -222,4 +224,38 @@ def methodsDescriptionText(mqc_methods_yaml) {
     def description_html = engine.createTemplate(methods_text).make(meta)
 
     return description_html.toString()
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RECORD DEFINITION
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+record Samplesheet {
+    meta: Map
+    genome: Path
+}
+
+record Genome {
+    id: String
+    genome_fasta: Path
+    species: String
+    gff: Path
+    rnaseq_bam: Bag<Path>
+    rnaseq_fastq: Bag<Path>
+    rnaseq_public_id: Bag<String>
+    proteins: Bag<Path>
+    braker_gtf: Path
+    hintsfile: Path
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    FUNCTIONS FOR MANAGEMENT OF RECORD CHANNELS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+def mergeRecords(ch1, ch2, true_left_join = false) {
+     return ch1.join( ch2, by: 'id', remainder: true_left_join )
 }

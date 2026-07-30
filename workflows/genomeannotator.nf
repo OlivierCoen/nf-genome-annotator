@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
@@ -20,6 +22,8 @@ include { FUNCTIONAL_ANNOTATION                                         } from '
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { REPORTING                                                     } from '../subworkflows/local/reporting'
 
+include { Samplesheet; Genome } from '../subworkflows/local/utils_nfcore_genomeannotator_pipeline'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,22 +34,27 @@ include { REPORTING                                                     } from '
 workflow GENOMEANNOTATOR {
 
     take:
-    ch_samplesheet
+    ch_samplesheet: Channel<Samplesheet>
 
     main:
 
-    ch_input = ch_samplesheet.multiMap{
-                    meta, genome, gff, rnaseq_bam, rnaseq_fastq, rnaseq_ids, proteins, braker_gtf, braker_hintsfile ->
-                        genome: [ meta, genome ]
-                        gff: gff ? [ meta, gff ] : [[:], []]
-                        rnaseq_bam: rnaseq_bam ? [ meta, rnaseq_bam ] : [[:], []]
-                        rnaseq_fastq: rnaseq_fastq ? [ meta, rnaseq_fastq ] : [[:], []]
-                        rnaseq_id: rnaseq_ids ? [ meta, rnaseq_ids ] : [[:], []]
-                        protein: proteins ? [ meta, proteins ] : [[:], []]
-                        braker_gtf: braker_gtf ? [ meta, braker_gtf ] : [[:], []]
-                        braker_hintsfile: braker_hintsfile ? [ meta, braker_hintsfile ] : [[:], []]
-                }
+    ch_input = ch_samplesheet
+                    .map{ meta, genome ->
+                        record(
+                            id: meta.id,
+                            genome_fasta: genome,
+                            species: meta.species,
+                            gff: meta.gff ?: [],
+                            rnaseq_bam: meta.rnaseq_bam ?: [],
+                            rnaseq_fastq: meta.rnaseq_fastq ?: [],
+                            rnaseq_public_id: meta.rnaseq_public_id ?: [],
+                            proteins: meta.proteins ?: [],
+                            braker_gtf: meta.braker_gtf ?: [],
+                            hintsfile: meta.hintsfile ?: []
+                        )
+                    }
 
+                /*
     ch_genome       = ch_input.genome
 
     ch_gff          = ch_input.gff
@@ -82,7 +91,7 @@ workflow GENOMEANNOTATOR {
     ch_rnaseq_id   = ch_input.rnaseq_id
                         .transpose()
                         .filter { meta, id -> id != []}
-
+*/
 
     ch_versions            = channel.empty()
 
@@ -98,15 +107,15 @@ workflow GENOMEANNOTATOR {
     // GENOME PREPARATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GENOME_PREPARATION ( ch_genome )
+    GENOME_PREPARATION ( ch_input )
     ch_genome        = GENOME_PREPARATION.out.prepared_genome
     ch_genome_stats  = GENOME_PREPARATION.out.stats
-
+/*
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TAXONOMY_INFO( ch_genome )
+    TAXONOMY_INFO( ch_input )
     ch_busco_lineage = TAXONOMY_INFO.out.busco_lineages
     ch_orthodb_clade  = TAXONOMY_INFO.out.orthodb_clade
 
@@ -117,7 +126,7 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if ( !params.skip_masking ) {
-            GENOME_MASKING ( ch_genome )
+            GENOME_MASKING ( ch_input )
             ch_masked_genome = GENOME_MASKING.out.masked_genome
             ch_genome = ch_masked_genome
         }
@@ -126,7 +135,7 @@ workflow GENOMEANNOTATOR {
         // DOWNLOAD READS FROM SRA / ENA IF NEEDED
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        DOWNLOAD_READS( ch_rnaseq_id )
+        DOWNLOAD_READS( ch_input )
         ch_downloaded_reads = DOWNLOAD_READS.out.reads
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -312,6 +321,14 @@ workflow GENOMEANNOTATOR {
         params.outdir
     )
 
+*/
+
+ch_structural_annotation = channel.empty()
+ch_intermediate_annotations = channel.empty()
+
+ch_alternative_annotations = channel.empty()
+ch_main_proteome = channel.empty()
+
 
     emit:
     final_annotation            = ch_final_annotation
@@ -326,10 +343,16 @@ workflow GENOMEANNOTATOR {
     eggnogmapper_output         = ch_eggnogmapper_output
     interproscan_output         = ch_interproscan_output
     functional_annotation       = ch_functional_annotation
-    structural_annotation_stats = QUALITY_CONTROLS.out.structural_annotation_stats
-    functional_annotation_stats = QUALITY_CONTROLS.out.functional_annotation_stats
-    omark_results               = QUALITY_CONTROLS.out.omark_results
-    multiqc_report              = REPORTING.out.report.toList()
+
+    structural_annotation_stats = channel.empty()
+    functional_annotation_stats = channel.empty()
+    omark_results               = channel.empty()
+    multiqc_report              = channel.empty()
+    
+    //structural_annotation_stats = QUALITY_CONTROLS.out.structural_annotation_stats
+    //functional_annotation_stats = QUALITY_CONTROLS.out.functional_annotation_stats
+    //omark_results               = QUALITY_CONTROLS.out.omark_results
+    //multiqc_report              = REPORTING.out.report.toList()
 
 }
 
