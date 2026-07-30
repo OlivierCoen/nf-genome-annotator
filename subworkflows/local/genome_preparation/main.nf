@@ -1,5 +1,3 @@
-nextflow.enable.types = true
-
 include { CHECK_GENOME              } from '../../../modules/local/check/genome'
 include { SEQKIT_STATS              } from '../../../modules/local/seqkit/stats'
 
@@ -13,7 +11,7 @@ include { SEQKIT_STATS              } from '../../../modules/local/seqkit/stats'
 workflow GENOME_PREPARATION {
 
     take:
-    ch_input
+    ch_main
 
     main:
 
@@ -21,26 +19,26 @@ workflow GENOME_PREPARATION {
     // CHECK HEADERS OR WHOLE PROTEIN DB AND RAISE ERROR IF UNHANDLED CHARACTERS
     // ----------------------------------------------------------
 
-    CHECK_GENOME( ch_input )
-    ch_input = ch_input.join(CHECK_GENOME.out.checked, by: 'id')
+    CHECK_GENOME( ch_main )
+    ch_main = ch_main.join(CHECK_GENOME.out.checked, by: 'id')
     
     // ----------------------------------------------------------
     // COMPUTE STATS ABOUT GENOME
     // ----------------------------------------------------------
 
-    SEQKIT_STATS ( ch_input )
+    SEQKIT_STATS ( ch_main )
     ch_stats = SEQKIT_STATS.out.stats
 
-    ch_prepared_genome = ch_input
-                            .join(ch_stats, by: 'id')
-                            .map {
-                                rec ->
-                                    def csv = rec.genome_stats.splitCsv( header: true, sep: '\t', limit: 1 ).collect()
-                                    rec + record(genome_size: csv[0].sum_len.toInteger())
-                            }
+    ch_main = ch_main
+                .join(ch_stats, by: 'id')
+                .map {
+                    rec ->
+                        def csv = rec.genome_stats.splitCsv( header: true, sep: '\t', limit: 1 ).collect()
+                        rec + record(genome_size: csv[0].sum_len.toInteger())
+                }
 
     emit:
-    prepared_genome     = ch_prepared_genome
-    stats               = ch_stats
+    prepared    = ch_main
+    stats       = ch_stats
 
 }

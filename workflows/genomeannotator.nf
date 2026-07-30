@@ -38,21 +38,21 @@ workflow GENOMEANNOTATOR {
 
     main:
 
-    ch_input = ch_samplesheet
-                    .map{ meta, genome ->
-                        record(
-                            id: meta.id,
-                            genome_fasta: genome,
-                            species: meta.species,
-                            gff: meta.gff ?: [],
-                            rnaseq_bam: meta.rnaseq_bam ?: [],
-                            rnaseq_fastq: meta.rnaseq_fastq ?: [],
-                            rnaseq_public_id: meta.rnaseq_public_id ?: [],
-                            proteins: meta.proteins ?: [],
-                            braker_gtf: meta.braker_gtf ?: [],
-                            hintsfile: meta.hintsfile ?: []
-                        )
-                    }
+    ch_main = ch_samplesheet
+                .map{ meta, genome ->
+                    record(
+                        id: meta.id,
+                        genome_fasta: genome,
+                        species: meta.species,
+                        gff: meta.gff ?: [],
+                        rnaseq_bam: meta.rnaseq_bam ?: [],
+                        rnaseq_fastq: meta.rnaseq_fastq ?: [],
+                        rnaseq_public_id: meta.rnaseq_public_id ?: [],
+                        proteins: meta.proteins ?: [],
+                        braker_gtf: meta.braker_gtf ?: [],
+                        hintsfile: meta.hintsfile ?: []
+                    )
+                }
 
                 /*
     ch_genome       = ch_input.genome
@@ -107,17 +107,17 @@ workflow GENOMEANNOTATOR {
     // GENOME PREPARATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GENOME_PREPARATION ( ch_input )
-    ch_genome        = GENOME_PREPARATION.out.prepared_genome
-    ch_genome_stats  = GENOME_PREPARATION.out.stats
+    GENOME_PREPARATION ( ch_main )
+    ch_main         = GENOME_PREPARATION.out.prepared
+    ch_genome_stats = GENOME_PREPARATION.out.stats
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TAXONOMY_INFO( ch_input )
-    ch_busco_lineage = TAXONOMY_INFO.out.busco_lineages
-    ch_orthodb_clade  = TAXONOMY_INFO.out.orthodb_clade
+    TAXONOMY_INFO( ch_main )
+    ch_main = TAXONOMY_INFO.out.enriched_with_taxonomy
+    ch_main.view()
 /*
     if ( !params.skip_structural_annotation ) {
 

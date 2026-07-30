@@ -10,7 +10,7 @@
 
 - sample: braker_proteins
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  species: arabidopsis_thaliana
+  species: 3702
   proteins:
     - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
   rnaseq_fastq:

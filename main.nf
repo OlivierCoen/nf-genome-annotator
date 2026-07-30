@@ -207,11 +207,10 @@ output {
     
 
     genome_stats {
-        path { meta, file ->
-            file >> "${meta.id}/quality_controls/${meta.id}.genome_stats.${file.extension}"
+        path { rec ->
+            rec.genome_stats >> "${rec.id}/quality_controls/"
         }
     }
-
 
     structural_annotation_stats {
         path { meta, file ->
