@@ -11,10 +11,10 @@ process CHECK_GENOME {
         'community.wave.seqera.io/library/biopython_python:f180d02b12dd489c' }"
 
     input:
-        record( id: String, genome_fasta: Path )
+        record( id: String, fasta: Path )
 
     output:
-        checked = record( id: id, genome_fasta: file("output/*.cleaned.*") )
+        record( id: id, fasta: file("output/*.cleaned.*") )
 
     topic:
         tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )           >> 'versions'
@@ -22,12 +22,12 @@ process CHECK_GENOME {
 
     script:
     def prefix = task.ext.prefix ?: "${id}.cleaned"
-    def is_compressed = genome_fasta.getExtension() == "gz" ? true : false
-    def genome_name = is_compressed ? genome_fasta.getBaseName() : genome_fasta.name
+    def is_compressed = fasta.getExtension() == "gz" ? true : false
+    def genome_name = is_compressed ? fasta.getBaseName() : fasta.name
     def genome_ext = genome_name.tokenize('.')[-1]
     """
     if [ "${is_compressed}" == "true" ]; then
-        gzip -c -d ${genome_fasta} > ${genome_name}
+        gzip -c -d ${fasta} > ${genome_name}
     fi
 
     mkdir output
