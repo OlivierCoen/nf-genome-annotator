@@ -20,6 +20,8 @@ include { GENOMEANNOTATOR         } from './workflows/genomeannotator'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 
+include { getField                } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -42,22 +44,7 @@ workflow NFCORE_GENOMEANNOTATOR {
     GENOMEANNOTATOR( samplesheet )
 
     emit:
-    final_annotation            = GENOMEANNOTATOR.out.final_annotation
-    genome_stats                = GENOMEANNOTATOR.out.genome_stats
-    masked_genome               = GENOMEANNOTATOR.out.masked_genome
-    downloaded_reads            = GENOMEANNOTATOR.out.downloaded_reads
-    mapping                     = GENOMEANNOTATOR.out.mapping
-    structural_annotation       = GENOMEANNOTATOR.out.structural_annotation
-    intermediate_annotations    = GENOMEANNOTATOR.out.intermediate_annotations
-    alternative_annotations     = GENOMEANNOTATOR.out.alternative_annotations
-    proteome                    = GENOMEANNOTATOR.out.proteome
-    eggnogmapper_output         = GENOMEANNOTATOR.out.eggnogmapper_output
-    interproscan_output         = GENOMEANNOTATOR.out.interproscan_output
-    functional_annotation       = GENOMEANNOTATOR.out.functional_annotation
-    structural_annotation_stats = GENOMEANNOTATOR.out.structural_annotation_stats
-    functional_annotation_stats = GENOMEANNOTATOR.out.functional_annotation_stats
-    omark_results               = GENOMEANNOTATOR.out.omark_results
-    multiqc_report              = GENOMEANNOTATOR.out.multiqc_report
+    results = GENOMEANNOTATOR.out.results
 }
 
 
@@ -100,28 +87,11 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        NFCORE_GENOMEANNOTATOR.out.multiqc_report
+        NFCORE_GENOMEANNOTATOR.out.results.map{ rec -> rec.multiqc_report }.toList()
     )
 
     publish:
-    final_annotation            = NFCORE_GENOMEANNOTATOR.out.final_annotation
-    genome_stats                = NFCORE_GENOMEANNOTATOR.out.genome_stats
-    masked_genome               = NFCORE_GENOMEANNOTATOR.out.masked_genome
-    downloaded_reads            = NFCORE_GENOMEANNOTATOR.out.downloaded_reads
-    mapping                     = NFCORE_GENOMEANNOTATOR.out.mapping
-    structural_annotation       = NFCORE_GENOMEANNOTATOR.out.structural_annotation
-    intermediate_annotations    = NFCORE_GENOMEANNOTATOR.out.intermediate_annotations
-    alternative_annotations     = NFCORE_GENOMEANNOTATOR.out.alternative_annotations
-    proteome                    = NFCORE_GENOMEANNOTATOR.out.proteome
-    eggnogmapper_output         = NFCORE_GENOMEANNOTATOR.out.eggnogmapper_output
-    interproscan_output         = NFCORE_GENOMEANNOTATOR.out.interproscan_output
-    functional_annotation       = NFCORE_GENOMEANNOTATOR.out.functional_annotation
-    structural_annotation_stats = NFCORE_GENOMEANNOTATOR.out.structural_annotation_stats
-    functional_annotation_stats = NFCORE_GENOMEANNOTATOR.out.functional_annotation_stats
-    omark_results               = NFCORE_GENOMEANNOTATOR.out.omark_results
-    multiqc_report              = NFCORE_GENOMEANNOTATOR.out.multiqc_report
-
-    
+    results            = NFCORE_GENOMEANNOTATOR.out.results
 }
 
 /*
@@ -132,108 +102,33 @@ OUTPUTS
 
 output {
 
-    final_annotation {
-        path { meta, file ->
-            file >> "${meta.id}/final/${meta.id}.annotation.gff3"
-        }
-    }
-
-    proteome {
-        path { meta, file ->
-            file >> "${meta.id}/final/${meta.id}.proteome.faa"
-        }
-    }
-
-    masked_genome {
-        path { meta, file ->
-            file >> "${meta.id}/final/${meta.id}.masked_genome.fna"
-        }
-    }
-
-
-    
-    downloaded_reads {
-        path { meta, file ->
-            file >> "${meta.id}/structural_annotations/mappings/downloaded_reads/"
-        }
-    }
-
-    mapping {
-        path { meta, bam, bai ->
-            bam >> "${meta.id}/structural_annotations/mappings/"
-            bai >> "${meta.id}/structural_annotations/mappings/"
-        }
-    }
-
-    structural_annotation {
-        path { meta, file ->
-            file >> "${meta.id}/structural_annotations/final/"
-        }
-    }
-
-    intermediate_annotations {
-        path { meta, file ->
-            file >> "${meta.id}/structural_annotations/partially_cleaned/"
-        }
-    }
-
-    alternative_annotations {
-        path { meta, file ->
-            file >> "${meta.id}/structural_annotations/alternative/"
-        }
-    }
-
-    
-
-    eggnogmapper_output {
-        path { meta, file ->
-            file >> "${meta.id}/functional_annotations/eggnog_mapper/"
-        }
-    }
-
-    interproscan_output {
-        path { meta, file ->
-            file >> "${meta.id}/functional_annotations/interproscan/"
-        }
-    }
-
-    functional_annotation {
-        path { meta, file ->
-            file >> "${meta.id}/functional_annotations/"
-        }
-    }
-
-
-    
-
-    genome_stats {
+    results {
         path { rec ->
-            rec.genome_stats >> "${rec.id}/quality_controls/"
-        }
-    }
+            rec.final_annotation >> "${rec.id}/${rec.id}.annotation.gff3"
+            rec.proteome         >> "${rec.id}/${rec.id}.proteome.faa"
+            rec.masked_genome    >> "${rec.id}/${rec.id}.masked_genome.fna" 
+            rec.multiqc_report   >> "${rec.id}/${rec.id}.multiqc_report.html"
 
-    structural_annotation_stats {
-        path { meta, file ->
-            file >> "${meta.id}/quality_controls/${meta.id}.structural_annotation_stats.${file.extension}"
-        }
-    }
+            rec.structural_annotation    >> "${rec.id}/structural_annotations/final/"
+            rec.intermediate_annotations >> "${rec.id}/structural_annotations/partially_cleaned/"
+            rec.alternative_annotations  >> "${rec.id}/structural_annotations/alternative/"
+           
 
-    functional_annotation_stats {
-        path { meta, file ->
-            file >> "${meta.id}/quality_controls/${meta.id}.functional_annotation_stats.${file.extension}"
-        }
-    }
+            rec.eggnogmapper_output   >> "${rec.id}/functional_annotations/eggnog_mapper/"
+            rec.interproscan_output   >> "${rec.id}/functional_annotations/interproscan/"
+            rec.functional_annotation >> "${rec.id}/functional_annotations/"
 
-    omark_results {
-        path { meta, file ->
-            file >> "${meta.id}/quality_controls/"
-        }
-    }
-
-    multiqc_report {
-        path { file ->
-            file >> "reporting/"
+            rec.genome_stats                >> "${rec.id}/quality_controls/"
+            rec.structural_annotation_stats >> "${rec.id}/quality_controls/${rec.id}.structural_annotation_stats.yaml"
+            rec.functional_annotation_stats >> "${rec.id}/quality_controls/${rec.id}.functional_annotation_stats.yaml"
+            rec.omark                       >> "${rec.id}/quality_controls/"
         }
     }
 
 }
+
+/*
+rec.reads.each{ file -> file >> "${rec.id}/structural_annotations/mappings/downloaded_reads/" }
+rec.bams.each { file -> file >> "${rec.id}/structural_annotations/mappings/" }
+rec.bais.each { file -> file >> "${rec.id}/structural_annotations/mappings/" }
+*/
