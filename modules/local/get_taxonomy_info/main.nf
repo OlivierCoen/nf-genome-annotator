@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process GET_TAXONOMY_INFO {
 
     tag "${species}"
@@ -9,19 +11,26 @@ process GET_TAXONOMY_INFO {
         'community.wave.seqera.io/library/python_httpx_tenacity_pigz:aa5cc8a91450ff8d' }"
 
     input:
-    val(species)
-    path busco_datasets
-    path orthodb_clades
+        species: String
+        busco_datasets_list: List<Path> // because we used collect()
+        orthodb_clades_list: List<Path> // because we used collect()
 
     output:
-    tuple val(species), env("TAXID"),                              emit: taxid
-    tuple val(species), env("BUSCO_DATASET"),                      emit: busco_dataset
-    tuple val(species), env("ORTHODB_CLADE"),                      emit: orthodb_clade
-    tuple val("${task.process}"), val('python'), eval("python3 --version | sed 's/Python //'"),               topic: versions
-    tuple val("${task.process}"), val('httpx'),  eval('python3 -c "import httpx; print(httpx.__version__)"'), topic: versions
-    tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"),                topic: versions
+        taxonomy = record(
+            species: species, 
+            taxid: env("TAXID"),
+            busco_lineage: env("BUSCO_LINEAGE"),
+            orthodb_clade: env("ORTHODB_CLADE")
+        )
+
+    topic:
+        tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )               >> 'versions' 
+        tuple( "${task.process}", 'httpx',  eval('python3 -c "import httpx; print(httpx.__version__)"') ) >> 'versions' 
+        tuple( "${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'") )              >> 'versions'             
 
     script:
+    def busco_datasets = busco_datasets_list[0]
+    def orthodb_clades = orthodb_clades_list[0]
     def orthodb_clades_is_compressed = orthodb_clades.getExtension() == "gz" ? true : false
     def orthodb_clades_file = orthodb_clades_is_compressed ? orthodb_clades.baseName : orthodb_clades
     """
@@ -41,7 +50,7 @@ process GET_TAXONOMY_INFO {
         --orthodb-clades ${orthodb_clades_file}
 
     TAXID=\$(cat found_taxid.txt)
-    BUSCO_DATASET=\$(cat found_busco_dataset.txt)
+    BUSCO_LINEAGE=\$(cat found_busco_lineage.txt)
     ORTHODB_CLADE=\$(cat found_orthodb_clade.txt)
     """
 
