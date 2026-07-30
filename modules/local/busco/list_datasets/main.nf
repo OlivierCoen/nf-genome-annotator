@@ -9,6 +9,9 @@ process BUSCO_LISTDATASETS {
             ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/96/963bad66c10646cf0adb1967cc462ad04d02789ddbfae4fbb94182291dbddf8c/data'
             : 'community.wave.seqera.io/library/busco:6.1.0--6d1f7006d91892b3'}"
 
+    input:
+        _s: List // only used to enable caching
+
     output:
         datasets: Path = file("busco_datasets.yaml")
 
