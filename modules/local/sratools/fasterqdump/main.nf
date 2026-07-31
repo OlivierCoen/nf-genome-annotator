@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process SRATOOLS_FASTERQDUMP {
-    tag "${sra.name}"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -8,18 +10,26 @@ process SRATOOLS_FASTERQDUMP {
         'community.wave.seqera.io/library/seqkit_sra-tools_awk_pigz:885a0bc209e70207' }"
 
     input:
-    tuple val(meta), path(sra)
-    path ncbi_settings
+        record(
+            id: String, 
+            sra: Path
+        )
+        ncbi_settings: Path
 
     output:
-    tuple val(meta), path('*.fastq.gz'),                                                                      emit: reads
-    tuple val("${task.process}"), val('sratools'), eval("fasterq-dump --version 2>&1 | grep -Eo '[0-9.]+'"),  topic: versions
-    tuple val("${task.process}"), val('pigz'),     eval("pigz --version 2>&1 | sed 's/pigz //g'"),            topic: versions
+        record(
+            id: id, 
+            reads: files('*.fastq.gz')
+        )             
 
+    topic:
+        tuple( "${task.process}", 'sratools', eval("fasterq-dump --version 2>&1 | grep -Eo '[0-9.]+'") ) >> 'versions' 
+        tuple( "${task.process}", 'pigz',     eval("pigz --version 2>&1 | sed 's/pigz //g'") )           >> 'versions'  
+   
     script:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
-    def prefix = task.ext.prefix ?: "${sra.name}"
+    def prefix = task.ext.prefix ?: "$id"
     """
     export NCBI_SETTINGS="\$PWD/${ncbi_settings}"
 
@@ -39,7 +49,7 @@ process SRATOOLS_FASTERQDUMP {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${sra.name}"
+    def prefix = task.ext.prefix ?: "$id"
     """
     touch ${prefix}.fastq.gz
     """
