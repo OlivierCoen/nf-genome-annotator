@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 include { FETCH_ENA_FASTQ_URLS        } from '../../../modules/local/ena/fetch_ena_fastq_urls'
 include { DOWNLOAD_ENA_FASTQ          } from '../../../modules/local/ena/download_ena_fastq'
 
@@ -6,8 +8,9 @@ include { DOWNLOAD_ENA_FASTQ          } from '../../../modules/local/ena/downloa
 // ----------------------------------------------------------------------------
 
 workflow DOWNLOAD_ENA {
+
     take:
-    ch_ena_ids   // channel: [ val(meta), val(ena_id) ]
+    ch_ids: Channel<String>
 
     main:
 
@@ -15,16 +18,16 @@ workflow DOWNLOAD_ENA {
     // FETCH ENA FASTQ URLS
     // ----------------------------------------
 
-    FETCH_ENA_FASTQ_URLS ( ch_ena_ids )
+    FETCH_ENA_FASTQ_URLS ( ch_ids )
 
     // ---------------------------------------------------------------
     // DOWNLOAD ENA FASTQ FILES
     // ---------------------------------------------------------------
 
-    DOWNLOAD_ENA_FASTQ ( FETCH_ENA_FASTQ_URLS.out.ftp_urls)
+    DOWNLOAD_ENA_FASTQ ( FETCH_ENA_FASTQ_URLS.out )
 
 
     emit:
-    reads               = DOWNLOAD_ENA_FASTQ.out.fastq
+    reads = DOWNLOAD_ENA_FASTQ.out
 
 }
