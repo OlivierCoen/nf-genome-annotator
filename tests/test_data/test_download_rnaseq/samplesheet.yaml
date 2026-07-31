@@ -1,6 +1,14 @@
 - sample: sra
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  rnaseq_public_id: 
+  species: Arabidopsis thaliana
+  rnaseq_public_ids: 
     - SRX30583970 # paired-end
     - DRX552466 # single-end
+
+- sample: ena
+  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  species: Arabidopsis thaliana
+  rnaseq_public_ids: 
+    - ERX14354136 # paired-end
+    - ERR3365947 # single-end
   

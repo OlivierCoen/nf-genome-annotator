@@ -22,13 +22,13 @@ workflow TAXONOMY_INFO {
     // FETCHING LIST OF BUSCO DATASETS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    BUSCO_LISTDATASETS()
+    BUSCO_LISTDATASETS([])
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCHING LIST OF ORTHODB CLADES
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ORTHODB_GETCLADES()
+    ORTHODB_GETCLADES([])
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCHING TAXONOMY INFO AND AGGREGATING WITH PREVIOUS DATA FETCHED

@@ -34,7 +34,7 @@
                 "errorMessage": "Existing annotation GTF file cannot contain spaces and must have extension '.gtf', '.gff' or '.gff3'",
                 "meta": ["gff"]
             },
-            "rnaseq_bam": {
+            "rnaseq_bams": {
                 "type": "array",
                 "items": {
                     "type": "string",
@@ -43,9 +43,9 @@
                     "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
                     "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'"
                 },
-                "meta": ["rnaseq_bam"]
+                "meta": ["rnaseq_bams"]
             },
-            "rnaseq_fastq": {
+            "rnaseq_fastqs": {
                 "type": "array",
                 "items": {
                     "type": "object",
@@ -74,16 +74,16 @@
                         }
                     }
                 },
-                "meta": ["rnaseq_fastq"]
+                "meta": ["rnaseq_fastqs"]
             },
-            "rnaseq_public_id": {
+            "rnaseq_public_ids": {
                 "type": "array",
                 "items": {
                     "type": "string",
                     "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
                     "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
                 },
-                "meta": ["rnaseq_public_id"]
+                "meta": ["rnaseq_public_ids"]
             },
             "proteins": {
                 "type": "array",
