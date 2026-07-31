@@ -1,8 +1,9 @@
+nextflow.enable.types = true
+
 process DOWNLOAD_ENA_FASTQ {
 
+    tag "$id"
     label 'process_single'
-
-    tag "${meta.id}"
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
@@ -10,15 +11,23 @@ process DOWNLOAD_ENA_FASTQ {
         'community.wave.seqera.io/library/aria2:1.37.0--3a9ec328469995dd' }"
 
     input:
-    tuple val(meta), path(ena_ftp_url_file)
+        record(
+            id: String, 
+            ftp_urls: Path
+        )
 
     output:
-    tuple val(meta), path('*.fastq.gz'),                                                              emit: fastq
-    tuple val("${task.process}"), val('aria2'), eval('aria2c --version | head -1 | cut -d" " -f3'),   topic: versions
+        record(
+            id: id, 
+            reads: files('*.fastq.gz')
+        )
+        
+    topic:
+        tuple( "${task.process}", 'aria2', eval('aria2c --version | head -1 | cut -d" " -f3') ) >> 'versions'
 
     script:
     """
-    for url in \$(cat ${ena_ftp_url_file}); do
+    for url in \$(cat ${ftp_urls}); do
         echo "Downloading \${url}"
         aria2c \\
             -x ${task.cpus} \\
