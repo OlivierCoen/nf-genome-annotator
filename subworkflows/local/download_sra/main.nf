@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 include { CUSTOM_SRATOOLSNCBISETTINGS } from '../../../modules/nf-core/custom/sratoolsncbisettings'
 include { SRATOOLS_PREFETCH           } from '../../../modules/local/sratools/prefetch'
 include { SRATOOLS_FASTERQDUMP        } from '../../../modules/local/sratools/fasterqdump'
@@ -7,8 +9,9 @@ include { SRATOOLS_FASTERQDUMP        } from '../../../modules/local/sratools/fa
 // ----------------------------------------------------------------------------
 
 workflow DOWNLOAD_SRA {
+
     take:
-    ch_sra_ids   // channel: [ val(meta), val(sra_id) ]
+    ch_ids: Channel<String>
 
     main:
 
@@ -16,7 +19,7 @@ workflow DOWNLOAD_SRA {
     // DETECT EXISTING NCBI USER SETTINGS OR CREATE NEW ONES.
     // --------------------------------------------------------
 
-    CUSTOM_SRATOOLSNCBISETTINGS ( ch_sra_ids.collect() )
+    CUSTOM_SRATOOLSNCBISETTINGS( [] )
     ch_ncbi_settings = CUSTOM_SRATOOLSNCBISETTINGS.out.ncbi_settings
 
     // ----------------------------------------
@@ -24,16 +27,13 @@ workflow DOWNLOAD_SRA {
     // ----------------------------------------
 
     SRATOOLS_PREFETCH (
-        ch_sra_ids,
+        ch_ids,
         ch_ncbi_settings
     )
 
-    ch_sra = SRATOOLS_PREFETCH.out.sra
-                .transpose() // when multiple SRRs are downloaded for a specific SRA ID, we split them
-                .map {
-                    meta, sra ->
-                        def new_meta = [ id: sra.name ] + meta
-                        [ new_meta, sra ]
+    ch_sra = SRATOOLS_PREFETCH.out
+                .flatMap { rec -> // transpose (typed version): when multiple SRRs are downloaded for a specific SRA ID, we split them
+                    rec.sra.collect { value -> record(id: rec.id, sra: value) }
                 }
 
     // ---------------------------------------------------------------
@@ -44,9 +44,7 @@ workflow DOWNLOAD_SRA {
         ch_sra,
         ch_ncbi_settings
     )
-    ch_sra_reads = SRATOOLS_FASTERQDUMP.out.reads
-
 
     emit:
-    reads               = ch_sra_reads
+    reads = SRATOOLS_FASTERQDUMP.out
 }
