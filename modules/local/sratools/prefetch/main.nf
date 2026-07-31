@@ -1,5 +1,8 @@
+nextflow.enable.types = true
+
 process SRATOOLS_PREFETCH {
-    tag "${sra_id}"
+
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -8,21 +11,26 @@ process SRATOOLS_PREFETCH {
         'community.wave.seqera.io/library/sra-tools:3.2.1--2063130dadd340c5' }"
 
     input:
-    tuple val(meta), val(sra_id)
-    path ncbi_settings
+        id: String
+        ncbi_settings: Path
 
     output:
-    tuple val(meta), path("${two_first_letters}*", type: 'dir'),                                                                   emit: sra
-    tuple val("${task.process}"), val('sratools'), eval("prefetch --version 2>&1 | grep -Eo '[0-9.]+'"),         topic: versions
-    tuple val("${task.process}"), val('curl'), eval("curl --version | head -n 1 | sed 's/^curl //; s/ .*\$//'"), topic: versions
+        record(
+            id: id, 
+            sra: files("${id[0..1]}*", type: 'dir')
+        )
+  
+    topic:
+        tuple( "${task.process}", 'sratools', eval("fasterq-dump --version 2>&1 | grep -Eo '[0-9.]+'") )         >> 'versions' 
+        tuple( "${task.process}", 'curl',     eval("curl --version | head -n 1 | sed 's/^curl //; s/ .*\$//'") ) >> 'versions'  
 
     script:
-    args = task.ext.args ?: ''
-    two_first_letters = sra_id[0..1]
+    def args = task.ext.args ?: ''
+    def two_first_letters = id[0..1]
     """
     export NCBI_SETTINGS="\$PWD/!{ncbi_settings}"
-
-    prefetch $args $sra_id
+    
+    prefetch $args $id
 
     # sometimes the SRA ID actually downloaded is different from the original one
     # but the two first letters stay the same
@@ -42,7 +50,7 @@ process SRATOOLS_PREFETCH {
 
     stub:
     """
-    mkdir ${sra_id}
-    touch ${sra_id}/${sra_id}.sra
+    mkdir ${id}
+    touch ${id}/${id}.sra
     """
 }
