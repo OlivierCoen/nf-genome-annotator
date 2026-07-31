@@ -22,7 +22,6 @@ include { FUNCTIONAL_ANNOTATION                                         } from '
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { REPORTING                                                     } from '../subworkflows/local/reporting'
 
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -48,9 +47,9 @@ workflow GENOMEANNOTATOR {
                         fasta: genome,
                         species: meta.species,
                         gff: meta.gff ?: [],
-                        rnaseq_bam: meta.rnaseq_bam ?: [],
-                        rnaseq_fastq: meta.rnaseq_fastq ?: [],
-                        rnaseq_public_id: meta.rnaseq_public_id ?: [],
+                        rnaseq_bams: meta.rnaseq_bams ?: [],
+                        rnaseq_fastqs: meta.rnaseq_fastqs ?: [],
+                        rnaseq_public_ids: meta.rnaseq_public_ids ?: [],
                         proteins: meta.proteins ?: [],
                         braker_gtf: meta.braker_gtf ?: [],
                         hintsfile: meta.hintsfile ?: []
@@ -126,14 +125,18 @@ workflow GENOMEANNOTATOR {
             )
             ch_main = ch_main.join(GENOME_MASKING.out.masked, by: 'id')
         }
-/*
+
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // DOWNLOAD READS FROM SRA / ENA IF NEEDED
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+        DOWNLOAD_READS( 
+            ch_main.map{ rec -> rec.subMap(['id', 'rnaseq_public_ids']) }
+        )
 
-        DOWNLOAD_READS( ch_input )
-        ch_downloaded_reads = DOWNLOAD_READS.out.reads
-
+        //ch_main = ch_main.join(DOWNLOAD_READS.out.reads, by : 'id').view()
+      
+/*
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // MAP RNASEQ READS TO GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
