@@ -1,8 +1,10 @@
+nextflow.enable.types = true
+
 process FETCH_ENA_FASTQ_URLS {
 
     label 'process_medium'
 
-    tag "${meta.id}"
+    tag "$id"
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
@@ -10,18 +12,23 @@ process FETCH_ENA_FASTQ_URLS {
         'community.wave.seqera.io/library/requests_tenacity:4bfd6dae88df84fc' }"
 
     input:
-    tuple val(meta), val(accession)
+        id: String
 
     output:
-    tuple val(meta), path('ena_ftp_links.txt'),                                                                                                 emit: ftp_urls
-    tuple val("${task.process}"), val('python'),   eval("python3 --version | sed 's/Python //'"),                                               topic: versions
-    tuple val("${task.process}"), val('requests'), eval('python3 -c "import requests; print(requests.__version__)"'),                           topic: versions
-    tuple val("${task.process}"), val('tenacity'), eval('python3 -c "from importlib.metadata import version; print(version(\'tenacity\'))"'),   topic: versions
-
+        record(
+            id: id, 
+            ftp_urls: file('ena_ftp_links.txt')
+        ) 
+    
+    topic:
+        tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )                                               >> 'versions'
+        tuple( "${task.process}", 'requests', eval('python3 -c "import requests; print(requests.__version__)"') )                         >> 'versions'
+        tuple( "${task.process}", 'tenacity', eval('python3 -c "from importlib.metadata import version; print(version(\'tenacity\'))"') ) >> 'versions'
+        
     script:
     """
     fetch_ena_fastq_urls.py \\
-        --accession $accession
+        --accession $id 
     """
 
 }
