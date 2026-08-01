@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process HISAT2_BUILD {
-    tag "${fasta}"
+    tag "${id}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -8,12 +10,21 @@ process HISAT2_BUILD {
         'community.wave.seqera.io/library/hisat2:2.2.2--3dea1097582b823a'}"
 
     input:
-    tuple val(meta), path(fasta), path(splicesites), path(exons)
+        record(
+            id: String,
+            fasta: Path,
+            splice_sites: Path?,
+            exons: Path?
+        )
 
     output:
-    tuple val(meta), path("hisat2"), emit: index
-    tuple val("${task.process}"), val('hisat2'), eval("hisat2 --version | sed -n 's/.*version \\([^ ]*\\).*/\\1/p'"), topic: versions
+        record(
+            id: id,
+            index: file("hisat2", type: 'dir')
+        )
 
+    topic:
+        tuple("${task.process}", 'hisat2', eval('hisat2 --version | grep -o "version [^ ]*" | cut -d " " -f 2')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
