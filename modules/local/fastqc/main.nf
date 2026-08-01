@@ -1,28 +1,30 @@
+nextflow.enable.types = true
+
 process FASTQC {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0'
-        : 'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0'}"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+            ? 'https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0'
+            : 'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0'}"
 
     input:
-    tuple val(meta), path(reads, stageAs: '?/*')
+        record(id: String, reads: List<Path>)
 
-    output:
-    tuple val(meta), path("*.html"), emit: html
-    tuple val(meta), path("*.zip"), emit: zip
-    tuple val("${task.process}"), val('fastqc'), eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"'), emit: versions_fastqc, topic: versions
+    stage:
+        stageAs reads, '?/*'
 
-    when:
-    task.ext.when == null || task.ext.when
+    topic:
+        tuple('fastqc', id, file("*.html"))                                                        >> 'additional_results'
+        tuple('fastqc', id, file("*.zip"))                                                         >> 'fastqc_multiqc'
+        tuple("${task.process}", 'fastqc', eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "$id"
     // Make list of old name and new name pairs to use for renaming in the bash while loop
-    def old_new_pairs = reads instanceof Path || reads.size() == 1 ? [[reads, "${prefix}.${reads.extension}"]] : reads.withIndex().collect { entry, index -> [entry, "${prefix}_${index + 1}.${entry.extension}"] }
+    def old_new_pairs = reads.size() == 1 ? [[reads[0], "${prefix}.${reads[0].extension}"]] : reads.withIndex().collect { entry, index -> [entry, "${prefix}_${index + 1}.${entry.extension}"] }
     def rename_to = old_new_pairs*.join(' ').join(' ')
     def renamed_files = old_new_pairs.collect { _old_name, new_name -> new_name }.join(' ')
 
@@ -49,7 +51,7 @@ process FASTQC {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "$id"
     """
     touch ${prefix}.html
     touch ${prefix}.zip
