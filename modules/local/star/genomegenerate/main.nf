@@ -1,90 +1,49 @@
+nextflow.enable.types = true
+
 process STAR_GENOMEGENERATE {
-    tag "$fasta"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/26/268b4c9c6cbf8fa6606c9b7fd4fafce18bf2c931d1a809a0ce51b105ec06c89d/data' :
-        'community.wave.seqera.io/library/htslib_samtools_star_gawk:ae438e9a604351a4' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/1b/1b03f5c57d28f4975bbbda74a56202f192c69744e3f4533463cc2dfc1bde2bba/data' :
+        'community.wave.seqera.io/library/star:2.7.11b--5300af0cf0d14492' }"
 
     input:
-    tuple val(meta), path(fasta), path(gtf)
-    val ignore_existing_gtf
+        record(
+            id: String,
+            fasta: Path,
+            gtf: Path
+        )
+        ignore_existing_gtf: Boolean
 
     output:
-    tuple val(meta), path("star")  , emit: index
-    tuple val("${task.process}"), val('star'), eval('STAR --version | sed -e "s/STAR_//g"'), emit: versions_star, topic: versions
-    tuple val("${task.process}"), val('samtools'), eval("samtools --version | sed -n '1s/samtools //p'"), emit: versions_samtools, topic: versions
-    tuple val("${task.process}"), val('gawk'), eval("gawk --version | sed -n '1{s/GNU Awk //;s/,.*//;p}'"), emit: versions_gawk, topic: versions
+        record(
+            id: id,
+            index: file('star', type: 'dir')
+        )
+
+    topic:
+        tuple("${task.process}", 'star', eval('STAR --version | sed "s/STAR_//g"')) >> 'versions'
 
     script:
     def args        = task.ext.args ?: ''
     def args_list   = args.tokenize()
     def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
     def gtf_arg     = ignore_existing_gtf ? "" : gtf ? "--sjdbGTFfile $gtf" : ''
-    if (args_list.contains('--genomeSAindexNbases')) {
-        """
-        mkdir star
-        STAR \\
-            --runMode genomeGenerate \\
-            --genomeDir star/ \\
-            --genomeFastaFiles $fasta \\
-            $gtf_arg \\
-            --runThreadN $task.cpus \\
-            $memory \\
-            $args
-        """
-    } else {
-        """
-        samtools faidx $fasta
-        NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
+    """
+    NUM_BASES=\$(grep -v '^>' $fasta | tr -d '\n' | wc -c)
 
-        mkdir star
-        STAR \\
-            --runMode genomeGenerate \\
-            --genomeDir star/ \\
-            --genomeFastaFiles $fasta \\
-            $gtf_arg \\
-            --runThreadN $task.cpus \\
-            --genomeSAindexNbases \$NUM_BASES \\
-            $memory \\
-            $args
-        """
-    }
+    mkdir star
+    STAR \\
+        --runMode genomeGenerate \\
+        --genomeDir star/ \\
+        --genomeFastaFiles $fasta \\
+        $gtf_arg \\
+        --runThreadN $task.cpus \\
+        --genomeSAindexNbases \$NUM_BASES \\
+        $memory \\
+        $args
+    """
 
-    stub:
-    if (gtf) {
-        """
-        mkdir star
-        touch star/Genome
-        touch star/Log.out
-        touch star/SA
-        touch star/SAindex
-        touch star/chrLength.txt
-        touch star/chrName.txt
-        touch star/chrNameLength.txt
-        touch star/chrStart.txt
-        touch star/exonGeTrInfo.tab
-        touch star/exonInfo.tab
-        touch star/geneInfo.tab
-        touch star/genomeParameters.txt
-        touch star/sjdbInfo.txt
-        touch star/sjdbList.fromGTF.out.tab
-        touch star/sjdbList.out.tab
-        touch star/transcriptInfo.tab
-        """
-    } else {
-        """
-        mkdir star
-        touch star/Genome
-        touch star/Log.out
-        touch star/SA
-        touch star/SAindex
-        touch star/chrLength.txt
-        touch star/chrName.txt
-        touch star/chrNameLength.txt
-        touch star/chrStart.txt
-        touch star/genomeParameters.txt
-        """
-    }
 }
