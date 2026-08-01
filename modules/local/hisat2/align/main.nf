@@ -1,26 +1,40 @@
+nextflow.enable.types = true
+
 process HISAT2_ALIGN {
-    tag "$meta.id"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/c3/c36472269e8898f63b7b65dd40433462d541f9e75f9401f0bf8488021275d006/data' :
-        'community.wave.seqera.io/library/hisat2_samtools:6ca0ef72b662d5c8' }"
+            'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ca/ca541d2e69c03b3cb2a10da5dc6fbe21d4548f90bbdc08d5e4f8e13f0fea9a75/data' :
+            'community.wave.seqera.io/library/hisat2_samtools:add4b555d95c067d' }"
 
     input:
-    tuple val(meta), path(reads), path(index)
+        record(
+            id: String,
+            reads: List<Path>,
+            index: Path
+        )
 
     output:
-    tuple val(meta), path("*.bam")                   , emit: bam
-    tuple val(meta), path("*.log")                   , topic: hisat2_summary
-    tuple val(meta), path("*fastq.gz"), optional:true, emit: fastq
-    tuple val("${task.process}"), val('hisat2'), eval("hisat2 --version | sed -n '1s/.*version //p'"), topic: versions
-    tuple val("${task.process}"), val('samtools'), eval("samtools --version | sed -n '1s/samtools //p'"), topic: versions
+        record(
+            id: id,
+            bam: file("*.bam")
+        )
+
+    topic:
+        tuple('hisat2', id, '*.log') >> 'logs'
+        tuple("${task.process}", 'hisat2', eval('hisat2 --version | grep -o "version [^ ]*" | cut -d " " -f 2')) >> 'versions'
+        tuple("${task.process}", 'samtools', eval("samtools --version | sed -n '1s/samtools //p'"))              >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "$id"
+    def single_end = reads.size() == 1 ? true: false
 
+    // TODO: implement computation of strandedness
+    strandedness_arg = ''
+    /*
     def strandedness = ''
     if (meta.strandedness == 'forward') {
         strandedness_arg = meta.single_end ? '--rna-strandness F' : '--rna-strandness FR'
@@ -29,9 +43,10 @@ process HISAT2_ALIGN {
     } else {
         strandedness_arg = ''
     }
-    
+    */
+
     def rg = args.contains("--rg-id") ? "" : "--rg-id ${prefix} --rg SM:${prefix}"
-    if (meta.single_end) {
+    if ( single_end ) {
         """
         INDEX=`find -L ./ -name "*.1.ht2*" | sed 's/\\.1.ht2.*\$//'`
         hisat2 \\
