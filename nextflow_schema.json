@@ -118,7 +118,7 @@
                 "enum": ["hisat2", "star"],
                 "default": "hisat2"
               },
-              "ignore_existing_gtf_for_mapping": {
+              "ignore_existing_gff_for_mapping": {
                   "type": "boolean",
                   "description": "Ignore existing GTF (when provided) for guiding RNA-seq read mapping.",
                   "fa_icon": "fas fa-hand-scissors"
