@@ -1,72 +1,57 @@
+nextflow.enable.types = true
+
 include { HISAT2_EXTRACTSPLICESITES     } from '../../../modules/nf-core/hisat2/extractsplicesites'
 include { HISAT2_EXTRACTEXONS           } from '../../../modules/local/hisat2/extractexons'
 include { HISAT2_BUILD                  } from '../../../modules/local/hisat2/build'
 include { HISAT2_ALIGN                  } from '../../../modules/local/hisat2/align'
 
+record MappingInput {
+    id: String
+    reads: List<Path>
+    fasta: Path
+    gtf: Path
+}
 
 workflow FASTQ_ALIGN_HISAT2 {
+
     take:
-    ch_genome
-    ch_reads
-    ch_gtf
-    ignore_existing_gtf_for_mapping
+    ch_input: Channel<MappingInput>
+    ignore_existing_gff_for_mapping: Boolean
 
     main:
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // EXTRACT SPLICE SITES AND EXONS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if ( !ignore_existing_gff_for_mapping ) {
+
+        HISAT2_EXTRACTSPLICESITES( ch_input )
+
+        HISAT2_EXTRACTEXONS( ch_input )
+
+        ch_input = ch_input
+                    .join(HISAT2_EXTRACTSPLICESITES.out, by: 'id')
+                    .join(HISAT2_EXTRACTEXONS.out, by: 'id')
+
+    } else {
+        ch_input = ch_input.map{ rec -> rec + record(splice_sites: null, exons: null) }
+    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // INDEX GENOME FOR HISAT2
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if ( !ignore_existing_gtf_for_mapping ) {
+    HISAT2_BUILD( ch_input )
 
-        ch_gtf_to_extract = ch_reads
-                                .cross( ch_gtf ) { v -> v[0][0] } // match only on id
-                                .map{ // [[meta, reads], [meta2, index]]
-                                    read_part, gtf_part -> 
-                                        def meta = gtf_part[0]
-                                        def gtf = gtf_part[1]
-                                        [ meta, gtf ]
-                                }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // MAP READS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        HISAT2_EXTRACTSPLICESITES( ch_gtf_to_extract )
-        ch_splicessites = HISAT2_EXTRACTSPLICESITES.out.txt
-        
-        HISAT2_EXTRACTEXONS( ch_gtf_to_extract )
-        ch_exons = HISAT2_EXTRACTEXONS.out.txt
-        
-    } else {
-        ch_splicessites = channel.of( [] )
-        ch_exons = channel.of( [] )
-    }
-
-    ch_hisat2_build_input = ch_genome
-                                .join( ch_splicessites, remainder: true ) // gives objects even if no corresponding splice sites
-                                .join( ch_exons, remainder: true ) // gives objects even if no corresponding exons
-                                .filter{ meta, genome, splicesites, exons -> genome != null }
-                                .map{
-                                    meta, genome, splicesites, exons ->
-                                        [ meta, genome, splicesites?: [], exons?: [] ]
-                                }
-
-    HISAT2_BUILD( ch_hisat2_build_input )
-    ch_index = HISAT2_BUILD.out.index
-    
-    //
-    // Map reads with HISAT2
-    //
-
-    ch_hisat2_input =  ch_reads
-                        .cross( ch_index ) { v -> v[0][0] } // match only on id, ignore single_end
-                        .map{ // [[meta, reads], [meta2, index]]
-                            read_part, index_part -> 
-                                def meta = read_part[0]
-                                def reads = read_part[1]
-                                def index = index_part[1]
-                                [ meta, reads, index ]
-                        }
-    
-    HISAT2_ALIGN( ch_hisat2_input )
+    HISAT2_ALIGN(
+        ch_input.join(HISAT2_BUILD.out, by: 'id')
+    )
 
     emit:
-    bam                 = HISAT2_ALIGN.out.bam // channel: [ val(meta), path(bam) ]
+    mapped = ch_input.join(HISAT2_ALIGN, by: 'id')
 }
