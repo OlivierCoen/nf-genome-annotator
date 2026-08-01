@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process SAMTOOLS_SORT {
     tag "${meta.id}"
     label 'process_medium'
@@ -8,12 +10,20 @@ process SAMTOOLS_SORT {
         : 'community.wave.seqera.io/library/htslib_samtools:1.23.1--5b6bb4ede7e612e5'}"
 
     input:
-    tuple val(meta), path(bam)
+        record(
+            id: String,
+            bam: Path
+        )
 
     output:
-    tuple val(meta), path("${prefix}.bam"), emit: bam
-    tuple val(meta), path("${prefix}.bam.bai"), emit: index
-    tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), topic: versions, emit: versions_samtools
+        record(
+            id: id,
+            bam: file("*.bam"),
+            bai: file("*.bai")
+        )
+
+    topic:
+        tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''

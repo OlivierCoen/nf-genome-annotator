@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process SAMTOOLS_FAIDX {
-    tag "${fasta}"
+    tag "${fasta.name}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -8,11 +10,16 @@ process SAMTOOLS_FAIDX {
         : 'community.wave.seqera.io/library/htslib_samtools:1.23.1--5b6bb4ede7e612e5'}"
 
     input:
-    tuple val(meta), path(fasta)
+        record(fasta: Path)
 
     output:
-    tuple val(meta), path("*.fai"), emit: fai
-    tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), topic: versions, emit: versions_samtools
+        record(
+            id: id,
+            fai: file("*.fai")
+        )
+
+    topic:
+        tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''

@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process SAMTOOLS_MERGE {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
@@ -8,15 +10,28 @@ process SAMTOOLS_MERGE {
         : 'community.wave.seqera.io/library/htslib_samtools:1.23.1--5b6bb4ede7e612e5'}"
 
     input:
-    tuple val(meta), path(bam_files, stageAs: "?/*"), path(index_files, stageAs: "?/*")
+        record(
+            id: String,
+            bams: List<Path>,
+            bais: List<Path>
+        )
+
+    stage:
+        stageAs bams, '?/*
+        stageAs bais, '?/*'
 
     output:
-    tuple val(meta), path("${prefix}.bam"), optional: true, emit: bam
-    tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), topic: versions, emit: versions_samtools
+        record(
+            id: id,
+            bam: file("*.bam")
+        )
+
+    topic:
+        tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "$id"
     """
     # Note: --threads value represents *additional* CPUs to allocate (total CPUs = 1 + --threads).
     samtools \\
