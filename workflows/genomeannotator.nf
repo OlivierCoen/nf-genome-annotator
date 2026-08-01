@@ -13,7 +13,8 @@ include { GENOME_PREPARATION                                            } from '
 include { TAXONOMY_INFO                                                 } from '../subworkflows/local/taxonomy_info'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { DOWNLOAD_READS                                                } from '../subworkflows/local/download_reads'
-include { MAP_TO_GENOME_SORT_INDEX                                      } from '../subworkflows/local/map_to_genome_sort_index'
+include { MAP_RNASEQ_READS_TO_GENOME                                    } from '../subworkflows/local/map_rnaseq_reads_to_genome'
+include { BAM_SORT_INDEX_STATS                                          } from '../subworkflows/local/bam_sort_index_stats'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
 include { ALTERNATIVE_ANNOTATIONS                                       } from '../subworkflows/local/alternative_annotation'
@@ -33,6 +34,11 @@ record Samplesheet {
     genome: Path
 }
 
+// turning the map of fastq files into a list (all modules work with lists)
+def organiseRnaseqFastqFiles( rnaseq_fastqs_list: List<Map<String, Path>> ) {
+    return rnaseq_fastqs_list.collect { fastq_map -> fastq_map.R2 ? [ fastq_map.R1, fastq_map.R2 ] : [ fastq_map.R1 ] }
+}
+
 workflow GENOMEANNOTATOR {
 
     take:
@@ -41,18 +47,18 @@ workflow GENOMEANNOTATOR {
     main:
 
     ch_main = ch_samplesheet
-                .map{ meta, genome ->
+                .map{ item ->
                     record(
-                        id: meta.id,
+                        id: item.id,
                         fasta: genome,
-                        species: meta.species,
-                        gff: meta.gff ?: [],
-                        rnaseq_bams: meta.rnaseq_bams ?: [],
-                        rnaseq_fastqs: meta.rnaseq_fastqs ?: [],
-                        rnaseq_public_ids: meta.rnaseq_public_ids ?: [],
-                        proteins: meta.proteins ?: [],
-                        braker_gtf: meta.braker_gtf ?: [],
-                        hintsfile: meta.hintsfile ?: []
+                        species: item.species,
+                        gff: item.gff,
+                        supplied_rnaseq_bams: item.rnaseq_bams ?: [],
+                        supplied_rnaseq_fastqs: item.rnaseq_fastqs ? organiseRnaseqFastqFiles(item.rnaseq_fastqs) : [],
+                        rnaseq_experiment_ids: item.rnaseq_experiment_ids ?: [],
+                        proteins: item.proteins ?: [],
+                        braker_gtf: item.braker_gtf,
+                        hintsfile: item.hintsfile
                     )
                 }
 
@@ -99,16 +105,16 @@ workflow GENOMEANNOTATOR {
     // GENOME PREPARATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GENOME_PREPARATION ( 
+    GENOME_PREPARATION (
         ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) }
     )
     ch_main = ch_main.join(GENOME_PREPARATION.out.prepared, by: 'id')
-    
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TAXONOMY_INFO( 
+    TAXONOMY_INFO(
         ch_main.map{ rec -> rec.species }.unique()
     )
     ch_main = ch_main.join(TAXONOMY_INFO.out.taxonomy, by: 'species')
@@ -120,7 +126,7 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if ( !params.skip_masking ) {
-            GENOME_MASKING ( 
+            GENOME_MASKING (
                 ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) }
             )
             ch_main = ch_main.join(GENOME_MASKING.out.masked, by: 'id')
@@ -129,35 +135,43 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // DOWNLOAD READS FROM SRA / ENA IF NEEDED
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        DOWNLOAD_READS( 
+
+        DOWNLOAD_READS(
             ch_main.map{ rec -> rec.subMap(['id', 'rnaseq_public_ids']) }
         )
 
-        //ch_main = ch_main.join(DOWNLOAD_READS.out.reads, by : 'id').view()
-      
-/*
+        ch_main = ch_main.join(DOWNLOAD_READS.out.reads, by: 'id')
+
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // MAP RNASEQ READS TO GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        ch_rnaseq_fastq = ch_provided_rnaseq_fastq
-                            .mix( ch_downloaded_reads )
+        ch_main = ch_main.map{ rec -> rec + record(rnaseq_fastqs: rec.supplied_rnaseq_fastqs + rec.downloaded_rnaseq_fastqs) }
 
-        MAP_TO_GENOME_SORT_INDEX(
-            ch_genome,
-            ch_rnaseq_fastq,
-            ch_rnaseq_bam,
-            ch_gff,
+        // get only genomes that need to be built (genomes for which there are reads)
+        ch_input = ch_input.filter{ rec -> rec.rnaseq_fastqs.size() > 0 }
+
+        MAP_RNASEQ_READS_TO_GENOME(
+            ch_main,
             params.skip_fastqc,
             params.skip_umi_extract,
             params.skip_trimming,
             params.rnaseq_mapper,
-            params.ignore_existing_gtf_for_mapping
+            params.ignore_existing_gff_for_mapping
         )
 
-        ch_bam_bai = MAP_TO_GENOME_SORT_INDEX.out.bam_bai
-                               
+        ch_main = MAP_RNASEQ_READS_TO_GENOME.out.bam_bai
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
+        BAM_SORT_INDEX_STATS(
+            ch_bam.mix( ch_aligned_bam ),
+            ch_genome_for_mapping
+        )
+
+
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // STRUCTURAL ANNOTATION
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -325,7 +339,7 @@ workflow GENOMEANNOTATOR {
 }
     emit:
     results = ch_main
-    
+
 }
 
 /*
