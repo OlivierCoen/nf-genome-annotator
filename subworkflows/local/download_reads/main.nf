@@ -21,20 +21,20 @@ workflow DOWNLOAD_READS {
 
     // creating a channel containing unique public ids (SRA / ENA)
     ch_public_ids = ch_ids.flatMap{ rec -> rec.rnaseq_public_ids.collect() }.unique()
-   
+
     // ------------------------------------------------------------------------------------
     // DOWNLOAD SRA DATA
     // ------------------------------------------------------------------------------------
-    
-    DOWNLOAD_SRA( 
+
+    DOWNLOAD_SRA(
         ch_public_ids.filter{ id -> id.startsWith('SR') || id.startsWith('DR') }
     )
-    
+
     // ------------------------------------------------------------------------------------
     // DOWNLOAD ENA DATA
     // ------------------------------------------------------------------------------------
-    
-    DOWNLOAD_ENA( 
+
+    DOWNLOAD_ENA(
         ch_public_ids.filter{ id -> id.startsWith('ER') }
     )
 
@@ -46,22 +46,22 @@ workflow DOWNLOAD_READS {
                             .mix( DOWNLOAD_ENA.out.reads )
                             .map{ rec -> record(public_id: rec.id, reads: rec.reads) }
 
-    // the Nextflow syntax is not appropriate here...
+    // associating back to the corresponding sample IDs
+    // TODO: simplify when groupBy can handle reo
     ch_reads = ch_ids
-                .flatMap{ 
-                    rec -> rec.rnaseq_public_ids.collect{ value -> record(id: rec.id, public_id: value) } 
+                .flatMap{
+                    rec -> rec.rnaseq_public_ids.collect{ value -> record(id: rec.id, public_id: value) }
                 }
                 .join(ch_downloaded_reads, by: 'public_id')
-                .map{ rec -> tuple(rec.id, [rec.public_id, rec.reads]) } 
+                .map{ rec -> tuple(rec.id, [rec.public_id, rec.reads]) }
                 .groupTuple()
-                .map{ id, tuples -> 
-                    println tuples
-                    
+                .map{ id, tuples ->
+                    record(
+                        id: id,
+                        downloaded_rnaseq_fastqs: tuples.collect{ tup -> tup[1].flatten() } // keep only reads
+                    )
                 }
-                //.view{ v -> "after $v"}
-                            
-    // single_end: rec.reads instanceof Path ? true : false 
-    // associating back to the corresponding sample IDs
+
     emit:
     reads = ch_ids
 
