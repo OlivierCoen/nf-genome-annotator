@@ -1,15 +1,20 @@
+nextflow.enable.types = true
+
 include { STAR_GENOMEGENERATE            } from '../../../modules/local/star/genomegenerate'
 include { STAR_ALIGN                     } from '../../../modules/local/star/align'
 
-
+record MappingInput {
+    id: String
+    reads: List<Path>
+    fasta: Path
+    gtf: Path
+}
 
 workflow FASTQ_ALIGN_STAR {
 
     take:
-    ch_genome
-    ch_reads
-    ch_gtf
-    ignore_existing_gtf_for_mapping
+    ch_input: Channel<MappingInput>
+    ignore_existing_gff_for_mapping: Boolean
 
     main:
 
@@ -17,40 +22,21 @@ workflow FASTQ_ALIGN_STAR {
     // INDEX GENOME FOR STAR
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_star_genomegenerate_input = ch_genome
-                                    .join( ch_gtf, remainder: true ) // gives objects even if no corresponding gtf
-                                    .filter{ meta, genome, gtf -> genome != null }
-                                    .map{
-                                        meta, genome, gtf ->
-                                            [ meta, genome, gtf?: [] ]
-                                    }
-
     STAR_GENOMEGENERATE(
-        ch_star_genomegenerate_input,
-        ignore_existing_gtf_for_mapping
+        ch_input,
+        ignore_existing_gff_for_mapping
     )
-    ch_index = STAR_GENOMEGENERATE.out.index
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAP READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (ignore_existing_gtf_for_mapping) {
-        ch_star_input = ch_reads
-                            .cross( ch_index ) { v -> v[0][0] } // match only on id, ignore single_end
-                            .map{ meta, reads, index -> [ meta, reads, index, [] ] }
-    } else {
-        ch_star_input = ch_reads
-                            .cross( ch_index ) { v -> v[0][0] }
-                            .cross( ch_gtf ) { v -> v[0][0] }
-    }
-
     STAR_ALIGN(
-        ch_star_input,
-        ignore_existing_gtf_for_mapping
+        ch_input.join(STAR_GENOMEGENERATE.out, by: 'id'),
+        ignore_existing_gff_for_mapping
     )
 
     emit:
-    bam                 = STAR_ALIGN.out.bam // channel: [ val(meta), path(bam) ]
+    mapped = ch_input.join(STAR_ALIGN.out, by: 'id')
 
 }
