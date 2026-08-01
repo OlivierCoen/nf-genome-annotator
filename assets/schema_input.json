@@ -18,7 +18,8 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|n)?a(\\.gz)?$",
-                "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
+                "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)",
+                "meta": ["genome"]
             },
             "species": {
                 "type": ["string", "integer"],
@@ -28,6 +29,7 @@
             },
             "gff": {
                 "type": "string",
+                "description": "Current annotation of the genome. Can be a `GFF` or `GTF` file.",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gtf|gff|gff3)$",
@@ -50,40 +52,37 @@
                 "items": {
                     "type": "object",
                     "properties": {
-                        "fastq_1": {
+                        "R1": {
                             "type": "string",
-                            "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                            "description": "Forward fastq file (paired-end) or single fastq file (single-end). Mandatory field.",
+                            "pattern": "^\\S+\\.f(ast)?q\\(\\.gz)?$",
                             "format": "file-path",
                             "exists": true,
-                            "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                            "errorMessage": "Forward / single fastq file for must be provided, cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
                         },
-                        "fastq_2": {
-                            "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                            "anyOf": [
-                                {
-                                    "type": "string",
-                                    "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                                    "format": "file-path",
-                                    "exists": true
-                                },
-                                {
-                                    "type": "string",
-                                    "maxLength": 0
-                                }
-                            ]
+                        "R2": {
+                            "type": "string",
+                            "description": "Reverse fastq file.",
+                            "pattern": "^\\S+\\.f(ast)?q\\(\\.gz)?$",
+                            "format": "file-path",
+                            "exists": true,
+                            "errorMessage": "Reverse fastq file cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
                         }
+                    },
+                    "dependentRequired": {
+                        "R2": ["R1"]
                     }
                 },
                 "meta": ["rnaseq_fastqs"]
             },
-            "rnaseq_public_ids": {
+            "rnaseq_experiment_ids": {
                 "type": "array",
                 "items": {
                     "type": "string",
                     "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
                     "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
                 },
-                "meta": ["rnaseq_public_ids"]
+                "meta": ["rnaseq_experiment_ids"]
             },
             "proteins": {
                 "type": "array",
