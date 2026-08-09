@@ -31,7 +31,7 @@ process SAMTOOLS_INDEX {
         index \\
         -@ ${task.cpus} \\
         ${args} \\
-        ${input}
+        ${bam}
     """
 
 }

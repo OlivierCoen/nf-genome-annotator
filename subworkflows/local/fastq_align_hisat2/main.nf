@@ -1,6 +1,6 @@
 nextflow.enable.types = true
 
-include { HISAT2_EXTRACTSPLICESITES     } from '../../../modules/nf-core/hisat2/extractsplicesites'
+include { HISAT2_EXTRACTSPLICESITES     } from '../../../modules/local/hisat2/extractsplicesites'
 include { HISAT2_EXTRACTEXONS           } from '../../../modules/local/hisat2/extractexons'
 include { HISAT2_BUILD                  } from '../../../modules/local/hisat2/build'
 include { HISAT2_ALIGN                  } from '../../../modules/local/hisat2/align'

@@ -47,11 +47,11 @@ workflow GENOMEANNOTATOR {
     main:
 
     ch_main = ch_samplesheet
-                .map{ item ->
+                .map{ item, sample, genome, species ->
                     record(
-                        id: item.id,
+                        id: sample,
                         fasta: genome,
-                        species: item.species,
+                        species: species,
                         gff: item.gff,
                         supplied_rnaseq_bams: item.rnaseq_bams ?: [],
                         supplied_rnaseq_fastqs: item.rnaseq_fastqs ? organiseRnaseqFastqFiles(item.rnaseq_fastqs) : [],
@@ -149,7 +149,7 @@ workflow GENOMEANNOTATOR {
         ch_main = ch_main.map{ rec -> rec + record(rnaseq_fastqs: rec.supplied_rnaseq_fastqs + rec.downloaded_rnaseq_fastqs) }
 
         // get only genomes that need to be built (genomes for which there are reads)
-        ch_input = ch_input.filter{ rec -> rec.rnaseq_fastqs.size() > 0 }
+        ch_main = ch_main.filter{ rec -> rec.rnaseq_fastqs.size() > 0 }
 
         MAP_RNASEQ_READS_TO_GENOME(
             ch_main,

@@ -1,6 +1,6 @@
 include { BRAKER3                                               } from '../../../modules/local/braker3'
 include { TSEBRA_TSEBRA as TSEBRA                               } from '../../../modules/local/tsebra/tsebra'
-include { SAMTOOLS_INDEX                                        } from '../../../modules/nf-core/samtools/index'
+include { SAMTOOLS_INDEX                                        } from '../../../modules/local/samtools/index'
 include { SAMTOOLS_MERGE                                        } from '../../../modules/local/samtools/merge'
 include { METAEUK_EASYPREDICT                                   } from '../../../modules/local/metaeuk/easypredict'
 
@@ -41,7 +41,7 @@ workflow STRUCTURAL_ANNOTATION {
         // ----------------------------------------------------------
         // PREPARE ORTHODB PROTEIN DB FROM CLADE-SPECIFIC ORTHODB AND CUSTOM PROTEIN FASTA FILES
         // ----------------------------------------------------------
-    
+
         ORTHODB_PREPARATION(
             ch_proteins,
             clade,
@@ -65,7 +65,7 @@ workflow STRUCTURAL_ANNOTATION {
                                     merge_me: bams.size() > 1
                                         [ meta, bams, bais ]
                             }
-        
+
         SAMTOOLS_MERGE( ch_branched_bam.merge_me )
 
         ch_single_bam = ch_branched_bam.leave_me_alone
@@ -131,7 +131,7 @@ workflow STRUCTURAL_ANNOTATION {
         // ----------------------------------------------------------
         // PREPARE MMSEQS PROTEIN DB FROM THE CHOSEN MMSEQS DB AND CUSTOM PROTEIN FASTA FILES
         // ----------------------------------------------------------
-    
+
         MMSEQS_DB_PREPARATION(
             ch_proteins,
             mmseqs_db,
@@ -144,7 +144,7 @@ workflow STRUCTURAL_ANNOTATION {
         // RUN METAEUK
         // ----------------------------------------------------------
 
-        METAEUK_EASYPREDICT( 
+        METAEUK_EASYPREDICT(
             ch_genome.join( ch_mmseqs_db )
         )
         ch_annotations = METAEUK_EASYPREDICT.out.gff

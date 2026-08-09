@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process SAMTOOLS_SORT {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -27,7 +27,7 @@ process SAMTOOLS_SORT {
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}.sorted"
+    prefix = task.ext.prefix ?: "${id}.sorted"
     """
     samtools sort \\
         ${args} \\

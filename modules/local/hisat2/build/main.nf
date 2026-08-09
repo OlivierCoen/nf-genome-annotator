@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process HISAT2_BUILD {
-    tag "${id}"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -28,7 +28,7 @@ process HISAT2_BUILD {
 
     script:
     def args = task.ext.args ?: ''
-    def splice_site_arg = splicesites ? "--ss ${splicesites}" : ""
+    def splice_site_arg = splice_sites ? "--ss ${splice_sites}" : ""
     def exon_arg = exons ? "--exon ${exons}" : ""
     """
     mkdir hisat2

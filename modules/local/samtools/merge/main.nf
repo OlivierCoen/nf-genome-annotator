@@ -17,7 +17,7 @@ process SAMTOOLS_MERGE {
         )
 
     stage:
-        stageAs bams, '?/*
+        stageAs bams, '?/*'
         stageAs bais, '?/*'
 
     output:
@@ -39,6 +39,6 @@ process SAMTOOLS_MERGE {
         --threads ${task.cpus - 1} \\
         ${args} \\
         ${prefix}.bam \\
-        ${bam_files}
+        ${bams}
     """
 }

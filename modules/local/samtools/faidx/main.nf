@@ -10,7 +10,10 @@ process SAMTOOLS_FAIDX {
         : 'community.wave.seqera.io/library/htslib_samtools:1.23.1--5b6bb4ede7e612e5'}"
 
     input:
-        record(fasta: Path)
+        record(
+            id: String,
+            fasta: Path
+        )
 
     output:
         record(

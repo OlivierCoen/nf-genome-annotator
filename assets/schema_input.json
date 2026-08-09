@@ -10,22 +10,19 @@
             "sample": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces",
-                "meta": ["id"]
+                "errorMessage": "Sample name must be provided and cannot contain spaces"
             },
             "genome": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|n)?a(\\.gz)?$",
-                "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)",
-                "meta": ["genome"]
+                "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
             },
             "species": {
                 "type": ["string", "integer"],
                 "description": "Scientifc species name (genus and species) or NCBI Taxid",
-                "help_text": "Genus and species can be separated by a '_'. Example: `'Arabidopsis thaliana'`,  `'armadillidium_nasatum'` or `3702`.",
-                "meta": ["species"]
+                "help_text": "Genus and species can be separated by a '_'. Example: `'Arabidopsis thaliana'`,  `'armadillidium_nasatum'` or `3702`."
             },
             "gff": {
                 "type": "string",

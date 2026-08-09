@@ -29,15 +29,14 @@ process SAMTOOLS_STATS {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def reference = fasta ? "--reference ${fasta}" : ""
+    def prefix = task.ext.prefix ?: "$id"
     """
     samtools \\
         stats \\
         ${args} \\
         --threads ${task.cpus} \\
-        ${reference} \\
-        ${input} \\
+        --reference ${fasta} \\
+        ${bam} \\
         > ${prefix}.stats
     """
 }

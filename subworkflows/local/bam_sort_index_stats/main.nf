@@ -1,8 +1,8 @@
 include { SAMTOOLS_FAIDX                           } from '../../../modules/local/samtools/faidx'
 include { SAMTOOLS_SORT as SAMTOOLS_SORT_INDEX     } from '../../../modules/local/samtools/sort'
 include { SAMTOOLS_STATS                           } from '../../../modules/local/samtools/stats'
-include { SAMTOOLS_IDXSTATS                        } from '../../../modules/nf-core/samtools/idxstats'
-include { SAMTOOLS_FLAGSTAT                        } from '../../../modules/nf-core/samtools/flagstat'
+include { SAMTOOLS_IDXSTATS                        } from '../../../modules/local/samtools/idxstats'
+include { SAMTOOLS_FLAGSTAT                        } from '../../../modules/local/samtools/flagstat'
 
 workflow BAM_SORT_INDEX_STATS {
     take:
@@ -21,7 +21,7 @@ workflow BAM_SORT_INDEX_STATS {
     SAMTOOLS_STATS(
         ch_bam_bai.join( ch_fasta_fai )
     )
-    
+
     SAMTOOLS_FLAGSTAT(ch_bam_bai)
 
     SAMTOOLS_IDXSTATS(ch_bam_bai)
