@@ -23,7 +23,7 @@ workflow FASTQ_FASTQC_UMITOOLS_FASTP {
     skip_trimming: Boolean
 
     main:
-
+ch_reads.view()
     if (!skip_fastqc) {
         FASTQC_RAW( ch_reads )
     }

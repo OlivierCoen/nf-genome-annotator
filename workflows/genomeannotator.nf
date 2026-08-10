@@ -13,7 +13,7 @@ include { GENOME_PREPARATION                                            } from '
 include { TAXONOMY_INFO                                                 } from '../subworkflows/local/taxonomy_info'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { DOWNLOAD_READS                                                } from '../subworkflows/local/download_reads'
-include { MAP_RNASEQ_READS_TO_GENOME                                    } from '../subworkflows/local/map_rnaseq_reads_to_genome'
+include { MAP_RNASEQ_READS                                              } from '../subworkflows/local/map_rnaseq_reads'
 include { BAM_SORT_INDEX_STATS                                          } from '../subworkflows/local/bam_sort_index_stats'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
@@ -47,18 +47,18 @@ workflow GENOMEANNOTATOR {
     main:
 
     ch_main = ch_samplesheet
-                .map{ item, sample, genome, species ->
+                .map{ meta, sample, genome, species ->
                     record(
                         id: sample,
                         fasta: genome,
                         species: species,
-                        gff: item.gff,
-                        supplied_rnaseq_bams: item.rnaseq_bams ?: [],
-                        supplied_rnaseq_fastqs: item.rnaseq_fastqs ? organiseRnaseqFastqFiles(item.rnaseq_fastqs) : [],
-                        rnaseq_experiment_ids: item.rnaseq_experiment_ids ?: [],
-                        proteins: item.proteins ?: [],
-                        braker_gtf: item.braker_gtf,
-                        hintsfile: item.hintsfile
+                        gff: meta.gff,
+                        supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
+                        supplied_rnaseq_fastqs: meta.rnaseq_fastqs ? organiseRnaseqFastqFiles(meta.rnaseq_fastqs) : [],
+                        rnaseq_experiment_ids: meta.rnaseq_experiment_ids ?: [],
+                        proteins: meta.proteins ?: [],
+                        braker_gtf: meta.braker_gtf,
+                        hintsfile: meta.hintsfile
                     )
                 }
 
@@ -82,7 +82,7 @@ workflow GENOMEANNOTATOR {
                                     if ( fastq_2 ) {
                                         [ meta + [ single_end: false ], [ fastq_1, fastq_2 ] ]
                                     } else {
-                                        [ meta + [ single_end: true ], fastq_1 ]
+            HISAT2_EXTRACTSPLICESITES                            [ meta + [ single_end: true ], fastq_1 ]
                                     }
                                 }
 
@@ -137,7 +137,7 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         DOWNLOAD_READS(
-            ch_main.map{ rec -> rec.subMap(['id', 'rnaseq_public_ids']) }
+            ch_main.map{ rec -> rec.subMap(['id', 'rnaseq_experiment_ids']) }
         )
 
         ch_main = ch_main.join(DOWNLOAD_READS.out.reads, by: 'id')
@@ -146,26 +146,29 @@ workflow GENOMEANNOTATOR {
         // MAP RNASEQ READS TO GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        ch_main = ch_main.map{ rec -> rec + record(rnaseq_fastqs: rec.supplied_rnaseq_fastqs + rec.downloaded_rnaseq_fastqs) }
+        ch_main = ch_main.map{ rec ->
+            def downloaded_rnaseq_fastqs = rec.downloaded_rnaseq_fastqs ?: []
+            rec + record(reads: rec.supplied_rnaseq_fastqs + downloaded_rnaseq_fastqs)
+        }
 
         // get only genomes that need to be built (genomes for which there are reads)
-        ch_main = ch_main.filter{ rec -> rec.rnaseq_fastqs.size() > 0 }
+        ch_main = ch_main.filter{ rec -> rec.reads.size() > 0 }
 
-        MAP_RNASEQ_READS_TO_GENOME(
-            ch_main,
+        MAP_RNASEQ_READS(
+            ch_main.map{ rec -> rec.subMap(['id', 'fasta', 'reads', 'gff']) },
             params.skip_fastqc,
             params.skip_umi_extract,
             params.skip_trimming,
             params.rnaseq_mapper,
             params.ignore_existing_gff_for_mapping
         )
-
-        ch_main = MAP_RNASEQ_READS_TO_GENOME.out.bam_bai
+/*
+        ch_main = ch_main.join(MAP_RNASEQ_READS.out.mapped, by: 'id')
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/*
+
         BAM_SORT_INDEX_STATS(
             ch_bam.mix( ch_aligned_bam ),
             ch_genome_for_mapping

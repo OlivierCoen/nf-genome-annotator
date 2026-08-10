@@ -106,13 +106,13 @@ output {
         path { rec ->
             rec.final_annotation >> "${rec.id}/${rec.id}.annotation.gff3"
             rec.proteome         >> "${rec.id}/${rec.id}.proteome.faa"
-            rec.masked_genome    >> "${rec.id}/${rec.id}.masked_genome.fna" 
+            rec.masked_genome    >> "${rec.id}/${rec.id}.masked_genome.fna"
             rec.multiqc_report   >> "${rec.id}/${rec.id}.multiqc_report.html"
 
             rec.structural_annotation    >> "${rec.id}/structural_annotations/final/"
             rec.intermediate_annotations >> "${rec.id}/structural_annotations/partially_cleaned/"
             rec.alternative_annotations  >> "${rec.id}/structural_annotations/alternative/"
-           
+
 
             rec.eggnogmapper_output   >> "${rec.id}/functional_annotations/eggnog_mapper/"
             rec.interproscan_output   >> "${rec.id}/functional_annotations/interproscan/"

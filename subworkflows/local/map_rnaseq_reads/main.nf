@@ -36,7 +36,7 @@ workflow MAP_RNASEQ_READS {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FASTQC & FASTP
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+ch_input.view()
     FASTQ_FASTQC_UMITOOLS_FASTP(
         ch_input.map{ rec -> rec.subMap(['id', 'reads']) },
         skip_fastqc,

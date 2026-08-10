@@ -52,7 +52,7 @@
                         "R1": {
                             "type": "string",
                             "description": "Forward fastq file (paired-end) or single fastq file (single-end). Mandatory field.",
-                            "pattern": "^\\S+\\.f(ast)?q\\(\\.gz)?$",
+                            "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
                             "format": "file-path",
                             "exists": true,
                             "errorMessage": "Forward / single fastq file for must be provided, cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
@@ -60,7 +60,7 @@
                         "R2": {
                             "type": "string",
                             "description": "Reverse fastq file.",
-                            "pattern": "^\\S+\\.f(ast)?q\\(\\.gz)?$",
+                            "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
                             "format": "file-path",
                             "exists": true,
                             "errorMessage": "Reverse fastq file cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."

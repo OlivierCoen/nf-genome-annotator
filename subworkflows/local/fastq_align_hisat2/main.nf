@@ -53,5 +53,5 @@ workflow FASTQ_ALIGN_HISAT2 {
     )
 
     emit:
-    mapped = ch_input.join(HISAT2_ALIGN, by: 'id')
+    mapped = ch_input.join(HISAT2_ALIGN.out, by: 'id')
 }

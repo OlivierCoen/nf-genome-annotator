@@ -9,7 +9,7 @@ include { DOWNLOAD_ENA           } from '../download_ena'
 
 record PublicIDs {
     id: String
-    public_id: Iterable<String>
+    rnaseq_experiment_ids: Iterable<String>
 }
 
 workflow DOWNLOAD_READS {
@@ -20,14 +20,14 @@ workflow DOWNLOAD_READS {
     main:
 
     // creating a channel containing unique public ids (SRA / ENA)
-    ch_public_ids = ch_ids.flatMap{ rec -> rec.rnaseq_public_ids.collect() }.unique()
+    ch_experiment_ids = ch_ids.flatMap{ rec -> rec.rnaseq_experiment_ids.collect() }.unique()
 
     // ------------------------------------------------------------------------------------
     // DOWNLOAD SRA DATA
     // ------------------------------------------------------------------------------------
 
     DOWNLOAD_SRA(
-        ch_public_ids.filter{ id -> id.startsWith('SR') || id.startsWith('DR') }
+        ch_experiment_ids.filter{ id -> id.startsWith('SR') || id.startsWith('DR') }
     )
 
     // ------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ workflow DOWNLOAD_READS {
     // ------------------------------------------------------------------------------------
 
     DOWNLOAD_ENA(
-        ch_public_ids.filter{ id -> id.startsWith('ER') }
+        ch_experiment_ids.filter{ id -> id.startsWith('ER') }
     )
 
     // ------------------------------------------------------------------------------------
@@ -44,16 +44,16 @@ workflow DOWNLOAD_READS {
 
     ch_downloaded_reads = DOWNLOAD_SRA.out.reads
                             .mix( DOWNLOAD_ENA.out.reads )
-                            .map{ rec -> record(public_id: rec.id, reads: rec.reads) }
+                            .map{ rec -> record(experiment_id: rec.id, reads: rec.reads) }
 
     // associating back to the corresponding sample IDs
     // TODO: simplify when groupBy can handle reo
     ch_reads = ch_ids
                 .flatMap{
-                    rec -> rec.rnaseq_public_ids.collect{ value -> record(id: rec.id, public_id: value) }
+                    rec -> rec.rnaseq_experiment_ids.collect{ value -> record(id: rec.id, experiment_id: value) }
                 }
-                .join(ch_downloaded_reads, by: 'public_id')
-                .map{ rec -> tuple(rec.id, [rec.public_id, rec.reads]) }
+                .join(ch_downloaded_reads, by: 'experiment_id')
+                .map{ rec -> tuple(rec.id, [rec.experiment_id, rec.reads]) }
                 .groupTuple()
                 .map{ id, tuples ->
                     record(
@@ -63,6 +63,6 @@ workflow DOWNLOAD_READS {
                 }
 
     emit:
-    reads = ch_ids
+    reads = ch_reads
 
 }
