@@ -12,7 +12,7 @@ process HISAT2_ALIGN {
     input:
         record(
             id: String,
-            reads: List<Path>,
+            reads: Iterable<Path>,
             index: Path
         )
 
@@ -30,7 +30,6 @@ process HISAT2_ALIGN {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "$id"
-    def single_end = reads.size() == 1 ? true: false
 
     // TODO: implement computation of strandedness
     strandedness_arg = ''
@@ -46,12 +45,14 @@ process HISAT2_ALIGN {
     */
 
     def rg = args.contains("--rg-id") ? "" : "--rg-id ${prefix} --rg SM:${prefix}"
-    if ( single_end ) {
+    if ( reads.size() == 1 ) {
         """
-        INDEX=`find -L ./ -name "*.1.ht2*" | sed 's/\\.1.ht2.*\$//'`
+        # find is not included in the Docker image, so use ls instead
+        INDEX=\$(ls -1 hisat2/*.1.ht2 | sed 's/\\.1.ht2.*\$//')
+
         hisat2 \\
             -x \$INDEX \\
-            -U $reads \\
+            -U ${reads[0]} \\
             $strandedness_arg \\
             --summary-file ${prefix}.hisat2.summary.log \\
             --threads $task.cpus \\
@@ -61,7 +62,9 @@ process HISAT2_ALIGN {
         """
     } else {
         """
-        INDEX=`find -L ./ -name "*.1.ht2*" | sed 's/\\.1.ht2.*\$//'`
+        # find is not included in the Docker image, so use ls instead
+        INDEX=\$(ls -1 hisat2/*.1.ht2 | sed 's/\\.1.ht2.*\$//')
+
         hisat2 \\
             -x \$INDEX \\
             -1 ${reads[0]} \\

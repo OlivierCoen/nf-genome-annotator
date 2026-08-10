@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process STAR_GENOMEGENERATE {
-    tag "$id"
+    tag "$sample_id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -11,15 +11,15 @@ process STAR_GENOMEGENERATE {
 
     input:
         record(
-            id: String,
+            sample_id: String,
             fasta: Path,
-            gtf: Path
+            gtf: Path?
         )
         ignore_existing_gtf: Boolean
 
     output:
         record(
-            id: id,
+            sample_id: sample_id,
             index: file('star', type: 'dir')
         )
 

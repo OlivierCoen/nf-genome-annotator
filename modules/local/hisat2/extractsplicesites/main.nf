@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process HISAT2_EXTRACTSPLICESITES {
-    tag "$id"
+    tag "$sample_id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -11,13 +11,13 @@ process HISAT2_EXTRACTSPLICESITES {
 
     input:
         record(
-            id: String,
+            sample_id: String,
             gtf: Path
         )
 
     output:
         record(
-            id: id,
+            sample_id: sample_id,
             splice_sites: file("*.splice_sites.txt")
         )
 
@@ -30,11 +30,6 @@ process HISAT2_EXTRACTSPLICESITES {
     hisat2_extract_splice_sites.py \\
         $args \\
         $gtf \\
-        > ${id}.splice_sites.txt
-    """
-
-    stub:
-    """
-    touch ${id}.splice_sites.txt
+        > ${sample_id}.splice_sites.txt
     """
 }

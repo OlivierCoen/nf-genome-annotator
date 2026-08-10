@@ -58,7 +58,9 @@ workflow DOWNLOAD_READS {
                 .map{ id, tuples ->
                     record(
                         id: id,
-                        downloaded_rnaseq_fastqs: tuples.collect{ tup -> tup[1].flatten() } // keep only reads
+                        downloaded_rnaseq_fastqs: tuples.collect{ tup ->
+                            record(id: tup[0], reads: tup[1].flatten())
+                        }
                     )
                 }
 

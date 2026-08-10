@@ -10,48 +10,41 @@ process FASTP {
     :         'community.wave.seqera.io/library/fastp:1.3.6--4df8d6c11b471bde' }"
 
     input:
-        record(id: String, reads: List<Path>)
+        record(id: String, reads: Iterable<Path>)
 
     output:
         record(
             id: id,
-            reads: file('*.fastp.fastq.gz')
+            reads: files('*.fastp.fastq.gz')
         )
 
     topic:
         tuple(id, file('*.json'))                                                              >> 'fastp_multiqc'
-        tuple('fastp', id, file('*.json'))                                                     >> 'logs'
+        tuple('fastp', id, file('*.fastp.log'))                                                >> 'logs'
         tuple("${task.process}", 'fastp', eval('fastp --version 2>&1 | sed -e "s/fastp //g"')) >> 'versions'
 
 
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "$id"
-    def single_end = reads.size() == 1 ? true : false
-    def out_fq1 = single_end ? "--out1 ${prefix}.fastp.fastq.gz" : "--out1 ${prefix}_R1.fastp.fastq.gz"
-    def out_fq2 = single_end ? "" : "--out2 ${prefix}_R2.fastp.fastq.gz"
-    if (single_end) {
+    if ( reads.size() == 1 ) { // single-end
         """
-        [ ! -f  ${prefix}.fastq.gz ] && ln -sf $reads ${prefix}.fastq.gz
-
         fastp \\
-            --in1 ${prefix}.fastq.gz \\
-            $out_fq1 \\
+            --in1 ${reads[0]} \\
+            --out1 ${prefix}.fastp.fastq.gz \\
             --thread $task.cpus \\
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
             $args \\
             2>| >(tee ${prefix}.fastp.log >&2)
         """
-    } else {
+    } else { // paired-end
         """
-        [ ! -f  ${prefix}_R1.fastq.gz ] && ln -sf ${reads[0]} ${prefix}_R1.fastq.gz
-        [ ! -f  ${prefix}_R2.fastq.gz ] && ln -sf ${reads[1]} ${prefix}_R2.fastq.gz
         fastp \\
-            --in1 ${prefix}_R1.fastq.gz \\
-            --in2 ${prefix}_R2.fastq.gz \\
-            $out_fq1 \\
-            $out_fq2 \\
+            --in1 ${reads[0]} \\
+            --in2 ${reads[1]} \\
+            --out1 ${prefix}_R1.fastp.fastq.gz \\
+            --out2 ${prefix}_R2.fastp.fastq.gz \\
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
             --thread $task.cpus \\

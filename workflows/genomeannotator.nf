@@ -148,33 +148,38 @@ workflow GENOMEANNOTATOR {
 
         ch_main = ch_main.map{ rec ->
             def downloaded_rnaseq_fastqs = rec.downloaded_rnaseq_fastqs ?: []
-            rec + record(reads: rec.supplied_rnaseq_fastqs + downloaded_rnaseq_fastqs)
+            rec + record(reads_to_map: rec.supplied_rnaseq_fastqs + downloaded_rnaseq_fastqs)
         }
 
         // get only genomes that need to be built (genomes for which there are reads)
-        ch_main = ch_main.filter{ rec -> rec.reads.size() > 0 }
+        ch_main = ch_main.filter{ rec -> rec.reads_to_map.size() > 0 }
 
         MAP_RNASEQ_READS(
-            ch_main.map{ rec -> rec.subMap(['id', 'fasta', 'reads', 'gff']) },
+            ch_main.map{ rec -> rec.subMap(['id', 'fasta', 'reads_to_map', 'gff']) },
             params.skip_fastqc,
             params.skip_umi_extract,
             params.skip_trimming,
             params.rnaseq_mapper,
             params.ignore_existing_gff_for_mapping
         )
-/*
+
         ch_main = ch_main.join(MAP_RNASEQ_READS.out.mapped, by: 'id')
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        ch_main = ch_main.map{ rec ->
+            def new_rnaseq_bams = rec.new_rnaseq_bams ?: []
+            rec + record(bams: rec.supplied_rnaseq_bams + new_rnaseq_bams)
+        }
+
         BAM_SORT_INDEX_STATS(
-            ch_bam.mix( ch_aligned_bam ),
+            ch_main.map{ rec -> rec.subMap(['id', 'bams']) },
             ch_genome_for_mapping
         )
 
-
+/*
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // STRUCTURAL ANNOTATION
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process HISAT2_BUILD {
-    tag "$id"
+    tag "$sample_id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -11,7 +11,7 @@ process HISAT2_BUILD {
 
     input:
         record(
-            id: String,
+            sample_id: String,
             fasta: Path,
             splice_sites: Path?,
             exons: Path?
@@ -19,7 +19,7 @@ process HISAT2_BUILD {
 
     output:
         record(
-            id: id,
+            sample_id: sample_id,
             index: file("hisat2", type: 'dir')
         )
 
@@ -38,6 +38,6 @@ process HISAT2_BUILD {
         ${exon_arg} \\
         ${args} \\
         ${fasta} \\
-        hisat2/${fasta.baseName}
+        hisat2/${sample_id}
     """
 }

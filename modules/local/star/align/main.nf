@@ -12,9 +12,9 @@ process STAR_ALIGN {
     input:
         record(
             id: String,
-            reads: List<Path>,
+            reads: Iterable<Path>,
             index: Path,
-            gtf: Path
+            gtf: Path?
         )
         ignore_existing_gtf: Boolean
 

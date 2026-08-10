@@ -10,17 +10,14 @@ process FASTQC {
             : 'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0'}"
 
     input:
-        record(
-            id: String,
-            reads: List<Path>
-        )
+        record(id: String, reads: Iterable<Path>)
 
     stage:
         stageAs reads, '?/*'
 
     topic:
-        tuple('fastqc', id, file("*.html"))                                                        >> 'additional_results'
-        tuple('fastqc', id, file("*.zip"))                                                         >> 'fastqc_multiqc'
+        tuple('fastqc', id, files("*.html"))                                                        >> 'additional_results'
+        tuple('fastqc', id, files("*.zip"))                                                         >> 'fastqc_multiqc'
         tuple("${task.process}", 'fastqc', eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')) >> 'versions'
 
     script:
