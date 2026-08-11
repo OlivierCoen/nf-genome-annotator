@@ -37,6 +37,7 @@ process STAR_ALIGN {
     def gtf_arg = ignore_existing_gtf ? "" : gtf ? "--sjdbGTFfile $gtf": ""
     def read_file_command_arg = reads[0].extension == 'gz' ? "--readFilesCommand zcat": ''
     """
+    # Note: '--outSAMstrandField intronMotif' is required for BRAKER
     STAR \\
         --genomeDir $index \\
         --readFilesIn ${reads.join(",")} \\
