@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process BRAKER3 {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_high'
 
     // Re. Conda from the BRAKER team:
@@ -8,47 +10,49 @@ process BRAKER3 {
     container "docker.io/teambraker/braker3:v3.0.7.5"
 
     input:
-    tuple val(meta), path(fasta), path(proteins), path(bam)
-    val species
+        record(
+            id: String,
+            species: String,
+            fasta: Path,
+            training_proteins: Path?,
+            bam: Path?
+        )
 
     output:
-    tuple val(meta), path("$prefix/braker.gtf")         , emit: gtf
-    tuple val(meta), path("$prefix/braker.codingseq")   , emit: cds
-    tuple val(meta), path("$prefix/braker.aa")          , emit: aa
-    tuple val(meta), path("$prefix/braker.log")         , emit: log
-    tuple val(meta), path("$prefix/hintsfile.gff")      , emit: hintsfile   , optional: true
-    tuple val(meta), path("$prefix/braker.gff3")        , emit: gff3        , optional: true
-    tuple val(meta), path("$prefix/what-to-cite.txt")   , emit: citations
+        record(
+            id: id,
+            braker_gtf: file("workdir/braker.gtf"),
+            braker_hintsfile: file("workdir/hintsfile.gff"),
+        )
 
-    tuple val("${task.process}"), val('braker3'), eval("braker.pl --version 2>/dev/null | sed 's/braker.pl version //'"),           topic: versions
-    tuple val("${task.process}"), val('augustus'), eval("augustus --version |& sed -n 's/AUGUSTUS (\\(.*\\)) is a gene .*/\\1/p'"), topic: versions
-    tuple val("${task.process}"), val('augustus-etp'), eval("gmetp.pl | sed -n 's/ETP version \\(.*\\)/\\1/p'"),                    topic: versions
-    tuple val("${task.process}"), val('prothint'), eval("prothint.py --version | sed 's/prothint.py //1'"),                         topic: versions
+    topic:
+        tuple('braker3', id, file('workdir/braker.log'))       >> 'logs'
+        tuple('braker3', id, file("workdir/braker.codingseq")) >> 'additional_results'
+        tuple('braker3', id, file("workdir/braker.aa"))        >> 'additional_results'
+        tuple('braker3', id, file("workdir/braker.gff3"))      >> 'additional_results'
+        tuple("${task.process}", 'braker3',   eval("braker.pl --version 2>/dev/null | sed 's/braker.pl version //'"))          >> 'versions'
+        tuple("${task.process}", 'augustus',  eval("augustus --version |& sed -n 's/AUGUSTUS (\\(.*\\)) is a gene .*/\\1/p'")) >> 'versions'
+        tuple("${task.process}", 'genemark',  eval("gmetp.pl | sed -n 's/ETP version \\(.*\\)/\\1/p'"))                        >> 'versions'
+        tuple("${task.process}", 'prothint',  eval("prothint.py --version | sed 's/prothint.py //1'"))                         >> 'versions'
 
     script:
     def args               = task.ext.args                   ?: ''
-    prefix                 = task.ext.prefix                 ?: "${meta.id}"
+    def prefix             = task.ext.prefix                 ?: "$id"
     // The number of CPUs cannot exceed 48, otherwise BRAKER warns that it could create problems with GeneMark
     def nb_threads         = Math.min(48, task.cpus)
     def is_compressed      = fasta.getExtension() == "gz"    ? true : false
     def fasta_name         = is_compressed                   ? fasta.getBaseName() : fasta.name
-    //def rna_ids     = rnaseq_sets_ids           ? "--rnaseq_sets_ids=$rnaseq_sets_ids"      : ''
-    //def rna_dirs    = rnaseq_sets_dirs          ? "--rnaseq_sets_dirs=$rnaseq_sets_dirs"    : ''
     def bam_arg            = bam                             ? "--bam=$bam" : ''
-
-    def prot_is_compressed = proteins && proteins.getExtension() == "gz" ? true : false
-    def prot_fasta_name    = proteins ? ( prot_is_compressed ? proteins.getBaseName() : proteins.name ) : null
-    def prot_arg           = proteins ? "--prot_seq=$prot_fasta_name": ""
-
-    //def hints       = hintsfile                 ? "--hints=$hintsfile"                      : ''
-    def new_species        = args.contains('--species')      ? '' : '--species new_species'
+    def prot_is_compressed = training_proteins && training_proteins.getExtension() == "gz" ? true : false
+    def prot_fasta_name    = training_proteins ? ( prot_is_compressed ? training_proteins.getBaseName() : training_proteins.name ) : null
+    def prot_arg           = training_proteins ? "--prot_seq=$prot_fasta_name": ""
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
-    if [ -f $proteins -a "${prot_is_compressed}" == "true" ]; then
-        gzip -c -d ${proteins} > ${prot_fasta_name}
+    if [ -f $training_proteins -a "${prot_is_compressed}" == "true" ]; then
+        gzip -c -d ${training_proteins} > ${prot_fasta_name}
     fi
 
     cp -r \$AUGUSTUS_CONFIG_PATH \\
@@ -64,11 +68,10 @@ process BRAKER3 {
 
     braker.pl \\
         --genome ${prefix}.genome.masked.fasta \\
-        --workingdir $prefix \\
+        --species ${species} \\
+        --workingdir workdir \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
-        --AUGUSTUS_ab_initio \\
         --threads $nb_threads \\
-        $new_species \\
         $bam_arg \\
         $prot_arg \\
         $args
