@@ -61,9 +61,9 @@ workflow BAM_SORT_INDEX_STATS {
     // ------------------------------------------------------------------------------------
 
     ch_bams = ch_bam
-                .map { rec -> tuple( rec.sample_id, record(bam: rec.bam, bai: rec.bai) ) }
+                .map { rec -> tuple( rec.sample_id, record(bam: rec.bam, bai: rec.bai)) }
                 .groupTuple()
-                .map { id, rec_list -> record(id: id, mappings: rec_list) }
+                .map { id, mappings -> record(id: id, mappings: mappings) }
 
     emit:
     sorted_indexed = ch_input.join( ch_bams, by: 'id' )
