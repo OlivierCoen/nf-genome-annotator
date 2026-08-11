@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process MMSEQS_CONCATDBS {
-    tag "${databases.join(' ')}"
+    tag "${mmseqs_dbs.join(' ')}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -8,21 +10,31 @@ process MMSEQS_CONCATDBS {
         : 'community.wave.seqera.io/library/mmseqs2_wget:aa683a2c5355899d'}"
 
     input:
-    path databases
+        record(
+            id: String,
+            mmseqs_dbs: Iterable<Path>
+        )
+
+    stage:
+        stageAs mmseqs_dbs, "mmseqs_dbs/*"
 
     output:
-    path "all_mmseqs_dbs", emit: db
-    tuple val("${task.process}"), val('mmseqs'), eval('mmseqs version'), topic: versions, emit: versions_mmseqs
+        record(
+            id: id,
+            mmseqs_db: file("mmseqs_db")
+        )
+
+    topic:
+        tuple("${task.process}", 'mmseqs', eval('mmseqs version')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def database_arg = databases.join(' ')
+    def database_arg = mmseqs_dbs.join(' ')
     """
     mmseqs concatdbs \\
         ${database_arg} \\
-        all_mmseqs_dbs \\
+        mmseqs_db \\
         --threads 1 \\
         ${args}
-
     """
 }
