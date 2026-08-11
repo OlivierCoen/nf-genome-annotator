@@ -27,12 +27,12 @@ record Input {
 workflow STRUCTURAL_ANNOTATION {
 
     take:
-    ch_input
-    structural_annotator
-    mmseqs_db
-    skip_orthodb_download
-    skip_mmseqs_db_download
-    min_prot_db_seq_length
+    ch_input: Channel<Input>
+    structural_annotator: String
+    mmseqs_db: String
+    skip_orthodb_download: Boolean
+    skip_mmseqs_db_download: Boolean
+    min_prot_db_seq_length: Integer
 
     main:
 

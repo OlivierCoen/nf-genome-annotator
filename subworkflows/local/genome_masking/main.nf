@@ -1,8 +1,13 @@
 nextflow.enable.types = true
 
+include { RED_RED as RED                                            } from '../../../modules/local/red/red'
+
 include { REPEATMODELER_BUILDDATABASE as BUILDDATABASE              } from '../../../modules/local/repeatmodeler/builddatabase'
 include { REPEATMODELER_REPEATMODELER as REPEATMODELER              } from '../../../modules/local/repeatmodeler/repeatmodeler'
-include { REPEATMASKER_REPEATMASKER as REPEATMASKER                 } from '../../../modules/local/repeatmasker/repeatmasker'
+include { REPEATMASKER_REPEATMASKER   as REPEATMASKER               } from '../../../modules/local/repeatmasker/repeatmasker'
+
+//include { EARLGREY_DOWNLOADDB                                       } from '../../../modules/local/earlgrey/download_db'
+//include { EARLGREY_EARLGREY as EARLGREY                             } from '../../../modules/local/earlgrey/earlgrey'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,36 +24,54 @@ workflow GENOME_MASKING {
 
     take:
     ch_input: Channel<Genome>
+    genome_masker: String
 
     main:
 
-    BUILDDATABASE( ch_input )
+    ch_cannot_be_masked = channel.empty()
 
-    REPEATMODELER( BUILDDATABASE.out )
+    if ( genome_masker == "red" ) {
 
-    // SOMETIMES REPEAT MODELER DOES NOT FIND FAMILIES
-    // THE GENOME SHOULD NOT BE MASKED IN SUCH CASES
+        ch_masked = RED( ch_input )
 
-    ch_input = ch_input.join( REPEATMODELER.out, by: 'id' )
+    } else if ( genome_masker == "repeatmasker" ) {
 
-    ch_can_be_masked    = ch_input.filter{ rec -> rec.lib != null }
-    ch_cannot_be_masked = ch_input.filter{ rec -> rec.lib == null }
+        ch_repeatmodeler_db = BUILDDATABASE( ch_input )
 
-    REPEATMASKER( ch_can_be_masked )
+        ch_repeatmodeler_out = REPEATMODELER( ch_repeatmodeler_db )
+
+        // SOMETIMES REPEAT MODELER DOES NOT FIND FAMILIES
+        // THE GENOME SHOULD NOT BE MASKED IN SUCH CASES
+
+        ch_input = ch_input.join( ch_repeatmodeler_out, by: 'id' )
+
+        ch_can_be_masked    = ch_input.filter{ rec -> rec.lib != null }
+        ch_cannot_be_masked = ch_input.filter{ rec -> rec.lib == null }
+
+        ch_masked = REPEATMASKER( ch_can_be_masked )
+
+    } else if ( genome_masker == "earlgrey" ) {
+
+        //EARLGREY_DOWNLOADDB()
+
+        //EARLGREY
+
+
+    }
 
     ch_masked = ch_input
-                   .join( REPEATMASKER.out, by: 'id' )
-                   .map{ rec -> 
+                .join( ch_masked, by: 'id' )
+                .map{ rec ->
                         // setting the softmasked genome as the default fasta file from now on
-                        rec.unmasked_fasta = rec.fasta
-                        rec.fasta = rec.softmasked
+                        rec = rec + record(unmasked_fasta: rec.fasta)
+                        rec = rec + record(fasta: rec.softmasked)
                         // return the record without the 'softmasked' field
                         rec.subMap(rec.keySet() - ['softmasked'])
                     }
-                    
+
     // records in ch_masked may have additional fields (like repeats_gff)
     // but these fields should not be used inside the workflow
     emit:
-    masked  = ch_masked.mix( ch_cannot_be_masked ) 
+    masked  = ch_masked.mix( ch_cannot_be_masked )
 
 }

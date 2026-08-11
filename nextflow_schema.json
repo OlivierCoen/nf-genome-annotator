@@ -54,6 +54,12 @@
                     "description": "Skip genome masking",
                     "fa_icon": "fas fa-hand-scissors"
                 },
+                "genome_masker": {
+                    "type": "string",
+                    "description": "Tool to use for genome masking. Choose between the RepeatModeler / RepeatMasker suite, or EarlGrey.",
+                    "enum": ["red", "repeatmasker", "earlgrey"],
+                    "default": "red"
+                },
                 "dfam_db": {
                     "type": "string",
                     "description": "Path to DFAM database",

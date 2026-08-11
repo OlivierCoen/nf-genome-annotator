@@ -21,9 +21,9 @@ workflow METAEUK {
 
     take:
     ch_input: Channel<Input>
-    mmseqs_db
-    skip_mmseqs_db_download
-    min_prot_db_seq_length
+    mmseqs_db: String
+    skip_mmseqs_db_download: Boolean
+    min_prot_db_seq_length: Integer
 
     main:
 

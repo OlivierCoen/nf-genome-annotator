@@ -11,35 +11,35 @@ process REPEATMASKER_REPEATMASKER {
 
     input:
         record(
-            id: String, 
-            fasta: Path, 
+            id: String,
+            fasta: Path,
             lib: Path
         )
 
     output:
         record(
-            id: id, 
-            softmasked: file("*.masked"), 
+            id: id,
+            softmasked: file("*.masked"),
             repeats_gff: file("*.gff", optional: true)
         )
-   
+
     topic:
-        tuple('repeatmasker', file("*.tbl"))                 >> 'additional_results'
-        tuple('repeatmasker', file("*.out"))                 >> 'logs'
+        tuple('repeatmasker', id, file("*.tbl"))                 >> 'additional_results'
+        tuple('repeatmasker', id, file("*.out"))                 >> 'logs'
         tuple("${task.process}", 'repeatmasker', eval("RepeatMasker -v | sed 's/RepeatMasker version //1'")) >>  'versions'
 
     script:
     def args    = task.ext.args     ?: ''
     def prefix  = task.ext.prefix   ?: "${id}"
     def lib_arg = lib               ? "-lib $lib"   : ''
-    
+
     def is_compressed  = fasta.getExtension() == "gz" ? true : false
     def fasta_name     = is_compressed                ? fasta.getBaseName() : fasta.name
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
     fi
-    
+
     RepeatMasker \\
         $lib_arg \\
         -pa ${task.cpus} \\

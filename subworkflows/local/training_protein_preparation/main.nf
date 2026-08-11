@@ -35,8 +35,8 @@ workflow TRAINING_PROTEIN_PREPARATION {
 
     take:
     ch_input: Channel<Input>
-    skip_orthodb_download
-    min_prot_db_seq_length
+    skip_orthodb_download: Boolean
+    min_prot_db_seq_length: Integer
 
     main:
 

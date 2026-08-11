@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process EARLGREY_DOWNLOADDB {
 
     label 'process_high'
@@ -15,7 +17,7 @@ process EARLGREY_DOWNLOADDB {
         'community.wave.seqera.io/library/aria2_pigz:6b38092500fd4da6' }"
 
     input:
-    val partitions
+        val partitions
 
     output:
     path("*/data"), emit: db

@@ -52,7 +52,7 @@ workflow GENOMEANNOTATOR {
                     record(
                         id: meta.id,
                         fasta: meta.fasta,
-                        species: meta.species,
+                        species: meta.species.toString(),
                         gff: meta.gff,
 
                         supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
@@ -97,7 +97,8 @@ workflow GENOMEANNOTATOR {
 
         if ( !params.skip_masking ) {
             GENOME_MASKING (
-                ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) }
+                ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) },
+                params.genome_masker
             )
             ch_main = ch_main.join(GENOME_MASKING.out.masked, by: 'id')
         }

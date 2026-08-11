@@ -11,7 +11,7 @@ process REPEATMODELER_REPEATMODELER {
             task.ext.args = task.ext.args.replace('-LTRStruct', ' ')
             return 'retry'
         } else  {
-            return 'ignore'
+            return 'terminate'
         }
     }
 
@@ -25,10 +25,10 @@ process REPEATMODELER_REPEATMODELER {
 
     output:
         record(id: id, lib: file("*.fa", optional: true))
-            
+
     topic:
-        tuple('repeatmodeler', file("*.stk", optional: true)) >> 'additional_results'
-        tuple('repeatmodeler', file("*.log", optional: true)) >> 'logs'
+        tuple('repeatmodeler', id, file("*.stk", optional: true)) >> 'additional_results'
+        tuple('repeatmodeler', id, file("*.log", optional: true)) >> 'logs'
         tuple("${task.process}", 'repeatmodeler', eval("RepeatModeler --version | sed 's/RepeatModeler version //'")) >> 'versions'
 
     script:

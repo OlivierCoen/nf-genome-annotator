@@ -29,9 +29,9 @@ record Input {
 workflow BRAKER {
 
     take:
-    ch_input
-    skip_orthodb_download
-    min_prot_db_seq_length
+    ch_input: Channel<Input>
+    skip_orthodb_download: Boolean
+    min_prot_db_seq_length: Integer
 
     main:
 
@@ -70,7 +70,7 @@ workflow BRAKER {
     // ----------------------------------------------------------
     // RUN BRAKER3
     // ----------------------------------------------------------
-ch_input.map { rec -> rec.subMap(['id', 'species', 'fasta', 'proteins_fasta', 'bam']) }.view()
+
     ch_braker_out = BRAKER3(
         ch_input.map { rec -> rec.subMap(['id', 'species', 'fasta', 'proteins_fasta', 'bam']) }
     )
