@@ -10,19 +10,22 @@
             "sample": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces"
+                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "meta": ["id"]
             },
             "genome": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|n)?a(\\.gz)?$",
-                "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)"
+                "errorMessage": "Genome fasta file must be provided, cannot contain spaces and must have extension '.fa', 'fna' or '.fasta' (possibly gzip compressed)",
+                "meta": ["fasta"]
             },
             "species": {
                 "type": ["string", "integer"],
                 "description": "Scientifc species name (genus and species) or NCBI Taxid",
-                "help_text": "Genus and species can be separated by a '_'. Example: `'Arabidopsis thaliana'`,  `'armadillidium_nasatum'` or `3702`."
+                "help_text": "Genus and species can be separated by a '_'. Example: `'Arabidopsis thaliana'`,  `'armadillidium_nasatum'` or `3702`.",
+                "meta": ["species"]
             },
             "gff": {
                 "type": "string",
@@ -33,55 +36,60 @@
                 "errorMessage": "Existing annotation GTF file cannot contain spaces and must have extension '.gtf', '.gff' or '.gff3'",
                 "meta": ["gff"]
             },
-            "rnaseq_bams": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
-                    "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'"
-                },
-                "meta": ["rnaseq_bams"]
-            },
-            "rnaseq_fastqs": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "R1": {
+            "rnaseq": {
+                "type": "object",
+                "properties": {
+                    "bams": {
+                        "type": "array",
+                        "items": {
                             "type": "string",
-                            "description": "Forward fastq file (paired-end) or single fastq file (single-end). Mandatory field.",
-                            "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
                             "format": "file-path",
                             "exists": true,
-                            "errorMessage": "Forward / single fastq file for must be provided, cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
+                            "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
+                            "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'"
                         },
-                        "R2": {
-                            "type": "string",
-                            "description": "Reverse fastq file.",
-                            "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
-                            "format": "file-path",
-                            "exists": true,
-                            "errorMessage": "Reverse fastq file cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
-                        }
+                        "meta": ["rnaseq_bams"]
                     },
-                    "dependentRequired": {
-                        "R2": ["R1"]
+                    "fastqs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "R1": {
+                                    "type": "string",
+                                    "description": "Forward fastq file (paired-end) or single fastq file (single-end). Mandatory field.",
+                                    "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
+                                    "format": "file-path",
+                                    "exists": true,
+                                    "errorMessage": "Forward / single fastq file for must be provided, cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
+                                },
+                                "R2": {
+                                    "type": "string",
+                                    "description": "Reverse fastq file.",
+                                    "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
+                                    "format": "file-path",
+                                    "exists": true,
+                                    "errorMessage": "Reverse fastq file cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
+                                }
+                            },
+                            "dependentRequired": {
+                                "R2": ["R1"]
+                            }
+                        },
+                        "meta": ["rnaseq_fastqs"]
+                    },
+                    "experiment_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
+                            "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
+                        },
+                        "meta": ["rnaseq_experiment_ids"]
                     }
-                },
-                "meta": ["rnaseq_fastqs"]
+                }
             },
-            "rnaseq_experiment_ids": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
-                    "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
-                },
-                "meta": ["rnaseq_experiment_ids"]
-            },
-            "proteins": {
+            "training_proteins": {
                 "type": "array",
                 "items": {
                     "type": "string",
@@ -90,23 +98,84 @@
                     "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast|a)?a(\\.gz)?$",
                     "errorMessage": "Protein Fasta file cannot contain spaces and must have extension '.fa', 'faa' or '.fasta' (possibly gzip compressed)"
                 },
-                "meta": ["proteins"]
+                "meta": ["training_proteins"]
             },
-            "braker_gtf": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.gtf$",
-                "errorMessage": "Braker GTF file cannot contain spaces and must have extension '.gtf'",
-                "meta": ["braker_gtf"]
+            "orthodb": {
+                "type": "object",
+                "properties": {
+                    "clade": {
+                        "type": "string",
+                        "description": "Clade of interest for OrthoDB custom protein database. By default, the clade is inferred from the provided species / taxid. You can override this by specifying a clade here.",
+                        "fa_icon": "fas fa-database",
+                        "help_text": "The list of recognised clades can be found at https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz",
+                        "meta": ["orthodb_clade"]
+                    },
+                    "excluded_clades": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "Sub-clades to exclude.",
+                            "fa_icon": "fas fa-database",
+                            "help_text": "The list of recognised clades can be found at https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz"
+                        },
+                        "meta": ["orthodb_excluded_clades"]
+                    },
+                    "excluded_species": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "List of species to exclude.",
+                            "fa_icon": "fas fa-database",
+                            "help_text": "A comma separated set of species names to exclude. The list of recognised species can be found at https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_species.tab.gz"
+                        },
+                        "meta": ["orthodb_excluded_species"]
+                    }
+                }
             },
-            "hintsfile": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.hintsfile.gff$",
-                "errorMessage": "Braker hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'",
-                "meta": ["hintsfile"]
+            "mmseqs": {
+                "type": "object",
+                "properties": {
+                    "database": {
+                        "type": "string",
+                        "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. Set to `UniRef50` by default.",
+                        "help_text": "mmseqs2 lists a large number of databases, not all of which are appropriate for use with MetaEuk. MetaEuk requires protein inputs, so you should select one of the Aminoacid or Profile options.",
+                        "fa_icon": "fas fa-database",
+                        "meta": ["mmseqs_db"]
+                    }
+                }
+            },
+            "tsebra": {
+                "type": "object",
+                "properties": {
+                    "gtf": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "file-path",
+                            "description": "GTF file(s) generated by a previous Braker and used to guide TSEBRA annotation. Each GTF file must have extension '.gtf'. When specifying multiple files, the order must be the same as the order of the Braker Hintsfile.",
+                            "exists": true,
+                            "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.gtf$",
+                            "errorMessage": "Braker GTF file cannot contain spaces and must have extension '.gtf'"
+                        },
+                        "meta": ["tsebra_gtfs"]
+                    },
+                    "hintsfile": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "file-path",
+                            "description": "Hinstfile(s) file generated by a previous Braker and used to guide TSEBRA annotation. Each Hintsfile must have extension '.hintsfile.gff'. When specifying multiple files, the order must be the same as the order of the Braker GTF files.",
+                            "exists": true,
+                            "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.hintsfile.gff$",
+                            "errorMessage": "Braker hints GFF file cannot contain spaces and must have extension '.hintsfile.gff'"
+                        },
+                        "meta": ["tsebra_hintsfiles"]
+                    }
+                },
+                "dependentRequired": {
+                    "gtf": ["hintsfile"],
+                    "hintsfile": ["gtf"]
+                }
             }
         },
         "required": ["sample", "genome", "species"]
