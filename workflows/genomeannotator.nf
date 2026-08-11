@@ -47,59 +47,30 @@ workflow GENOMEANNOTATOR {
     main:
 
     ch_main = ch_samplesheet
-                .map{ meta, sample, genome, species ->
+                .map{ args ->
+                    def meta = args[0]
                     record(
-                        id: sample,
-                        fasta: genome,
-                        species: species,
+                        id: meta.id,
+                        fasta: meta.fasta,
+                        species: meta.species,
                         gff: meta.gff,
+
                         supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
                         supplied_rnaseq_fastqs: meta.rnaseq_fastqs ? organiseRnaseqFastqFiles(meta.rnaseq_fastqs) : [],
                         rnaseq_experiment_ids: meta.rnaseq_experiment_ids ?: [],
-                        proteins: meta.proteins ?: [],
-                        braker_gtf: meta.braker_gtf,
-                        hintsfile: meta.hintsfile
+
+                        training_proteins: meta.training_proteins ?: [],
+
+                        orthodb_clade: meta.orthodb_clade,
+                        orthodb_excluded_clades: meta.orthodb_excluded_clades,
+                        orthodb_excluded_species: meta.orthodb_excluded_species,
+
+                        mmseqs_db: meta.mmseqs_db,
+
+                        tsebra_gtfs: meta.tsebra_gtfs ?: [],
+                        tsebra_hintsfiles: meta.tsebra_hintsfiles ?: []
                     )
                 }
-
-                /*
-    ch_genome       = ch_input.genome
-
-    ch_gff          = ch_input.gff
-                        .filter { meta, file -> file != []}
-
-    ch_proteins     = ch_input.protein
-                        .transpose()
-                        .filter { meta, fasta -> fasta != [] }
-                        .groupTuple()
-
-    ch_provided_rnaseq_fastq = ch_input.rnaseq_fastq
-                                .transpose()
-                                .filter { meta, reads -> reads != []}
-                                .map { meta, reads ->
-                                    def fastq_1 = reads[0]
-                                    def fastq_2 = reads[1]
-                                    if ( fastq_2 ) {
-                                        [ meta + [ single_end: false ], [ fastq_1, fastq_2 ] ]
-                                    } else {
-            HISAT2_EXTRACTSPLICESITES                            [ meta + [ single_end: true ], fastq_1 ]
-                                    }
-                                }
-
-    ch_rnaseq_bam   = ch_input.rnaseq_bam
-                        .transpose()
-                        .filter { meta, file -> file != []}
-
-    ch_braker_gtf   = ch_input.braker_gtf
-                        .filter { meta, file -> file != []}
-
-    ch_braker_hintsfile    = ch_input.braker_hintsfile
-                        .filter { meta, file -> file != []}
-
-    ch_rnaseq_id   = ch_input.rnaseq_id
-                        .transpose()
-                        .filter { meta, id -> id != []}
-*/
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME PREPARATION
@@ -178,34 +149,40 @@ workflow GENOMEANNOTATOR {
             ch_main.map{ rec -> rec.subMap(['id', 'fasta', 'bams']) }
         )
 
-        ch_main = ch_main.join(BAM_SORT_INDEX_STATS.out.sorted_indexed, by: 'id').view()
+        ch_main = ch_main.join(BAM_SORT_INDEX_STATS.out.sorted_indexed, by: 'id')
 
-/*
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // STRUCTURAL ANNOTATION
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        ch_structural_annot_input = ch_main.map { rec ->
+            rec.subMap([
+                'id',
+                'fasta',
+                'clade',
+                'orthodb_clade',
+                'excluded_clades',
+                'excluded_species',
+                'mmseqs_db',
+                'training_proteins',
+                'mappings',
+                'tsebra_gtfs',
+                'tsebra_hintsfiles'
+                ])
+            }
+
         STRUCTURAL_ANNOTATION (
-            ch_genome,
-            ch_proteins,
-            ch_bam_bai.groupTuple(),
-            ch_braker_gtf,
-            ch_braker_hintsfile,
+            ch_structural_annot_input,
             params.structural_annotator,
-            params.clade,
-            params.excluded_clades,
-            params.excluded_species,
             params.mmseqs_db,
             params.skip_orthodb_download,
             params.skip_mmseqs_db_download,
             params.min_prot_db_seq_length
         )
 
-        ch_structural_annotations = STRUCTURAL_ANNOTATION.out.annotations
+        ch_main = ch_main.join(STRUCTURAL_ANNOTATION.out.annotated, by: 'id')
 
-        ch_versions = ch_versions
-                        .mix( STRUCTURAL_ANNOTATION.out.versions )
-
+/*
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
