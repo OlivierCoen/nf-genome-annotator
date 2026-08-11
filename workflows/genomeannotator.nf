@@ -157,6 +157,7 @@ workflow GENOMEANNOTATOR {
         ch_structural_annot_input = ch_main.map { rec ->
             rec.subMap([
                 'id',
+                'species',
                 'fasta',
                 'orthodb_clade',
                 'orthodb_excluded_clades',

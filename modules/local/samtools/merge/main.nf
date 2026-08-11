@@ -39,6 +39,6 @@ process SAMTOOLS_MERGE {
         --threads ${task.cpus - 1} \\
         ${args} \\
         ${prefix}.bam \\
-        ${bams}
+        ${bams.join(' ')}
     """
 }

@@ -14,7 +14,7 @@ process BRAKER3 {
             id: String,
             species: String,
             fasta: Path,
-            training_proteins: Path?,
+            proteins_fasta: Path?,
             bam: Path?
         )
 
@@ -43,16 +43,16 @@ process BRAKER3 {
     def is_compressed      = fasta.getExtension() == "gz"    ? true : false
     def fasta_name         = is_compressed                   ? fasta.getBaseName() : fasta.name
     def bam_arg            = bam                             ? "--bam=$bam" : ''
-    def prot_is_compressed = training_proteins && training_proteins.getExtension() == "gz" ? true : false
-    def prot_fasta_name    = training_proteins ? ( prot_is_compressed ? training_proteins.getBaseName() : training_proteins.name ) : null
-    def prot_arg           = training_proteins ? "--prot_seq=$prot_fasta_name": ""
+    def prot_is_compressed = proteins_fasta && proteins_fasta.getExtension() == "gz" ? true : false
+    def prot_fasta_name    = proteins_fasta ? ( prot_is_compressed ? proteins_fasta.getBaseName() : proteins_fasta.name ) : null
+    def prot_arg           = proteins_fasta ? "--prot_seq=$prot_fasta_name": ""
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
     fi
 
-    if [ -f $training_proteins -a "${prot_is_compressed}" == "true" ]; then
-        gzip -c -d ${training_proteins} > ${prot_fasta_name}
+    if [ -f $proteins_fasta -a "${prot_is_compressed}" == "true" ]; then
+        gzip -c -d ${proteins_fasta} > ${prot_fasta_name}
     fi
 
     cp -r \$AUGUSTUS_CONFIG_PATH \\

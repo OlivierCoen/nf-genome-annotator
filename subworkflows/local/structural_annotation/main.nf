@@ -11,8 +11,8 @@ include { METAEUK          } from '../metaeuk'
 
 record Input {
     id: String
-    fasta: Path
     species: String
+    fasta: Path
     orthodb_clade: String
     excluded_clades: Iterable<String>
     excluded_species: Iterable<String>

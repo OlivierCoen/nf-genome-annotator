@@ -63,7 +63,7 @@ workflow TRAINING_PROTEIN_PREPARATION {
         ch_input = ch_input.map { rec -> rec + record(orthodb_proteins: null) }
     }
 
-    ch_input = ch_input.view().map { rec ->
+    ch_input = ch_input.map { rec ->
         def orthodb_proteins = rec.orthodb_proteins ? [rec.orthodb_proteins] : []
         rec + record(all_training_proteins: rec.training_proteins + orthodb_proteins)
     }

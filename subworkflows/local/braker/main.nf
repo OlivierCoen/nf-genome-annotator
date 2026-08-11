@@ -39,13 +39,13 @@ workflow BRAKER {
     // PREPARE PROTEIN TRAINING SET FOR BRAKER
     // ----------------------------------------------------------
 
-    TRAINING_PROTEIN_PREPARATION(
+    ch_proteins = TRAINING_PROTEIN_PREPARATION(
         ch_input.map { rec -> rec.subMap(['id', 'clade', 'orthodb_clade', 'orthodb_excluded_clades', 'orthodb_excluded_species', 'training_proteins']) },
         skip_orthodb_download,
         min_prot_db_seq_length
     )
 
-    ch_input = ch_input.join( TRAINING_PROTEIN_PREPARATION.out.proteins, by: 'id' )
+    ch_input = ch_input.join( ch_proteins, by: 'id' )
 
     // ----------------------------------------------------------
     // MERGE MULTIPLE BAM FILES INTO A SINGLE BAM WHEN NECESSARY
@@ -60,9 +60,9 @@ workflow BRAKER {
         record(id: rec.id, bams: bams, bais: bais)
     }
 
-    SAMTOOLS_MERGE( ch_samtools_merge_input )
+    ch_merged = SAMTOOLS_MERGE( ch_samtools_merge_input )
 
-    ch_merge_me       = ch_merge_me.join( SAMTOOLS_MERGE.out, by: 'id' )
+    ch_merge_me       = ch_merge_me.join( ch_merged, by: 'id' )
     ch_leave_me_alone = ch_leave_me_alone.map { rec -> rec + record(bam: null) }
 
     ch_input = ch_leave_me_alone.mix( ch_merge_me )
@@ -70,12 +70,12 @@ workflow BRAKER {
     // ----------------------------------------------------------
     // RUN BRAKER3
     // ----------------------------------------------------------
-
-    BRAKER3(
-        ch_input.map { rec -> rec.subMap(['id', 'species', 'fasta', 'training_proteins', 'bam']) }
+ch_input.map { rec -> rec.subMap(['id', 'species', 'fasta', 'proteins_fasta', 'bam']) }.view()
+    ch_braker_out = BRAKER3(
+        ch_input.map { rec -> rec.subMap(['id', 'species', 'fasta', 'proteins_fasta', 'bam']) }
     )
 
-    ch_input = ch_input.join(BRAKER3.out, by: 'id')
+    ch_input = ch_input.join(ch_braker_out, by: 'id')
 
     // ----------------------------------------------------------
     // MERGE ANNOTATIONS WHEN NECESSARY
@@ -94,9 +94,9 @@ workflow BRAKER {
         )
     }
 
-    TSEBRA( ch_tsebra_input )
+    ch_tsebra_out = TSEBRA( ch_tsebra_input )
 
-    ch_merged = ch_to_merge_with_tsebra.join( TSEBRA.out, by: 'id')
+    ch_merged = ch_to_merge_with_tsebra.join(ch_tsebra_out, by: 'id')
 
     // ----------------------------------------------------------
     // MIXING MERGED AND NOT MERGED
