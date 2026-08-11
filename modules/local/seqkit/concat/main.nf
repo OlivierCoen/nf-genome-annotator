@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process SEQKIT_CONCAT {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
@@ -8,29 +10,32 @@ process SEQKIT_CONCAT {
         : 'community.wave.seqera.io/library/seqkit:2.13.0--05c0a96bf9fb2751'}"
 
     input:
-    tuple val(meta), path(input, stageAs: 'in/*')
+        record(
+            id: String,
+            fasta_files: Iterable<Path>
+        )
+
+    stage:
+        stageAs fasta_files, 'in/*'
 
     output:
-    tuple val(meta), path("*.{fasta,fastq,fa,fq,fas,fna,faa}.gz"), emit: fastx
-    tuple val("${task.process}"), val('seqkit'), eval("seqkit version | sed 's/^.*v//'"), emit: versions_seqkit, topic: versions
+        record(
+            id: id,
+            fasta: file("*.{fasta,fastq,fa,fq,fas,fna,faa}.gz")
+        )
+
+    topic:
+        tuple( "${task.process}", 'seqkit', eval("seqkit version | sed 's/^.*v//'") ) >> 'versions'
 
     script:
     def args = task.ext.args ?: ""
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def file_type = input instanceof List ? input[0].getExtension() : input.getExtension()
+    def prefix = task.ext.prefix ?: "$id"
     """
     seqkit \\
         concat \\
         --threads ${task.cpus} \\
         ${args} \\
-        in/* > ${prefix}.faa
-
-    gzip ${prefix}.faa
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}.fasta.gz
+        in/* \\
+        | gzip -c > ${prefix}.faa.gz
     """
 }
