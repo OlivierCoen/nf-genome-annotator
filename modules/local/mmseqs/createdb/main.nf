@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process MMSEQS_CREATEDB {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
@@ -8,18 +10,26 @@ process MMSEQS_CREATEDB {
         : 'community.wave.seqera.io/library/mmseqs2:18.8cc5c--af05c9a98d9f6139'}"
 
     input:
-    tuple val(meta), path(sequences, stageAs: "tmp_input/*")
+        record(
+            id: String,
+            sequences: Iterable<Path>
+        )
+
+    stage:
+        stageAs sequences, "tmp_input/*"
 
     output:
-    tuple val(meta), path("${prefix}/"), emit: db
-    tuple val("${task.process}"), val('mmseqs'), eval('mmseqs version'), topic: versions, emit: versions_mmseqs
+        record(
+            id: id,
+            custom_mmseqs_db: file("mmseqs_db/")
+        )
 
-    when:
-    task.ext.when == null || task.ext.when
+    topic:
+        tuple("${task.process}", 'mmseqs', eval('mmseqs version')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "$id"
     """
     # Ensure the input is uncompressed
     mkdir input_seqs
@@ -35,12 +45,12 @@ process MMSEQS_CREATEDB {
 
     prepared_sequences=\$(ls -1 input_seqs | tr '\n' ' ')
 
-    mkdir -p ${prefix}
+    mkdir -p mmseqs_db
 
     mmseqs \\
         createdb \\
         \${prepared_sequences} \\
-        ${prefix}/${prefix} \\
+        mmseqs_db/${prefix} \\
         ${args}
 
     """
