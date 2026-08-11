@@ -1,6 +1,8 @@
+nextflow.enable.types = true
+
 process CHECK_PROTEIN_FASTA {
 
-    tag "${meta.id}"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -9,16 +11,24 @@ process CHECK_PROTEIN_FASTA {
         'community.wave.seqera.io/library/biopython_python:f180d02b12dd489c' }"
 
     input:
-    tuple val(meta), path(fasta)
-    val minlen
+        record(
+            id: String,
+            fasta: Path
+        )
+        minlen: Integer
 
     output:
-    tuple val(meta), path("*.cleaned.{fasta,fa,fas,fna,faa}*"), emit: fasta, optional: true
-    tuple val("${task.process}"), val('python'),eval("python3 --version | sed 's/Python //'"),            topic: versions
-    tuple val("${task.process}"), val('Bio'),    eval('python3 -c "import Bio; print(Bio.__version__)"'), topic: versions
+        record(
+            id: id,
+            fasta: file("*.cleaned.{fasta,fa,fas,fna,faa}*")
+        )
+
+    topic:
+        tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )           >> 'versions'
+        tuple( "${task.process}", 'Bio',    eval('python3 -c "import Bio; print(Bio.__version__)"') ) >> 'versions'
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}.cleaned"
+    def prefix = task.ext.prefix ?: "${id}.cleaned"
     def is_compressed = fasta.getExtension() == "gz" ? true : false
     def fasta_name = is_compressed ? fasta.getBaseName() : fasta.name
     def fasta_ext = fasta_name.tokenize('.')[-1]
