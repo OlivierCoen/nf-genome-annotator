@@ -18,7 +18,7 @@ record Read {
     reads: List<Path>
 }
 
-record MappingInput {
+record Input {
     id: String
     all_reads: List<Read>
     fasta: Path
@@ -29,7 +29,7 @@ record MappingInput {
 workflow MAP_RNASEQ_READS {
 
     take:
-    ch_input: Channel<MappingInput>
+    ch_input: Channel<Input>
     skip_fastqc
     skip_umi_extract
     skip_trimming
