@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::metaeuk=6.a5d39d9
+  - bioconda::metaeuk=7.bba0d80

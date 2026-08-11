@@ -1,32 +1,43 @@
+nextflow.enable.types = true
+
 process METAEUK_EASYPREDICT {
-    tag "$meta.id"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/metaeuk:6.a5d39d9--pl5321hf1761c0_2':
-        'biocontainers/metaeuk:6.a5d39d9--pl5321hf1761c0_2' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/a5/a5c4b28881614f8cb338a35e41bc5bf1ab7a77a0d94bfb5ad99c141af45400ce/data':
+        'community.wave.seqera.io/library/metaeuk:7.bba0d80--479859525590824a' }"
 
     input:
-    tuple val(meta), path(fasta), path(database)
+        record(
+            id: String,
+            fasta: Path,
+            db: Path
+        )
 
     output:
-    tuple val(meta), path("${prefix}.fas")      , emit: faa
-    tuple val(meta), path("${prefix}.codon.fas"), emit: codon
-    tuple val(meta), path("*.tsv")              , emit: tsv
-    tuple val(meta), path("*.gff")              , emit: gff
-    tuple val("${task.process}"), val('metaeuk'), eval("metaeuk | grep 'Version' | sed 's/metaeuk Version: //'"), topic: versions
+        record(
+            id: id,
+            gff: file("*.gff")
+        )
+
+    topic:
+        tuple('metaeuk', id, file("*.tsv"))       >> 'additional_results'
+        tuple('metaeuk', id, file("*.codon.fas")) >> 'additional_results'
+        tuple('metaeuk', id, file("*.fas"))       >> 'additional_results'
+        tuple("${task.process}", 'metaeuk', eval("metaeuk | grep 'Version' | sed 's/metaeuk Version: //'"))  >> 'versions'
 
     script:
     def args = task.ext.args   ?: ''
-    prefix   = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "$id"
     """
-    if [ -d ${database} ]; then
+    if [ -d ${db} ]; then
         ## if supplying an mmseqs database as a directory, metaeuk requires the basename of the database
-        DBBASE=`find ${database}/ -name "*.version" -exec sh -c 'file=\$(basename {}); echo \${file%%.*}' \\;`
-        DB=`echo "${database}/\${DBBASE}"`
+        DBBASE=`find ${db}/ -name "*.version" -exec sh -c 'file=\$(basename {}); echo \${file%%.*}' \\;`
+        DB=`echo "${db}/\${DBBASE}"`
     else
-        DB=${database}
+        DB=${db}
     fi
 
     metaeuk easy-predict \\
