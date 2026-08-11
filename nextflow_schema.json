@@ -141,24 +141,6 @@
                   "description": "Skip download of MMseqs2 protein database.",
                   "fa_icon": "fas fa-hand-scissors"
               },
-              "clade": {
-                  "type": "string",
-                  "description": "Clade of interest for OrthoDB custom protein database",
-                  "fa_icon": "fas fa-database",
-                  "help_text": "The list of recognised clades can be found at https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz"
-              },
-              "excluded_clades": {
-                  "type": "string",
-                  "description": "Sub-clade to exclude.",
-                  "fa_icon": "fas fa-database",
-                  "help_text": "The list of recognised clades can be found at https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz"
-              },
-              "excluded_species": {
-                  "type": "string",
-                  "description": "Species to exclude.",
-                  "fa_icon": "fas fa-database",
-                  "help_text": "A comma separated set of species names to exclude. The list of recognised species can be found at https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_species.tab.gz"
-              },
               "mmseqs_db": {
                   "type": "string",
                   "default": null,
