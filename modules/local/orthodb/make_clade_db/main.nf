@@ -3,7 +3,7 @@ nextflow.enable.types = true
 process ORTHODB_MAKECLADEDB {
 
     label 'process_download_db'
-    tag "$clade"
+    tag "$orthodb_clade"
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
@@ -12,17 +12,17 @@ process ORTHODB_MAKECLADEDB {
 
     input:
         record(
-            clade: String,
-            excluded_clades: Iterable<String>,
-            excluded_species: Iterable<String>
+            orthodb_clade: String,
+            orthodb_excluded_clades: Iterable<String>,
+            orthodb_excluded_species: Iterable<String>
         )
 
     output:
         record(
-            clade: clade,
-            excluded_clades: excluded_clades,
-            excluded_species: excluded_species,
-            orthodb_proteins: file("${clade}.orthodb_proteins.faa.gz")
+            orthodb_clade: orthodb_clade,
+            orthodb_excluded_clades: orthodb_excluded_clades,
+            orthodb_excluded_species: orthodb_excluded_species,
+            orthodb_proteins: file("${orthodb_clade}.orthodb_proteins.faa.gz")
         )
 
     topic:
@@ -37,8 +37,8 @@ process ORTHODB_MAKECLADEDB {
         "https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_level2species.tab.gz",
         "https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_levels.tab.gz"
     ].join(' ').trim()
-    def excluded_clades_arg = excluded_clades ? "--exclude ${excluded_clades.join(',')}" : ""
-    def excluded_species_arg = excluded_species ? "--excludeSpecies ${excluded_species.join(',')}" : ""
+    def excluded_clades_arg = orthodb_excluded_clades ? "--exclude ${orthodb_excluded_clades.join(',')}" : ""
+    def excluded_species_arg = orthodb_excluded_species ? "--excludeSpecies ${orthodb_excluded_species.join(',')}" : ""
     def nb_splits = Math.min(16, task.cpus.toInteger())
     def nb_max_connections = Math.min(16, task.cpus.toInteger())
     """
@@ -67,13 +67,13 @@ process ORTHODB_MAKECLADEDB {
         odb12v2_levels.tab \\
         odb12v2_level2species.tab \\
         odb12v2_species.tab \\
-        --clade "$clade" \\
+        --clade "$orthodb_clade" \\
         $excluded_clades_arg \\
         $excluded_species_arg \\
-        > ${clade}.orthodb_proteins.faa
+        > ${orthodb_clade}.orthodb_proteins.faa
 
-    echo "Compressing ${clade}.orthodb_proteins.faa"
-    pigz ${clade}.orthodb_proteins.faa
+    echo "Compressing ${orthodb_clade}.orthodb_proteins.faa"
+    pigz ${orthodb_clade}.orthodb_proteins.faa
 
     echo "Removing intermediate files"
     rm odb12v2_all.faa odb12v2_levels.tab odb12v2_level2species.tab odb12v2_species.tab

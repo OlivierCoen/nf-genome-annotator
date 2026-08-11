@@ -12,7 +12,10 @@ include { MMSEQS_CONCATDBS                                   } from '../../../mo
 */
 
 def warnNoProteinsFound(rec: Record){
-    log.warn("No proteins found for ${rec.id}. Structural annotation will be skipped for this sample. Please provide training proteins for this sample in the samplesheet, or unset the --skip_mmseqs_db_download flag.")
+    log.warn(
+        "No proteins found for ${rec.id}. Structural annotation will be skipped for this sample. " +
+        "Please provide training proteins for this sample in the samplesheet, or unset the --skip_mmseqs_db_download flag."
+    )
 }
 
 record Input {

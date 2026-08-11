@@ -17,16 +17,16 @@ process GET_TAXONOMY_INFO {
 
     output:
         taxonomy = record(
-            species: species, 
+            species: species,
             taxid: env("TAXID"),
             busco_lineage: env("BUSCO_LINEAGE"),
             orthodb_clade: env("ORTHODB_CLADE")
         )
 
     topic:
-        tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )               >> 'versions' 
-        tuple( "${task.process}", 'httpx',  eval('python3 -c "import httpx; print(httpx.__version__)"') ) >> 'versions' 
-        tuple( "${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'") )              >> 'versions'             
+        tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )               >> 'versions'
+        tuple( "${task.process}", 'httpx',  eval('python3 -c "import httpx; print(httpx.__version__)"') ) >> 'versions'
+        tuple( "${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'") )              >> 'versions'
 
     script:
     def busco_datasets = busco_datasets_list[0]

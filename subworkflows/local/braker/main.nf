@@ -16,7 +16,6 @@ record Input {
     id: String
     fasta: Path
     species: String
-    clade: String
     orthodb_clade: String
     excluded_clades: Iterable<String>
     excluded_species: Iterable<String>
@@ -41,7 +40,7 @@ workflow BRAKER {
     // ----------------------------------------------------------
 
     TRAINING_PROTEIN_PREPARATION(
-        ch_input.map { rec -> rec.subMap(['id', 'clade', 'orthodb_clade', 'excluded_clades', 'excluded_species', 'training_proteins']) },
+        ch_input.map { rec -> rec.subMap(['id', 'clade', 'orthodb_clade', 'orthodb_excluded_clades', 'orthodb_excluded_species', 'training_proteins']) },
         skip_orthodb_download,
         min_prot_db_seq_length
     )

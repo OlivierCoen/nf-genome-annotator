@@ -103,13 +103,6 @@
             "orthodb": {
                 "type": "object",
                 "properties": {
-                    "clade": {
-                        "type": "string",
-                        "description": "Clade of interest for OrthoDB custom protein database. By default, the clade is inferred from the provided species / taxid. You can override this by specifying a clade here.",
-                        "fa_icon": "fas fa-database",
-                        "help_text": "The list of recognised clades can be found at https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz",
-                        "meta": ["orthodb_clade"]
-                    },
                     "excluded_clades": {
                         "type": "array",
                         "items": {

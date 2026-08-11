@@ -13,7 +13,6 @@ record Input {
     id: String
     fasta: Path
     species: String
-    clade: String
     orthodb_clade: String
     excluded_clades: Iterable<String>
     excluded_species: Iterable<String>

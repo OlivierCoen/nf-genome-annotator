@@ -21,7 +21,7 @@ process SEQKIT_CONCAT {
     output:
         record(
             id: id,
-            fasta: file("*.{fasta,fastq,fa,fq,fas,fna,faa}.gz")
+            fasta: file("*.faa.gz")
         )
 
     topic:

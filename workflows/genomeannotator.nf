@@ -61,9 +61,8 @@ workflow GENOMEANNOTATOR {
 
                         training_proteins: meta.training_proteins ?: [],
 
-                        orthodb_clade: meta.orthodb_clade,
-                        orthodb_excluded_clades: meta.orthodb_excluded_clades,
-                        orthodb_excluded_species: meta.orthodb_excluded_species,
+                        orthodb_excluded_clades: meta.orthodb_excluded_clades ?: [],
+                        orthodb_excluded_species: meta.orthodb_excluded_species ?: [],
 
                         mmseqs_db: meta.mmseqs_db,
 
@@ -159,10 +158,9 @@ workflow GENOMEANNOTATOR {
             rec.subMap([
                 'id',
                 'fasta',
-                'clade',
                 'orthodb_clade',
-                'excluded_clades',
-                'excluded_species',
+                'orthodb_excluded_clades',
+                'orthodb_excluded_species',
                 'mmseqs_db',
                 'training_proteins',
                 'mappings',
