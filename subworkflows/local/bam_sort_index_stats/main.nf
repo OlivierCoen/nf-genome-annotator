@@ -1,34 +1,71 @@
+nextflow.enable.types = true
+
 include { SAMTOOLS_FAIDX                           } from '../../../modules/local/samtools/faidx'
 include { SAMTOOLS_SORT as SAMTOOLS_SORT_INDEX     } from '../../../modules/local/samtools/sort'
 include { SAMTOOLS_STATS                           } from '../../../modules/local/samtools/stats'
 include { SAMTOOLS_IDXSTATS                        } from '../../../modules/local/samtools/idxstats'
 include { SAMTOOLS_FLAGSTAT                        } from '../../../modules/local/samtools/flagstat'
 
+record Bams {
+    id: String
+    bam: Iterable<Path>
+}
+
 workflow BAM_SORT_INDEX_STATS {
+
     take:
-    ch_bam // channel: [ val(meta), path(bam) ]
-    ch_fasta // channel: [ val(meta), path(fasta) ]
+    ch_input: Channel<Bams>
 
     main:
 
-    SAMTOOLS_FAIDX( ch_fasta )
-    ch_fasta_fai = ch_fasta.join( SAMTOOLS_FAIDX.out.fai )
+    // ------------------------------------------------------------------------------------
+    // INDEX FASTA
+    // ------------------------------------------------------------------------------------
+
+    SAMTOOLS_FAIDX(
+        ch_input.map { rec -> rec.subMap(['id', 'fasta']) }.unique()
+    )
+    ch_input = ch_input.join( SAMTOOLS_FAIDX.out, by: 'id' )
+
+    // ------------------------------------------------------------------------------------
+    // SORT BAMS AND MAKE INDEX
+    // ------------------------------------------------------------------------------------
+
+    ch_bam = ch_input.flatMap { rec ->
+        rec.bams.collect{ bam ->
+            record(
+                sample_id: rec.id,
+                id: bam.baseName,
+                bam: bam,
+                fasta: rec.fasta,
+                fai: rec.fai
+            ) }
+    }
 
     SAMTOOLS_SORT_INDEX( ch_bam )
-    ch_bam_bai = SAMTOOLS_SORT_INDEX.out.bam
-                    .join( SAMTOOLS_SORT_INDEX.out.index )
 
-    SAMTOOLS_STATS(
-        ch_bam_bai.join( ch_fasta_fai )
-    )
+    ch_bam = ch_bam.join( SAMTOOLS_SORT_INDEX.out, by: 'id' )
 
-    SAMTOOLS_FLAGSTAT(ch_bam_bai)
+    // ------------------------------------------------------------------------------------
+    // MAPPING STATS
+    // ------------------------------------------------------------------------------------
 
-    SAMTOOLS_IDXSTATS(ch_bam_bai)
+    SAMTOOLS_STATS( ch_bam )
+
+    SAMTOOLS_FLAGSTAT( ch_bam )
+
+    SAMTOOLS_IDXSTATS( ch_bam )
+
+    // ------------------------------------------------------------------------------------
+    // ASSOCIATE SORTED BAM TO ORIGINAL DATA
+    // ------------------------------------------------------------------------------------
+
+    ch_bams = ch_bam
+                .map { rec -> tuple( rec.sample_id, record(bam: rec.bam, bai: rec.bai) ) }
+                .groupTuple()
+                .map { id, rec_list -> record(id: id, mappings: rec_list) }
 
     emit:
-    bam_bai  = ch_bam_bai
-    stats    = SAMTOOLS_STATS.out.stats // channel: [ val(meta), path(stats) ]
-    flagstat = SAMTOOLS_FLAGSTAT.out.flagstat // channel: [ val(meta), path(flagstat) ]
-    idxstats = SAMTOOLS_IDXSTATS.out.idxstats // channel: [ val(meta), path(idxstats) ]
+    sorted_indexed = ch_input.join( ch_bams, by: 'id' )
+
 }

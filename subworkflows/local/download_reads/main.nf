@@ -7,7 +7,7 @@ include { DOWNLOAD_ENA           } from '../download_ena'
 // DOWNLOAD READS FROM PUBLIC DATABASES
 // ----------------------------------------------------------------------------
 
-record PublicIDs {
+record ExperimentIDs {
     id: String
     rnaseq_experiment_ids: Iterable<String>
 }
@@ -15,7 +15,7 @@ record PublicIDs {
 workflow DOWNLOAD_READS {
 
     take:
-    ch_ids: Channel<PublicIDs>
+    ch_ids: Channel<ExperimentIDs>
 
     main:
 

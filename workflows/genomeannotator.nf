@@ -175,9 +175,10 @@ workflow GENOMEANNOTATOR {
         }
 
         BAM_SORT_INDEX_STATS(
-            ch_main.map{ rec -> rec.subMap(['id', 'bams']) },
-            ch_genome_for_mapping
+            ch_main.map{ rec -> rec.subMap(['id', 'fasta', 'bams']) }
         )
+
+        ch_main = ch_main.join(BAM_SORT_INDEX_STATS.out.sorted_indexed, by: 'id').view()
 
 /*
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
