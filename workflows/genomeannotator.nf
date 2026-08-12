@@ -16,6 +16,7 @@ include { DOWNLOAD_READS                                                } from '
 include { MAP_RNASEQ_READS                                              } from '../subworkflows/local/map_rnaseq_reads'
 include { BAM_SORT_INDEX_STATS                                          } from '../subworkflows/local/bam_sort_index_stats'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
+include { COMPLEMENT_ANNOTATION                                         } from '../subworkflows/local/complement_annotation'
 include { CLEAN_ANNOTATIONS                                             } from '../subworkflows/local/clean_annotations'
 include { ALTERNATIVE_ANNOTATIONS                                       } from '../subworkflows/local/alternative_annotation'
 include { GET_PROTEOMES                                                 } from '../subworkflows/local/get_proteomes'
@@ -182,34 +183,21 @@ workflow GENOMEANNOTATOR {
 
         ch_main = ch_main.join(STRUCTURAL_ANNOTATION.out.annotated, by: 'id')
 
-/*
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if ( !params.complement_annotation ) {
+        if ( params.complement_annotation ) {
 
-            ch_branched_annotations = ch_structural_annotations
-                                        .join( ch_gff, remainder: true )
-                                        .branch{
-                                            meta, annotation, gff ->
-                                                to_complement: gff != null
-                                                    [ meta, gff, annotation ]
-                                                leave_me_alone: gff == null
-                                                    [ meta, annotation ]
-                                        }
-
-            COMPLEMENT_ANNOTATIONS ( ch_branched_annotations.to_complement, [] )
-
-            ch_annotation = ch_branched_annotations.leave_me_alone
-                                .mix( COMPLEMENT_ANNOTATIONS.out.gff )
+            COMPLEMENT_ANNOTATION( ch_main )
 
         }
 
     } else {
-        ch_structural_annotations = ch_gff
+        // when skipping the structural annotation, the provided gff becomes the structural annotation
+        ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.gff)}
     }
-*/
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

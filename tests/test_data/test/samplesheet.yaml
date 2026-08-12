@@ -3,4 +3,5 @@
   species: "3702"
   training_proteins:
     - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
-  rnaseq_fastq:
+  rnaseq:
+    fastqs:
