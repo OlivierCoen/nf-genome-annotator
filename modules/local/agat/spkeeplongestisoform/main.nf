@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process AGAT_SPKEEPLONGESTISOFORM {
-    tag "$meta.id"
+    tag "$id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -8,18 +10,23 @@ process AGAT_SPKEEPLONGESTISOFORM {
         'community.wave.seqera.io/library/agat:1.7.0--9487e22276dbaaca' }"
 
     input:
-    tuple val(meta), path(gxf)
+    record(id: String, gff: Path)
 
     output:
-    tuple val(meta), path("*.longest_transcript_isoforms.gff"), emit: gff
-    tuple val("${task.process}"), val('agat'), eval("agat_sp_keep_longest_isoform.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
+        record(
+            id: id,
+            gff: file("*.longest_transcript_isoforms.gff")
+        )
+
+    topic:
+        tuple("${task.process}", 'agat', eval("agat_sp_keep_longest_isoform.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
-    def args         = task.ext.args   ?: ''
-    def prefix       = task.ext.prefix ?: "${meta.id}"
+    def args   = task.ext.args   ?: ''
+    def prefix = task.ext.prefix ?: "$id"
     """
     agat_sp_keep_longest_isoform.pl \\
-        --gff ${gxf} \\
+        --gff ${gff} \\
         --out "${prefix}.longest_transcript_isoforms.gff" \\
         ${args}
     """
