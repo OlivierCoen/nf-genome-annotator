@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
-    tag "$meta.id"
+    tag "$id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -8,20 +10,29 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
         'community.wave.seqera.io/library/agat:1.7.0--9487e22276dbaaca' }"
 
     input:
-    tuple val(meta), path(gff), path(genome)
+        record(
+            id: String,
+            gff: Path,
+            fasta: Path
+        )
 
     output:
-    tuple val(meta), path("*_incomplete_gene_models_fixed.gff"), emit: gff
-    tuple val("${task.process}"), val('agat'), eval("agat_sp_filter_incomplete_gene_coding_models.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
+        record(
+            id: id,
+            gff: file("*_incomplete_gene_models_fixed.gff")
+        )
+
+    topic:
+        tuple("${task.process}", 'agat', eval("agat_sp_filter_incomplete_gene_coding_models.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
     def args         = task.ext.args   ?: ''
-    def prefix       = task.ext.prefix ?: "${meta.id}"
-    def is_compressed = genome.getExtension() == "gz" ? true : false
-    def genome_fasta = is_compressed ? genome.getBaseName() : genome
+    def prefix       = task.ext.prefix ?: "$id"
+    def is_compressed = fasta.getExtension() == "gz" ? true : false
+    def genome_fasta = is_compressed ? fasta.getBaseName() : genome
     """
     if [ "${is_compressed}" == "true" ]; then
-        gzip -c -d ${genome} > ${genome_fasta}
+        gzip -c -d ${fasta} > ${genome_fasta}
     fi
 
     agat_sp_filter_incomplete_gene_coding_models.pl \\
@@ -30,11 +41,5 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
         --add_flag \\
        ${args} \\
         --output ${prefix}_incomplete_gene_models_fixed.gff
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}_incomplete_gene_models_fixed.gff
     """
 }
