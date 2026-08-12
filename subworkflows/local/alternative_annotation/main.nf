@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 include { AGAT_SPKEEPLONGESTISOFORM as AGAT_KEEP_LONGEST_ISOFORM } from '../../../modules/local/agat/spkeeplongestisoform'
 
 /*
@@ -10,7 +12,7 @@ include { AGAT_SPKEEPLONGESTISOFORM as AGAT_KEEP_LONGEST_ISOFORM } from '../../.
 workflow ALTERNATIVE_ANNOTATIONS {
 
     take:
-    ch_gff
+    ch_input
 
     main:
 
@@ -18,9 +20,10 @@ workflow ALTERNATIVE_ANNOTATIONS {
     // KEEPING ONLY LONGEST ISOFORMS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    AGAT_KEEP_LONGEST_ISOFORM ( ch_gff )
+    ch_out = AGAT_KEEP_LONGEST_ISOFORM( ch_input )
+    ch_input = ch_input.join( ch_out, by: 'id' )
 
     emit:
-    longest_isoforms_gff = AGAT_KEEP_LONGEST_ISOFORM.out.gff
+    ch_input
 
 }
