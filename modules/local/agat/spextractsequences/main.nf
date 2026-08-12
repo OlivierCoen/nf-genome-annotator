@@ -1,5 +1,8 @@
+nextflow.enable.types = true
+
 process AGAT_SPEXTRACTSEQUENCES {
-    tag "$meta.id"
+
+    tag "${id} :: ${gff.baseName}"
     label 'process_single'
 
     // for now, the version of AGAT is 1.4.2 for this module
@@ -11,20 +14,32 @@ process AGAT_SPEXTRACTSEQUENCES {
         'community.wave.seqera.io/library/agat:1.4.2--f0c60073d54a9afe' }"
 
     input:
-    tuple val(meta), path(gxf), path(genome)
-    val codon_usage_id
-    path config
+        record(
+            id: String,
+            gff: Path,
+            genome: Path
+        )
+        codon_usage_id: Integer?
 
     output:
-    tuple val(meta), path("*.prot.faa"), emit: proteins
-    tuple val("${task.process}"), val('agat'), eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
+        record(
+            id: id,
+            extracted_fasta: file("*.{faa,fna}")
+        )
+
+    topic:
+        tuple("${task.process}", 'agat', eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
     def args        = task.ext.args   ?: ''
-    def prefix      = meta.final_annotation ? "${meta.id}" : "${gxf.baseName}"
-    def config_arg  = config ? "-c ${config}" : ''
+    def prefix      = "${gff.baseName}"
+    
     def is_compressed = genome.getExtension() == "gz" ? true : false
     def genome_fasta = is_compressed ? genome.getBaseName() : genome
+
+    def extract_proteins = args.contains("--proteins") ? true : false
+    def codon_usage_arg = extract_proteins ? "--codon $codon_usage_id" : ""
+    def suffix          = extract_proteins ? "prot.faa" : "cds.fna"
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${genome} > ${genome_fasta}
@@ -32,20 +47,9 @@ process AGAT_SPEXTRACTSEQUENCES {
 
     agat_sp_extract_sequences.pl \\
         ${args} \\
-        --gff ${gxf} \\
+        --gff ${gff} \\
         --fasta ${genome_fasta} \\
-        --protein \\
-        --clean_final_stop \\
-        --clean_internal_stop \\
-        --codon $codon_usage_id \\
-        ${config_arg} \\
-        --output ${prefix}.prot.faa
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    if( "${genome}" == "${genome}.fasta" ) error "Input and output names are the same, use \"task.ext.prefix\" to disambiguate!"
-    """
-    touch ${prefix}.fasta
+        ${codon_usage_arg} \\
+        --output ${prefix}.${suffix}
     """
 }
