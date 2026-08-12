@@ -43,19 +43,17 @@ workflow GENOMEANNOTATOR {
     // GENOME PREPARATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GENOME_PREPARATION (
-        ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) }
-    )
-    ch_main = ch_main.join(GENOME_PREPARATION.out.prepared, by: 'id')
+    ch_out = GENOME_PREPARATION( ch_main )
+    ch_main = ch_main.join( ch_out.prepared, by: 'id' )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TAXONOMY_INFO(
+    ch_out = TAXONOMY_INFO(
         ch_main.map{ rec -> rec.species }.unique()
     )
-    ch_main = ch_main.join(TAXONOMY_INFO.out.taxonomy, by: 'species')
+    ch_main = ch_main.join( ch_out.taxonomy, by: 'species' )
 
     if ( !params.skip_structural_annotation ) {
 
@@ -64,22 +62,19 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if ( !params.skip_masking ) {
-            GENOME_MASKING (
-                ch_main.map{ rec -> record(id: rec.id, fasta: rec.fasta) },
+            ch_out = GENOME_MASKING (
+                ch_main,
                 params.genome_masker
             )
-            ch_main = ch_main.join(GENOME_MASKING.out.masked, by: 'id')
+            ch_main = ch_main.join( ch_out.masked, by: 'id' )
         }
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // DOWNLOAD READS FROM SRA / ENA IF NEEDED
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        DOWNLOAD_READS(
-            ch_main.map{ rec -> rec.subMap(['id', 'rnaseq_experiment_ids']) }
-        )
-
-        ch_main = ch_main.join(DOWNLOAD_READS.out.reads, by: 'id')
+        ch_out = DOWNLOAD_READS( ch_main ) 
+        ch_main = ch_main.join( ch_out.reads, by: 'id' )
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // MAP RNASEQ READS TO GENOME
@@ -90,19 +85,15 @@ workflow GENOMEANNOTATOR {
             rec + record(reads_to_map: rec.supplied_rnaseq_fastqs + downloaded_rnaseq_fastqs)
         }
 
-        // get only genomes that need to be built (genomes for which there are reads)
-        ch_main = ch_main.filter{ rec -> rec.reads_to_map.size() > 0 }
-
-        MAP_RNASEQ_READS(
-            ch_main.map{ rec -> rec.subMap(['id', 'fasta', 'reads_to_map', 'gff']) },
+        ch_out = MAP_RNASEQ_READS(
+            ch_main.filter{ rec -> rec.reads_to_map.size() > 0 }, // pass only samples for which there are reads
             params.skip_fastqc,
             params.skip_umi_extract,
             params.skip_trimming,
             params.rnaseq_mapper,
             params.ignore_existing_gff_for_mapping
         )
-
-        ch_main = ch_main.join(MAP_RNASEQ_READS.out.mapped, by: 'id')
+        ch_main = ch_main.join( ch_out.mapped, by: 'id' )
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
@@ -113,42 +104,24 @@ workflow GENOMEANNOTATOR {
             rec + record(bams: rec.supplied_rnaseq_bams + new_rnaseq_bams)
         }
 
-        BAM_SORT_INDEX_STATS(
-            ch_main.map{ rec -> rec.subMap(['id', 'fasta', 'bams']) }
+        ch_out = BAM_SORT_INDEX_STATS(
+            ch_main.map { rec -> rec.bams.size() > 0 }
         )
-
-        ch_main = ch_main.join(BAM_SORT_INDEX_STATS.out.sorted_indexed, by: 'id')
+        ch_main = ch_main.join( ch_out.sorted_indexed, by: 'id' )
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // STRUCTURAL ANNOTATION
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        ch_structural_annot_input = ch_main.map { rec ->
-            rec.subMap([
-                'id',
-                'species',
-                'fasta',
-                'orthodb_clade',
-                'orthodb_excluded_clades',
-                'orthodb_excluded_species',
-                'mmseqs_db',
-                'training_proteins',
-                'mappings',
-                'tsebra_gtfs',
-                'tsebra_hintsfiles'
-                ])
-            }
-
-        STRUCTURAL_ANNOTATION (
-            ch_structural_annot_input,
+        ch_out = STRUCTURAL_ANNOTATION (
+            ch_main,
             params.structural_annotator,
             params.mmseqs_db,
             params.skip_orthodb_download,
             params.skip_mmseqs_db_download,
             params.min_prot_db_seq_length
         )
-
-        ch_main = ch_main.join(STRUCTURAL_ANNOTATION.out.annotated, by: 'id')
+        ch_main = ch_main.join( ch_out.annotated, by: 'id')
 
     } else {
         // when skipping the structural annotation, the provided gff becomes the structural annotation
@@ -160,7 +133,8 @@ workflow GENOMEANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if ( params.complement_annotation ) {
-        ch_main = ch_main.join( COMPLEMENT_ANNOTATION( ch_main ), by: 'id' )
+        ch_out = COMPLEMENT_ANNOTATION( ch_main )
+        ch_main = ch_main.join( ch_out.complemented, by: 'id' )
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
