@@ -16,7 +16,7 @@ include { STRUCTURAL_ANNOTATION                                         } from '
 include { COMPLEMENT_ANNOTATION                                         } from '../subworkflows/local/complement_annotation'
 include { CLEAN_ANNOTATION                                              } from '../subworkflows/local/clean_annotation'
 include { ALTERNATIVE_ANNOTATIONS                                       } from '../subworkflows/local/alternative_annotation'
-include { GET_PROTEOMES                                                 } from '../subworkflows/local/get_proteomes'
+include { EXTRACT_SEQUENCES                                             } from '../subworkflows/local/extract_sequences'
 include { FUNCTIONAL_ANNOTATION                                         } from '../subworkflows/local/functional_annotation'
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
 include { REPORTING                                                     } from '../subworkflows/local/reporting'
@@ -152,6 +152,11 @@ workflow GENOMEANNOTATOR {
     // CLEANING OF GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    // storing the provided gff (if any)
+    ch_main = ch_main.map { rec -> 
+        rec.gff ? rec + record(previous_annotation: rec.gff) : rec
+    }
+    
     ch_cleaned = CLEAN_ANNOTATION (
         ch_main,
         params.gff_fix_feature_locations_duplicated,
@@ -160,55 +165,26 @@ workflow GENOMEANNOTATOR {
     )
     ch_main = ch_main.join( ch_cleaned, by: 'id' )
 
-/*
+    // NOTE: now the annotation is under the 'gff' key
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE ALTERNATIVE ANNOTATIONS (LONGEST ISOFORMS ONLY, ...)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ALTERNATIVE_ANNOTATIONS( ch_gff )
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // ORGANISE ANNOTATIONS
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    ch_structural_annotation = CLEAN_ANNOTATIONS.out.gff
-                            .map {
-                                meta, file -> [ meta + [final_annotation: true], file ]
-                            }
-
-    // for now, the final annotation is set to the structural annotation
-    // is will be set to the functional annotation if it is not skipped
-    ch_final_annotation = ch_structural_annotation
-
-    ch_intermediate_annotations = ch_structural_annotations
-                                    .mix( CLEAN_ANNOTATIONS.out.intermediate_gffs )
-                                    .map {
-                                        meta, file -> [ meta + [final_annotation: false], file ]
-                                    }
-
-    ch_alternative_annotations = ALTERNATIVE_ANNOTATIONS.out.longest_isoforms_gff
-                                    .map {
-                                        meta, file -> [ meta + [final_annotation: false], file ]
-                                    }
-
-    ch_all_annotations = ch_structural_annotation
-                            .mix( ch_intermediate_annotations )
-                            .mix( ch_alternative_annotations )
+    ch_alternative_annotations = ALTERNATIVE_ANNOTATIONS( ch_main )
+    ch_main = ch_main.join( ch_alternative_annotations, by: 'id' )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    GET_PROTEOMES (
-        ch_all_annotations,
-        ch_genome,
+    ch_extracted_sequences = EXTRACT_SEQUENCES (
+        ch_main,
         params.codon_usage_id
     )
 
-    ch_proteomes = GET_PROTEOMES.out.proteomes
-    ch_main_proteome = ch_proteomes
-                        .filter{ meta, file -> meta.final_annotation == true }
-
+    ch_main = ch_main.join( ch_extracted_sequences, by: 'id' )
+/*
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
