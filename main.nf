@@ -20,8 +20,6 @@ include { GENOMEANNOTATOR         } from './workflows/genomeannotator'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
 
-include { getField                } from './subworkflows/local/utils_nfcore_genomeannotator_pipeline'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE

@@ -279,11 +279,9 @@ def methodsDescriptionText(mqc_methods_yaml) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def getField(ch: Channel, field: String) {
-    // implicitely add 'id' field
-    return ch.map{ rec -> rec.subMap(['id', field]) }
-}
-
-def renameField(ch1: Channel, oldField: String, newField: String) {
-     return ch1.map{ rec -> rec.subMap(rec.keySet() - [oldField]) + record(newField: rec[oldField]) }
+def rename(rec: Record, renamingMap: Map<String, String>) {
+    def unchanged = rec.subMap(rec.keySet() - renamingMap.keySet())
+    def changed = record()
+    renamingMap.each { key, value -> changed = changed + record(value)}
+    return unchanged + changed
 }
