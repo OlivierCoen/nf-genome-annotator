@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process AGAT_CONVERTSPGXF2GXF {
-    tag "$meta.id"
+    tag "$id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -8,15 +10,20 @@ process AGAT_CONVERTSPGXF2GXF {
         'community.wave.seqera.io/library/agat:1.7.0--9487e22276dbaaca' }"
 
     input:
-    tuple val(meta), path(gff)
+        record(id: String, gxf: Path)
 
     output:
-    tuple val(meta), path("*.cleaned.gff"), emit: gff
-    tuple val("${task.process}"), val('agat'), eval("agat_convert_sp_gxf2gxf.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
+        record(
+            id: id,
+            gff: file("*.cleaned.gff")
+        )
+
+    topic:
+        tuple("${task.process}", 'agat', eval("agat_convert_sp_gxf2gxf.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
     def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}.cleaned"
+    def prefix = task.ext.prefix ?: "${id}.cleaned"
     """
     agat_convert_sp_gxf2gxf.pl \\
         --gff ${gff} \\
