@@ -103,7 +103,10 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
 
-    ch_samplesheet = channel.fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+    ch_samplesheet = parseSamplesheet()
+
+    // validate samplesheet
+    validateSamplesheet( ch_samplesheet )
 
     emit:
     samplesheet = ch_samplesheet
@@ -161,6 +164,53 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+// turning the map of fastq files into a list (all modules work with lists)
+def organiseRnaseqFastqFiles( rnaseq_fastqs_list: List<Map<String, Path>> ) {
+    return rnaseq_fastqs_list.collect { fastq_map -> fastq_map.R2 ? [ fastq_map.R1, fastq_map.R2 ] : [ fastq_map.R1 ] }
+}
+
+def parseSamplesheet() {
+    return channel
+            .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+            .map{ args ->
+                def meta = args[0]
+                record(
+                    id: meta.id,
+                    fasta: meta.fasta,
+                    species: meta.species.toString(),
+                    gff: meta.gff,
+
+                    supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
+                    supplied_rnaseq_fastqs: meta.rnaseq_fastqs ? organiseRnaseqFastqFiles(meta.rnaseq_fastqs) : [],
+                    rnaseq_experiment_ids: meta.rnaseq_experiment_ids ?: [],
+
+                    training_proteins: meta.training_proteins ?: [],
+
+                    orthodb_excluded_clades: meta.orthodb_excluded_clades ?: [],
+                    orthodb_excluded_species: meta.orthodb_excluded_species ?: [],
+
+                    mmseqs_db: meta.mmseqs_db,
+
+                    tsebra_gtfs: meta.tsebra_gtfs ?: [],
+                    tsebra_hintsfiles: meta.tsebra_hintsfiles ?: []
+                )
+            }
+}
+
+def validateSamplesheet( ch_samplesheet ) {
+    // if structural annotation is skipped, a gff must be provided for each sample in the samplesheet
+    if (params.skip_structural_annotation) {
+        ch_samplesheet.map { rec -> 
+            if (!rec.gff) {
+                error(
+                    "GFF not found for sample ${rec.id}. When skipping structural annotation, "
+                    + "a GFF must be provided for each sample in the samplesheet"
+                )
+            }
+        }
+    }
+}
 
 //
 // Generate methods description for MultiQC

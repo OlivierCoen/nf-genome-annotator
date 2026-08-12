@@ -6,9 +6,6 @@ nextflow.enable.types = true
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { AGAT_SPCOMPLEMENTANNOTATIONS as COMPLEMENT_ANNOTATIONS        } from '../modules/local/agat/spcomplementannotations'
-
-
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { TAXONOMY_INFO                                                 } from '../subworkflows/local/taxonomy_info'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
@@ -35,42 +32,12 @@ record Samplesheet {
     genome: Path
 }
 
-// turning the map of fastq files into a list (all modules work with lists)
-def organiseRnaseqFastqFiles( rnaseq_fastqs_list: List<Map<String, Path>> ) {
-    return rnaseq_fastqs_list.collect { fastq_map -> fastq_map.R2 ? [ fastq_map.R1, fastq_map.R2 ] : [ fastq_map.R1 ] }
-}
-
 workflow GENOMEANNOTATOR {
 
     take:
-    ch_samplesheet: Channel<Samplesheet>
+    ch_main: Channel<Samplesheet>
 
     main:
-
-    ch_main = ch_samplesheet
-                .map{ args ->
-                    def meta = args[0]
-                    record(
-                        id: meta.id,
-                        fasta: meta.fasta,
-                        species: meta.species.toString(),
-                        gff: meta.gff,
-
-                        supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
-                        supplied_rnaseq_fastqs: meta.rnaseq_fastqs ? organiseRnaseqFastqFiles(meta.rnaseq_fastqs) : [],
-                        rnaseq_experiment_ids: meta.rnaseq_experiment_ids ?: [],
-
-                        training_proteins: meta.training_proteins ?: [],
-
-                        orthodb_excluded_clades: meta.orthodb_excluded_clades ?: [],
-                        orthodb_excluded_species: meta.orthodb_excluded_species ?: [],
-
-                        mmseqs_db: meta.mmseqs_db,
-
-                        tsebra_gtfs: meta.tsebra_gtfs ?: [],
-                        tsebra_hintsfiles: meta.tsebra_hintsfiles ?: []
-                    )
-                }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME PREPARATION
@@ -183,19 +150,17 @@ workflow GENOMEANNOTATOR {
 
         ch_main = ch_main.join(STRUCTURAL_ANNOTATION.out.annotated, by: 'id')
 
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        if ( params.complement_annotation ) {
-
-            COMPLEMENT_ANNOTATION( ch_main )
-
-        }
-
     } else {
         // when skipping the structural annotation, the provided gff becomes the structural annotation
         ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.gff)}
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if ( params.complement_annotation ) {
+        ch_main = ch_main.join( COMPLEMENT_ANNOTATION( ch_main ), by: 'id' )
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
