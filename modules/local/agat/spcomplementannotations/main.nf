@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process AGAT_SPCOMPLEMENTANNOTATIONS {
-    tag "$meta.id"
+    tag "$id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -8,29 +10,29 @@ process AGAT_SPCOMPLEMENTANNOTATIONS {
         'community.wave.seqera.io/library/agat:1.7.0--9487e22276dbaaca' }"
 
     input:
-    tuple val(meta), path(ref_gff), path(other_gff)
-    path config
+        record(
+            id: String, 
+            ref_gff: Path,
+            other_gff: Path
+        )
 
     output:
-    tuple val(meta), path("*_complemented.gff"), emit: gff
-    tuple val("${task.process}"), val('agat'), eval("sp_complement_annotations.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"),    topic: versions
+        record(
+            id: id,
+            gff: file("*_complemented.gff")
+        )
 
+    topic:
+        tuple("${task.process}", 'agat', eval("sp_complement_annotations.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
+        
     script:
-    def args         = task.ext.args   ?: ''
-    def prefix       = task.ext.prefix ?: "${meta.id}"
-    def config_param = config ? "--config ${config}" : ''
+    def args   = task.ext.args   ?: ''
+    def prefix = task.ext.prefix ?: "${id}"
     """
     agat_sp_complement_annotations.pl \\
         --ref $ref_gff \\
         --add $other_gff \\
-        ${config_param} \\
        ${args} \\
         --output ${prefix}_complemented.gff
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}_complemented.gff
     """
 }
