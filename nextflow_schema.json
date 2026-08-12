@@ -292,7 +292,7 @@
                     "default": 1,
                     "description": "ID of the codon usage table to use (as defined in perl's Bio::Tools::CodonTable).",
                     "fa_icon": "fas fa-hand-scissors",
-                    "help_text": "For invertebrates / vertebrates / fungi, you should skip this parameter. It is important for mitochondrial genomes. For an extensive list of codon usage IDs, see https://forge.inrae.fr/genotoul-bioinfo/ngspipelines/-/blob/e628625ae2e44845ecbf3deb19637fcb1369b3f9/core/lib/Bio/Tools/CodonTable.pm"
+                    "help_text": "For invertebrates / vertebrates / fungi, you should skip this parameter. It is important for mitochondrial genomes. For an extensive list of codon usage IDs, see https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi#SG1"
                 }
             }
         },
