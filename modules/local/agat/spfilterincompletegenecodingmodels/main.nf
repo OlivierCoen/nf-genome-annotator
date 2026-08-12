@@ -29,7 +29,7 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
     def args         = task.ext.args   ?: ''
     def prefix       = task.ext.prefix ?: "$id"
     def is_compressed = fasta.getExtension() == "gz" ? true : false
-    def genome_fasta = is_compressed ? fasta.getBaseName() : genome
+    def genome_fasta = is_compressed ? fasta.getBaseName() : fasta
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${genome_fasta}

@@ -44,6 +44,6 @@ workflow GENOME_PREPARATION {
                 }
 
     emit:
-    prepared = ch_prepared
+    ch_prepared
 
 }

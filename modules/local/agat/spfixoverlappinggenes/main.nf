@@ -19,7 +19,7 @@ process AGAT_SPFIXOVERLAPPINGGENES {
         )
 
     topic:
-        tuple val("${task.process}", 'agat', eval("agat_sp_fix_overlaping_genes.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
+        tuple("${task.process}", 'agat', eval("agat_sp_fix_overlaping_genes.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
     def args   = task.ext.args   ?: ''

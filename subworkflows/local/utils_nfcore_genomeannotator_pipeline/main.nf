@@ -179,7 +179,7 @@ def parseSamplesheet() {
                     id: meta.id,
                     fasta: meta.fasta,
                     species: meta.species.toString(),
-                    gff: meta.gff,
+                    gff: meta.gff ?: null,
 
                     supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
                     supplied_rnaseq_fastqs: meta.rnaseq_fastqs ? organiseRnaseqFastqFiles(meta.rnaseq_fastqs) : [],
@@ -203,10 +203,7 @@ def validateSamplesheet( ch_samplesheet ) {
     if (params.skip_structural_annotation) {
         ch_samplesheet.map { rec -> 
             if (!rec.gff) {
-                error(
-                    "GFF not found for sample ${rec.id}. When skipping structural annotation, "
-                    + "a GFF must be provided for each sample in the samplesheet"
-                )
+                error("GFF not found for sample ${rec.id}. When skipping structural annotation, a GFF must be provided for each sample in the samplesheet")
             }
         }
     }

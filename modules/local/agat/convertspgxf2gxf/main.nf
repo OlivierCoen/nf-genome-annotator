@@ -26,7 +26,7 @@ process AGAT_CONVERTSPGXF2GXF {
     def prefix = task.ext.prefix ?: "${id}.cleaned"
     """
     agat_convert_sp_gxf2gxf.pl \\
-        --gff ${gff} \\
+        --gff ${gxf} \\
         --output ${prefix}.gff \\
         ${args}
     """

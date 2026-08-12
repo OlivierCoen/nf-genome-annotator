@@ -27,8 +27,8 @@ workflow COMPLEMENT_ANNOTATION {
     // PREPARE PROTEIN TRAINING SET FOR BRAKER
     // ----------------------------------------------------------
 
-    ch_to_complement  = ch_input.filter{ rec -> rec.gff != [] }
-    ch_leave_me_alone = ch_input.filter{ rec -> rec.gff == [] }
+    ch_to_complement  = ch_input.filter{ rec -> rec.gff != null }
+    ch_leave_me_alone = ch_input.filter{ rec -> rec.gff == null }
 
     // saving the uncomplemented annotation
     ch_to_complement = ch_to_complement.map { rec -> rec + record(uncomplemented_annotation: rec.annotation) }

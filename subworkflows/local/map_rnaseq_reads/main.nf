@@ -44,8 +44,8 @@ workflow MAP_RNASEQ_READS {
 
     if ( !ignore_existing_gff_for_mapping ) {
 
-        ch_input_with_gff    = ch_input.filter{ rec -> rec.gff != [] }
-        ch_input_without_gff = ch_input.filter{ rec -> rec.gff == [] }
+        ch_input_with_gff    = ch_input.filter{ rec -> rec.gff != null }
+        ch_input_without_gff = ch_input.filter{ rec -> rec.gff == null }
 
         CONVERT_TO_GTF( ch_input_with_gff )
 
