@@ -64,7 +64,10 @@ workflow FUNCTIONAL_ANNOTATION {
         // RUNNING INTERPROSCAN 5
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        ch_interproscan_out = INTERPROSCAN5( ch_proteome, interproscan_db )  
+        ch_interproscan_out = INTERPROSCAN5( 
+            ch_input, 
+            interproscan_db
+        )  
 
         ch_input = ch_input.join( 
             ch_interproscan_out.map { rec -> record(id: rec.id, interproscan_gff: rec.gff) }, 

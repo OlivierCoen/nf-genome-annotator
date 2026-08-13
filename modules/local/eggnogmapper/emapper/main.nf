@@ -32,7 +32,7 @@ process EGGNOGMAPPER_EMAPPER {
 
     script:
     def args            = task.ext.args                 ?: ''
-    def prefix          = task.ext.prefix               ?: "${meta.id}"
+    def prefix          = task.ext.prefix               ?: "$id"
     def is_compressed   = fasta.extension == '.gz'      ? true                              : false
     def fasta_name      = is_compressed                 ? fasta.baseName                    : "$fasta"
     def dbmem           = task.memory.toMega() > 40000  ? '--dbmem'                         : ''

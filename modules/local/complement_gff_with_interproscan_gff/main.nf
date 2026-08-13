@@ -29,7 +29,7 @@ process COMPLEMENT_GFF_WITH_INTERPROSCAN_GFF {
         tuple("${task.process}", 'pandas', eval('python3 -c "import pandas; print(pandas.__version__)"')) >> 'versions'
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}.complemented"
+    def prefix = task.ext.prefix ?: "${id}.complemented"
     """
     complement_gff_with_interproscan_gff.py \\
         --annot ${gff} \\
