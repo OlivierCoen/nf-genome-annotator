@@ -1,8 +1,12 @@
-process INTERPROSCAN_INTERPROSCAN {
+nextflow.enable.types = true
 
-    tag "$meta.id"
+process INTERPROSCAN5_INTERPROSCAN {
+
+    tag "$id"
     label 'process_high'
 
+    // there are issues with the interproscan db whith symlinks... 
+    // see if it's really not possible to use simlinks
     stageInMode 'copy'
 
     conda "${moduleDir}/environment.yml"
@@ -11,19 +15,31 @@ process INTERPROSCAN_INTERPROSCAN {
         'biocontainers/interproscan:5.59_91.0--hec16e2b_1' }"
 
     input:
-    tuple val(meta), path(fasta)
-    path(interproscan_database, stageAs: 'data')
+        record(
+            id: String,     
+            fasta: Path
+        )
+        interproscan5_db: Path
+
+    stage:
+        stageAs interproscan5_db, 'data'
 
     output:
-    tuple val(meta), path('*.tsv') , optional: true, emit: tsv
-    tuple val(meta), path('*.xml') , optional: true, emit: xml
-    tuple val(meta), path('*.gff3'), optional: true, emit: gff3
-    tuple val(meta), path('*.json'), optional: true, emit: json
-    tuple val("${task.process}"), val('interproscan'), eval("interproscan.sh --version | sed '1!d; s/.*version //'"),    topic: versions
+        record(
+            id: id,
+            gff: file('*.gff3', optional: true)
+        )
+    
+    topic:
+        tuple('interproscan', id, file('*.tsv', optional: true))  >> 'additional_results'
+        tuple('interproscan', id, file('*.xml', optional: true))  >> 'additional_results'
+        tuple('interproscan', id, file('*.json', optional: true)) >> 'additional_results'
+
+        tuple("${task.process}", 'interproscan', eval("interproscan.sh --version | sed '1!d; s/.*version //'")) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "$id"
     def is_compressed = fasta.name.endsWith(".gz")
     def fasta_name = fasta.name.replace(".gz", "")
     """
