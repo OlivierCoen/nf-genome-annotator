@@ -1,10 +1,12 @@
+nextflow.enable.types = true
+
 include { EGGNOGMAPPER_DOWNLOADDB                      } from '../../../modules/local/eggnogmapper/download_db'
 include { EGGNOGMAPPER_EMAPPER                         } from '../../../modules/local/eggnogmapper/emapper'
 
-include { INTERPROSCAN_DOWNLOADDB                      } from '../../../modules/local/interproscan5/download_db'
-include { INTERPROSCAN_INTERPROSCAN as INTERPROSCAN    } from '../../../modules/local/interproscan5/interproscan'
+include { INTERPROSCAN5_DOWNLOADDB                     } from '../../../modules/local/interproscan5/download_db'
+include { INTERPROSCAN5_INTERPROSCAN as INTERPROSCAN5  } from '../../../modules/local/interproscan5/interproscan'
 
-include { COMPLEMENT_GFF3_WITH_INTERPROSCAN            } from '../../../modules/local/complement_gff3_with_interproscan'
+include { COMPLEMENT_GFF_WITH_INTERPROSCAN_GFF         } from '../../../modules/local/complement_gff_with_interproscan_gff'
 
 
 
@@ -17,75 +19,67 @@ include { COMPLEMENT_GFF3_WITH_INTERPROSCAN            } from '../../../modules/
 workflow FUNCTIONAL_ANNOTATION {
 
     take:
-    ch_proteome
-    ch_gff
+    ch_input
     functional_annotators
-    interproscan_db
-    interproscan_db_url
+    interproscan5_db
+    interproscan5_db_url
 
     main:
 
-    ch_versions = channel.empty()
-    ch_eggnogmapper_output_to_publish = channel.empty()
-    ch_interproscan_output_to_publish = channel.empty()
-
-    ch_decorated_gff = ch_gff
-
     if ( "eggnogmapper" in functional_annotators ) {
 
-        EGGNOGMAPPER_DOWNLOADDB ( )
-        ch_eggnog_db = EGGNOGMAPPER_DOWNLOADDB.out.eggnog_data_dir
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // DOWNLOAD EGGNOG DB
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        EGGNOGMAPPER_EMAPPER(
-            ch_proteome.join( ch_gff ),
+        ch_eggnog_db = EGGNOGMAPPER_DOWNLOADDB( )
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // RUN EGGNOG MAPPER
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        ch_eggnog_mapper_out = EGGNOGMAPPER_EMAPPER(
+            ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome, gff: rec.gff) },
             ch_eggnog_db
         )
 
-        ch_decorated_gff = EGGNOGMAPPER_EMAPPER.out.decorated_gff
+        ch_input = ch_input.join( ch_eggnog_mapper_out, by: 'id' )
 
-        // putting together all output data to publish
-        ch_eggnogmapper_output_to_publish = ch_eggnogmapper_output_to_publish
-                                                .mix( EGGNOGMAPPER_EMAPPER.out.decorated_gff )
-                                                .mix( EGGNOGMAPPER_EMAPPER.out.annotations )
-                                                .mix( EGGNOGMAPPER_EMAPPER.out.orthhologs )
-                                                .mix( EGGNOGMAPPER_EMAPPER.out.seed_orthlogs )
-                                                .mix( EGGNOGMAPPER_EMAPPER.out.hits )
-
+        // NOTE: the 'gff' key now holds the gff decorated by eggnog mapper
     }
 
-    if ( "interproscan" in functional_annotators ) {
+    if ( "interproscan5" in functional_annotators ) {
 
-        if ( interproscan_db != null ) {
-
-            interproscan_db = file( interproscan_db, checkExists: true )
-
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // IF INTERPROSCAN DB WAS NOT PROVIDED, DOWNLOADING IT
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+        if ( interproscan5_db ) {
+            interproscan_db = channel.fromPath( interproscan5_db, checkExists: true )
         } else {
-
-            // DOWNLOADING
-            ch_db_url = Channel.value([
-                [ id: interproscan_db_url.tokenize("/")[-1] - '.tar.gz'],
-                interproscan_db_url
-            ])
-            INTERPROSCAN_DOWNLOADDB ( ch_db_url )
-            interproscan_db = INTERPROSCAN_DOWNLOADDB.out.db
+            interproscan_db = INTERPROSCAN5_DOWNLOADDB( channel.value( interproscan5_db_url ) )
         }
 
-        INTERPROSCAN( ch_proteome, interproscan_db )
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // RUNNING INTERPROSCAN 5
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        ch_versions = ch_versions.mix( INTERPROSCAN_DOWNLOADDB.out.versions )
+        ch_interproscan_out = INTERPROSCAN5( ch_proteome, interproscan_db )  
 
-        COMPLEMENT_GFF3_WITH_INTERPROSCAN(
-            ch_decorated_gff.join( INTERPROSCAN.out.gff3 )
+        ch_input = ch_input.join( 
+            ch_interproscan_out.map { rec -> record(id: rec.id, interproscan_gff: rec.gff) }, 
+            by: 'id' 
         )
-        ch_decorated_gff = COMPLEMENT_GFF3_WITH_INTERPROSCAN.out.gff3
 
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // COMPLEMENT EXISTING GFF WITH OUTPUT FROM INTERPROSCAN
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        ch_complemented = COMPLEMENT_GFF_WITH_INTERPROSCAN_GFF( ch_input )
+        ch_input = ch_input.join( ch_complemented, by: 'id' )
     }
 
 
     emit:
-    gff              = ch_decorated_gff
-    eggnogmapper_output = ch_eggnogmapper_output_to_publish
-    interproscan_output = ch_interproscan_output_to_publish
-    versions         = ch_versions
-
+    ch_input
 }

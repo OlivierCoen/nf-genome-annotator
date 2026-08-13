@@ -184,28 +184,26 @@ workflow GENOMEANNOTATOR {
     )
 
     ch_main = ch_main.join( ch_extracted_sequences, by: 'id' )
-/*
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if ( !params.skip_functional_annotation ) {
 
+        // storing the final structural annotation
+        ch_main = ch_main.map { rec -> rec + record(final_structural_annotation: rec.gff) }
+
         FUNCTIONAL_ANNOTATION (
-            ch_main_proteome,
-            ch_structural_annotation,
+            ch_main,
             params.functional_annotators,
-            params.interproscan_db,
-            params.interproscan_db_url
+            params.interproscan5_db,
+            params.interproscan5_db_url
         )
 
-        ch_functional_annotation = FUNCTIONAL_ANNOTATION.out.gff
-        ch_final_annotation      = ch_functional_annotation
-
-        ch_versions = ch_versions
-                        .mix( FUNCTIONAL_ANNOTATION.out.versions )
+        
     }
-
+/*
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // VARIOUS QUALITY CONTROLS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
