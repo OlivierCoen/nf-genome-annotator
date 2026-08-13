@@ -1,23 +1,32 @@
-process INTERPROSCAN_DOWNLOADDB {
+nextflow.enable.types = true
+
+process INTERPROSCAN5_DOWNLOADDB {
 
     label 'process_medium'
-    tag "${meta.id}"
+    tag "${db_url.tokenize('/')[-1] - '.tar.gz'}"
 
-    storeDir "${workflow.projectDir}/.nextflow/cache/interproscan"
+    //storeDir "${workflow.projectDir}/.nextflow/cache/interproscan"
 
     errorStrategy {
         if (task.exitStatus == 100) {
-            log.warn("md5 checksum failed for Interproscan URL ${db_url}. Please delete the local file and relaunch the pipeline.")
-            return 'terminate'
+            log.warn("md5 checksum failed for Interproscan DB URL ${db_url}.")
+            return 'retry'
         }
     }
 
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/95/95c0d3d867f5bc805b926b08ee761a993b24062739743eb82cc56363e0f7817d/data':
+        'community.wave.seqera.io/library/aria2:1.37.0--3a9ec328469995dd' }"
+
     input:
-    tuple val(meta), val(db_url)
+        db_url: String
 
     output:
-    path("*/data"),            emit: db
-    path "versions.yml",       emit: versions
+        file("data", type: 'dir')
+
+    topic:
+        tuple("${task.process}", 'aria2', eval("aria2c -v | head -1 | sed 's/aria2 version //g'")) >> 'versions'
 
     script:
     def filename = db_url.tokenize("/")[-1]
@@ -39,12 +48,6 @@ process INTERPROSCAN_DOWNLOADDB {
 
     echo "Deleting archive"
     rm ${filename} ${filename}.md5
-
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        aria2: \$(aria2c -v | head -1 | sed 's/aria2 version //g')
-    END_VERSIONS
     """
 
 
