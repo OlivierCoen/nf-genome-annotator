@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process EGGNOGMAPPER_DOWNLOADDB {
     label 'process_medium'
 
@@ -7,10 +9,12 @@ process EGGNOGMAPPER_DOWNLOADDB {
         'community.wave.seqera.io/library/aria2_httpx_pigz_tenacity:0cf226d5365c27ae' }"
 
     output:
-    path "data",          emit: eggnog_data_dir
-    tuple val("${task.process}"), val('aria2'), eval("aria2c -v | head -1 | sed 's/aria2 version //g'"), topic: versions
-    tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"),           topic: versions
-    tuple val("${task.process}"), val('httpx'), eval('python3 -c "import httpx; print(httpx.__version__)"'), topic: versions
+        file("data", type: 'dir')
+
+    topic:
+        tuple("${task.process}", 'aria2', eval("aria2c -v | head -1 | sed 's/aria2 version //g'"))     >> 'versions'
+        tuple("${task.process}", 'pigz',  eval("pigz --version 2>&1 | sed 's/pigz //g'"))              >> 'versions'
+        tuple("${task.process}", 'httpx', eval('python3 -c "import httpx; print(httpx.__version__)"')) >> 'versions'
 
     script:
     """
