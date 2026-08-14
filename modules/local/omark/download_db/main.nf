@@ -1,8 +1,10 @@
+nextflow.enable.types = true
+
 process OMARK_DOWNLOADDB {
 
-    errorStrategy 'ignore'
+    //errorStrategy 'ignore'
 
-    label 'process_high'
+    label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
@@ -10,11 +12,13 @@ process OMARK_DOWNLOADDB {
         'community.wave.seqera.io/library/aria2:1.37.0--3a9ec328469995dd' }"
 
     input:
-    val db_url
+        db_url: String
 
     output:
-    path("omamer_db/*"), emit: db
-    tuple val("${task.process}"), val('aria2'), eval("aria2c -v | head -1 | sed 's/aria2 version //g'"), topic: versions
+        file("omamer_db/", type: 'dir')
+
+    topic:
+        tuple("${task.process}", 'aria2', eval("aria2c -v | head -1 | sed 's/aria2 version //g'")) >> 'versions'
 
     script:
     """
