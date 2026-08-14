@@ -18,7 +18,7 @@ process AGAT_SPSTATISTICS {
 
     output:
         record(
-            id: id:
+            id: id,
             gff_stats: file("*.yaml")
         )
 
@@ -28,8 +28,8 @@ process AGAT_SPSTATISTICS {
 
     script:
     def args   = task.ext.args   ?: ''
-    def prefix = task/ext/prefix ?: "$id"
-    def genome_size_arg = genome_size ? "--gs ${meta.genome_size}" : ''
+    def prefix = task.ext.prefix ?: "$id"
+    def genome_size_arg = genome_size ? "--gs ${genome_size}" : ''
     """
     agat_sp_statistics.pl \\
         --gff ${gff} \\

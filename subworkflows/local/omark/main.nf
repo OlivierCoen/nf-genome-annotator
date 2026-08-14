@@ -63,6 +63,4 @@ workflow OMARK {
         ch_omark_db
     )
 
-    emit:
-    ch_input.join( ch_omark_out, by: 'id' )
 }

@@ -15,7 +15,7 @@ process BUSCO_BUSCO {
         record(
             id: String,
             fasta: Iterable<Path>,
-            busco_lineage: String?
+            busco_lineage: String?,
             busco_download_path: Path?
         )
         mode: String
@@ -78,7 +78,7 @@ process BUSCO_BUSCO {
         --in "\$INPUT_SEQS" \\
         --out ${prefix}-busco \\
         --mode ${mode} \\
-        --download_path ${busco_lineages_path} \\
+        --download_path ${busco_download_path} \\
         ${args}
 
     # clean up

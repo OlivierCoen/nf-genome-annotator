@@ -15,7 +15,7 @@ process OMARK_EXTRACT_TRANSCRIPT_ISOFORMS {
 
     output:
         record(
-            id: id:
+            id: id,
             transcript_isoforms: file("*.transcript_isoforms")
         )
 
@@ -24,10 +24,11 @@ process OMARK_EXTRACT_TRANSCRIPT_ISOFORMS {
         tuple("${task.process}", 'polars', eval('python3 -c "import polars; print(polars.__version__)"')) >> 'versions'
 
     script:
+    def prefix = task.ext.prefix ?: "$id"
     """
     extract_transcript_isoforms_per_gene.py \\
-        --gff $gff3 \\
-        --out ${meta.id}.transcript_isoforms
+        --gff $gff \\
+        --out ${prefix}.transcript_isoforms
     """
 
 }
