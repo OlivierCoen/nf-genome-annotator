@@ -1,7 +1,9 @@
+nextflow.enable.types = true
+
 process OMARK_EXTRACT_TRANSCRIPT_ISOFORMS {
 
-    tag "${meta.id}"
-    label 'process_high'
+    tag "$id"
+    label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
@@ -9,12 +11,17 @@ process OMARK_EXTRACT_TRANSCRIPT_ISOFORMS {
         'community.wave.seqera.io/library/polars:1.42.0--968231e32f4804f6' }"
 
     input:
-    tuple val(meta), path(gff3)
+        record(id: String, gff: Path)
 
     output:
-    tuple val(meta), path("*.transcript_isoforms"), emit: isoforms
-    tuple val("${task.process}"), val('python'),eval("python3 --version | sed 's/Python //'"),            topic: versions
-    tuple val("${task.process}"), val('polars'), eval('python3 -c "import polars; print(polars.__version__)"'), topic: versions
+        record(
+            id: id:
+            transcript_isoforms: file("*.transcript_isoforms")
+        )
+
+    topic:
+        tuple("${task.process}", 'python', eval("python3 --version | sed 's/Python //'")) >> 'versions'
+        tuple("${task.process}", 'polars', eval('python3 -c "import polars; print(polars.__version__)"')) >> 'versions'
 
     script:
     """

@@ -18,7 +18,7 @@ include { CLEAN_ANNOTATION                                              } from '
 include { ALTERNATIVE_ANNOTATIONS                                       } from '../subworkflows/local/alternative_annotation'
 include { EXTRACT_SEQUENCES                                             } from '../subworkflows/local/extract_sequences'
 include { FUNCTIONAL_ANNOTATION                                         } from '../subworkflows/local/functional_annotation'
-include { QUALITY_CONTROLS                                              } from '../subworkflows/local/qc'
+include { QUALITY_CONTROLS                                              } from '../subworkflows/local/quality_controls'
 include { REPORTING                                                     } from '../subworkflows/local/reporting'
 
 /*
@@ -202,26 +202,19 @@ workflow GENOMEANNOTATOR {
             params.interproscan5_db_url
         )
 
-        
     }
-/*
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // VARIOUS QUALITY CONTROLS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    QUALITY_CONTROLS (
-        ch_genome,
-        ch_busco_lineage,
-        ch_all_annotations,
-        ch_main_proteome,
-        ch_proteomes,
-        ch_structural_annotation,
-        ch_functional_annotation,
+    QUALITY_CONTROLS(
+        ch_main,
         params.skip_omark,
         params.omamer_db_url,
         params.omamer_db
     )
-
+/*
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MULTIQC & OTHER REPORTING
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

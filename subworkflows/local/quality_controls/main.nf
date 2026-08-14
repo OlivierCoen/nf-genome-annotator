@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 include { BUSCO_DOWNLOAD                                              } from '../../../modules/local/busco/download'
 include { BUSCO_BUSCO as BUSCO_GENOME                                 } from '../../../modules/local/busco/busco'
 include { BUSCO_BUSCO as BUSCO_PROTEOME                               } from '../../../modules/local/busco/busco'
@@ -6,57 +8,54 @@ include { AGAT_SPFUNCTIONALSTATISTICS as AGAT_FUNCTIONAL_STATISTICS   } from '..
 
 include { OMARK                                                       } from '../omark'
 
-
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+record Input {
+    id: String
+    gff: Path
+    busco_lineage: String
+    proteome: Path
+    other_proteomes: Iterable<Path>
+}
 
 workflow QUALITY_CONTROLS {
 
     take:
-    ch_genome
-    ch_busco_lineage
-    ch_all_annotations
-    ch_main_proteome
-    ch_all_proteomes
-    ch_structural_annotation
-    ch_functional_annotation
-    skip_omark
-    omamer_db_url
-    omamer_db
+    ch_input: Channel<Input>
+    skip_omark: Boolean
+    omamer_db_url: Boolean
+    omamer_db: Boolean
 
     main:
-
-    ch_omark_results = channel.empty()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // DOWNLOAD NECESSARY BUSCO DATASETS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    BUSCO_DOWNLOAD( 
-        ch_busco_lineage.map{ meta, lineage -> lineage }.unique()
+    ch_busco_downloads = BUSCO_DOWNLOAD( 
+        ch_input. map { rec -> rec.busco_lineage }.unique()
     )
-
-    ch_busco_download = ch_busco_lineage
-                            .combine( BUSCO_DOWNLOAD.out.download_dir )
-                            .filter { meta, lineage1, lineage2, busco_downloads -> lineage1 == lineage2 }
-                            .map { meta, lineage1, lineage2, busco_downloads -> [ meta, lineage1, busco_downloads ] }
+    ch_input = ch_input.join( ch_busco_downloads, by: 'busco_lineage' )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // BUSCO
+    // BUSCO ON GENOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     BUSCO_GENOME (
-        ch_genome.join( ch_busco_download ),
+        ch_input.map { rec -> rec.subMap(['id', 'fasta', 'busco_download_path']) },
         'genome'
     )
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // BUSCO ON ALL PROTEOMES
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     BUSCO_PROTEOME (
-        ch_all_proteomes.join( ch_busco_download ),
+        ch_input.map { rec -> record(id: rec.id, fasta: [rec.proteome] + rec.other_proteomes, busco_download_path: rec.busco_download_path) },
         'proteins'
     )
 
@@ -67,13 +66,10 @@ workflow QUALITY_CONTROLS {
     if ( !skip_omark ) {
 
         OMARK(
-            ch_main_proteome,
-            ch_structural_annotation,
+            ch_input,
             omamer_db_url,
             omamer_db
         )
-
-        ch_omark_results = OMARK.out.results
 
     }
 
@@ -81,17 +77,12 @@ workflow QUALITY_CONTROLS {
     // METRICS OF STRUCTURAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    AGAT_GTF_STATISTICS ( ch_all_annotations )
+    AGAT_GTF_STATISTICS ( ch_input )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // METRICS OF FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    AGAT_FUNCTIONAL_STATISTICS( ch_functional_annotation )
-
-    emit:
-    structural_annotation_stats = AGAT_GTF_STATISTICS.out.stats_yaml
-    functional_annotation_stats = AGAT_FUNCTIONAL_STATISTICS.out.stats_yaml
-    omark_results               = ch_omark_results
+    AGAT_FUNCTIONAL_STATISTICS( ch_input )
 
 }
