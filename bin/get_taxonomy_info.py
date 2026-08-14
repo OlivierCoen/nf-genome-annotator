@@ -4,6 +4,7 @@
 
 import argparse
 import logging
+from multiprocessing import Value
 from pathlib import Path
 import re
 
@@ -43,8 +44,8 @@ class Taxonomy:
     taxid: str | int
     common_name: str
     lineage: list[int]
-    busco_dataset: str | None = None
-    orthodb_clade: str | None = None
+    busco_lineage: str
+    orthodb_clade: str
 
     def __str__(self) -> str:
         return f"{self.species} [{self.common_name}] (taxid: {self.taxid})"
@@ -149,7 +150,7 @@ def get_taxonomy(
     metadata = get_taxon_metadata(species)
 
     # trying to find a lineage match in the busco datasets and orthodb clades
-    busco_dataset = None
+    busco_lineage = None
     orthodb_clade = None
     lineage = metadata["lineage"]
     for parent_taxid in lineage[::-1]:
@@ -158,28 +159,28 @@ def get_taxonomy(
         
         if parent_organism_name in lineages_to_busco_datasets:
             logger.info(f"Found lineage match for BUSCO: {parent_organism_name} -> {lineages_to_busco_datasets[parent_organism_name]}")
-            busco_dataset = lineages_to_busco_datasets[parent_organism_name]
+            busco_lineage = lineages_to_busco_datasets[parent_organism_name]
 
         if parent_organism_name in lineages_to_orthodb_clades:
             logger.info(f"Found lineage match for OrthoDB: {parent_organism_name} -> {lineages_to_orthodb_clades[parent_organism_name]}")
             orthodb_clade = lineages_to_orthodb_clades[parent_organism_name]
 
         # if both were found, break out of the loop
-        if busco_dataset and orthodb_clade:
+        if busco_lineage and orthodb_clade:
             break
 
-    if busco_dataset is None:
-        logger.warning(f"No lineage match found for species {species}")
+    if busco_lineage is None:
+        raise ValueError(f"No lineage match found for species {species} and lineage {' '.join([str(l) for l in lineage[::-1]])}.")
 
     if orthodb_clade is None:
-        logger.warning(f"No orthodb clade match found for species {species}")
+        raise ValueError(f"No orthodb clade match found for species {species} and lineage {' '.join([str(l) for l in lineage[::-1]])}.")
     
     return Taxonomy(
         species=metadata["organism_name"],
         taxid=int(metadata["tax_id"]),
         common_name=metadata["common_name"],
         lineage=lineage,
-        busco_dataset=busco_dataset,
+        busco_lineage=busco_lineage,
         orthodb_clade=orthodb_clade,
     )
 
@@ -196,7 +197,7 @@ def parse_busco_datasets(file_path: Path) -> dict[str, str]:
         if match := re.findall(r"\w+_odb\d+\.?\d+?", line):
             dataset = match[0]
             lineage = dataset.split("_")[0]
-            busco_datasets[lineage] = dataset
+            busco_datasets[lineage] = lineage
         else:
             logger.warning(f"Could not parse line: {line}")
     return busco_datasets
@@ -220,7 +221,7 @@ if __name__ == "__main__":
     species = format_species_name(args.species)
 
     lineages_to_busco_datasets = parse_busco_datasets(args.busco_datasets)
-    logger.info(f"Parsed {len(lineages_to_busco_datasets)} busco datasets")
+    logger.info(f"Parsed {len(lineages_to_busco_datasets)} busco lineages")
 
     lineages_to_orthodb_clades = parse_orthodb_clades(args.orthodb_clades)
     logger.info(f"Parsed {len(lineages_to_orthodb_clades)} orthodb clades")
@@ -236,12 +237,10 @@ if __name__ == "__main__":
     with open(TAXID_OUTFILE, "w") as fout:
         fout.write(str(taxonomy.taxid))
 
-    if taxonomy.busco_dataset:
-        with open(BUSCO_LINEAGE_OUTFILE, "w") as fout:
-            fout.write(taxonomy.busco_dataset)
+    with open(BUSCO_LINEAGE_OUTFILE, "w") as fout:
+        fout.write(taxonomy.busco_lineage)
 
-    if taxonomy.orthodb_clade:
-        with open(ORTHODB_CLADES_OUTFILE, "w") as fout:
-            fout.write(taxonomy.orthodb_clade)
+    with open(ORTHODB_CLADES_OUTFILE, "w") as fout:
+        fout.write(taxonomy.orthodb_clade)
 
     logger.info("Done")
