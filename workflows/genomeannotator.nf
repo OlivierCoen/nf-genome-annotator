@@ -197,6 +197,7 @@ workflow GENOMEANNOTATOR {
         FUNCTIONAL_ANNOTATION (
             ch_main,
             params.functional_annotators,
+            params.eggnog_mapper_mode,
             params.interproscan5_db,
             params.interproscan5_db_url
         )

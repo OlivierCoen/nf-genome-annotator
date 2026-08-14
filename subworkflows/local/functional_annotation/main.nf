@@ -21,6 +21,7 @@ workflow FUNCTIONAL_ANNOTATION {
     take:
     ch_input
     functional_annotators
+    eggnog_mapper_mode
     interproscan5_db
     interproscan5_db_url
 
@@ -32,15 +33,35 @@ workflow FUNCTIONAL_ANNOTATION {
         // DOWNLOAD EGGNOG DB
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        ch_eggnog_db = EGGNOGMAPPER_DOWNLOADDB( )
+        // providing taxids only in case of hmmer
+        if ( eggnog_mapper_mode == "hmmer" ) {
+        
+            ch_taxids = ch_input.map { rec -> rec.taxid }.unique()
+            ch_eggnog_db = EGGNOGMAPPER_DOWNLOADDB(
+                ch_taxids, 
+                eggnog_mapper_mode
+            )
+            ch_input = ch_input.join( ch_eggnog_db, by: 'taxid' )
+            
+        } else {
+
+            ch_eggnog_db = EGGNOGMAPPER_DOWNLOADDB( 
+                channel.value(record(taxid: null)), 
+                eggnog_mapper_mode
+            )
+
+            ch_eggnog_db = ch_eggnog_db.map { rec -> rec.subMap(['eggnog_mapper_db']) }
+            ch_input = ch_input.combine( ch_eggnog_db )
+        
+        }
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // RUN EGGNOG MAPPER
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         ch_eggnog_mapper_out = EGGNOGMAPPER_EMAPPER(
-            ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome, gff: rec.gff) },
-            ch_eggnog_db
+            ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome, gff: rec.gff, eggnog_mapper_db: rec.eggnog_mapper_db) },
+            eggnog_mapper_mode
         )
 
         ch_input = ch_input.join( ch_eggnog_mapper_out, by: 'id' )

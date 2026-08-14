@@ -236,6 +236,12 @@
                     "description": "Tool(s) to use for functional annotation. Tools should be separated by comma(s).",
                     "default": ["eggnogmapper", "interproscan5"]
                 },
+                "eggnog_mapper_mode": {
+                    "type": "string",
+                    "enum": ["diamond", "pfam", "mmseqs", "hmmer"],
+                    "default": "diamond",
+                    "fa_icon": "fas fa-database"
+                },
                 "interproscan5_db_url": {
                     "type": "string",
                     "help_text": "This allows the user to change the InterProScan database version that the pipeline will download for you automatically. To instead use a pre-downloaded database, please supply its path to `--interproscan5_db`. Changing this URL allows for the use of the latest database release.",

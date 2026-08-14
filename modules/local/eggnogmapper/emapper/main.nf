@@ -13,9 +13,10 @@ process EGGNOGMAPPER_EMAPPER {
         record(
             id: String, 
             fasta: Path,
-            gff: Path
+            gff: Path,
+            eggnog_mapper_db: Path
         )
-        eggnog_data_dir: Path
+        eggnog_mapper_mode: String
 
     output:
         record(
@@ -28,10 +29,24 @@ process EGGNOGMAPPER_EMAPPER {
         tuple('eggnog-mapper', id, file("*.emapper.orthologs"))      >> 'additional_results'
         tuple('eggnog-mapper', id, file("*.emapper.seed_orthologs")) >> 'additional_results'
         tuple('eggnog-mapper', id, file("*.emapper.hits"))           >> 'additional_results'
+        
         tuple("${task.process}", 'eggnog-mapper', eval('emapper.py --version | grep -o "emapper-[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+" | sed "s/emapper-//"')) >> 'versions'
 
     script:
-    def args            = task.ext.args                 ?: ''
+    def common_args = task.ext.common_args ?: ''
+    def mode_args = ''
+    if ( eggnog_mapper_mode == "diamond" ) {
+        mode_args = task.ext.args_diamond
+    } else if ( eggnog_mapper_mode == "pfam" ) {
+        mode_args = task.ext.args_pfam
+    } else if ( eggnog_mapper_mode == "mmseqs" ) {
+        mode_args = task.ext.args_mmseqs
+    } else if ( eggnog_mapper_mode == "hmmer" ) {
+        mode_args = task.ext.args_hmmer
+    } else {
+        error "Invalid eggnog_mapper_mode: ${eggnog_mapper_mode}"
+    }
+    
     def prefix          = task.ext.prefix               ?: "$id"
     def is_compressed   = fasta.extension == '.gz'      ? true                              : false
     def fasta_name      = is_compressed                 ? fasta.baseName                    : "$fasta"
@@ -44,11 +59,13 @@ process EGGNOGMAPPER_EMAPPER {
     emapper.py \\
         --cpu ${task.cpus} \\
         -i ${fasta_name} \\
-        --data_dir ${eggnog_data_dir} \\
+        -m $eggnog_mapper_mode \\
+        ${mode_args} \\
+        --data_dir ${eggnog_mapper_db} \\
         --report_orthologs \\
         --decorate_gff ${gff} \\
         --output ${prefix} \\
         ${dbmem} \\
-        ${args}
+        ${common_args}
     """
 }

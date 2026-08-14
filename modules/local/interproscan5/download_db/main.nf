@@ -5,7 +5,7 @@ process INTERPROSCAN5_DOWNLOADDB {
     label 'process_medium'
     tag "${db_url.tokenize('/')[-1] - '.tar.gz'}"
 
-    //storeDir "${workflow.projectDir}/.nextflow/cache/interproscan"
+    //storeDir "${workflow.projectDir}/.nextflow/cache/interproscan5_db"
 
     errorStrategy {
         if (task.exitStatus == 100) {
@@ -23,32 +23,66 @@ process INTERPROSCAN5_DOWNLOADDB {
         db_url: String
 
     output:
-        file("data", type: 'dir')
+        file("*/data", type: 'dir')
 
     topic:
         tuple("${task.process}", 'aria2', eval("aria2c -v | head -1 | sed 's/aria2 version //g'")) >> 'versions'
 
     script:
     def filename = db_url.tokenize("/")[-1]
-    """
-    aria2c \\
-        -s ${task.cpus} \\
-        -x ${task.cpus} \\
-        --max-tries=10 \\
-        --retry-wait=30 \\
-        --timeout=60 \\
-        "${db_url}"
+    // hardcoding a storeDir mechanism
+    def db_id = db_url.tokenize('/')[-1] - '.tar.gz'
+    def store_dir = file("${workflow.projectDir}/.nextflow/cache/${db_id}/")
+    if ( store_dir.isDirectory() && store_dir.listDirectory().size() > 0 ) {
+        """
+        ln -s ${store_dir} ${db_id}/data
+        """
+    } else {
+        """
+        aria2c \\
+            -s ${task.cpus} \\
+            -x ${task.cpus} \\
+            --max-tries=10 \\
+            --retry-wait=30 \\
+            --timeout=60 \\
+            "${db_url}"
+    
+        echo "Checking md5"
+        aria2c -c "${db_url}.md5"
+        md5sum -c --status ${filename}.md5 && echo "ok" || exit 100
+    
+        echo "Extracting archive"
+        tar -pxzf ${filename}
+    
+        echo "Deleting archive"
+        rm ${filename} ${filename}.md5
 
-    echo "Checking md5"
-    aria2c -c "${db_url}.md5"
-    md5sum -c --status ${filename}.md5 && echo "ok" || exit 100
+        #########################
+        # storing downloaded data
+        #########################
+        
+        # searching for the data directory
+        data_dir=""
+        ls -d */ | while read -r dir; do
+            if [ -d "\$dir/data" ]; then
+                data_dir="\$dir/data"
+                break
+            fi
+        done
+        echo "data dir: \$data_dir"
+        
+        # if not found, raise an error
+        if [ -z "\$data_dir" ]; then
+            echo "Error: data directory not found"
+            exit 1
+        fi
 
-    echo "Extracting archive"
-    tar -pxzf ${filename}
-
-    echo "Deleting archive"
-    rm ${filename} ${filename}.md5
-    """
+        # moving directory and creating a symlink
+        mv \${data_dir}/* ${store_dir}
+        rm -rf \$data_dir
+        ln -s ${store_dir} \$data_dir
+        """
+    }
 
 
 }

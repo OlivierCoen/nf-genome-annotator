@@ -3,7 +3,7 @@ nextflow.enable.types = true
 process GET_TAXONOMY_INFO {
 
     tag "${species}"
-    label 'process_download_db'
+    label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?

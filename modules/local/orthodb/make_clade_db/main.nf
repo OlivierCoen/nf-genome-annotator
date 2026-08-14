@@ -2,7 +2,7 @@ nextflow.enable.types = true
 
 process ORTHODB_MAKECLADEDB {
 
-    label 'process_download_db'
+    label 'process_medium'
     tag "$orthodb_clade"
 
     conda "${moduleDir}/environment.yml"

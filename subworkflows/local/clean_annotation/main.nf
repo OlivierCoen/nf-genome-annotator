@@ -48,7 +48,7 @@ workflow CLEAN_ANNOTATION {
     ch_out = AGAT_CONVERT_TO_GFF ( 
         ch_input.map { rec -> record(id: rec.id, gxf: rec.structural_annotation)}
     )
-    ch_input = ch_input.join( ch_out, by: 'id' )
+    ch_input = ch_input.join( ch_out, by: 'id' ).view()
 
     // each record has now a gff entry, that will be used in the subsequent steps
 
