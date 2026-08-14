@@ -13,9 +13,9 @@ process EGGNOGMAPPER_EMAPPER {
         record(
             id: String, 
             fasta: Path,
-            gff: Path,
-            eggnog_mapper_db: Path
+            gff: Path
         )
+        eggnog_mapper_db: Path
         eggnog_mapper_mode: String
 
     output:
@@ -41,8 +41,6 @@ process EGGNOGMAPPER_EMAPPER {
         mode_args = task.ext.args_pfam
     } else if ( eggnog_mapper_mode == "mmseqs" ) {
         mode_args = task.ext.args_mmseqs
-    } else if ( eggnog_mapper_mode == "hmmer" ) {
-        mode_args = task.ext.args_hmmer
     } else {
         error "Invalid eggnog_mapper_mode: ${eggnog_mapper_mode}"
     }

@@ -238,7 +238,7 @@
                 },
                 "eggnog_mapper_mode": {
                     "type": "string",
-                    "enum": ["diamond", "pfam", "mmseqs", "hmmer"],
+                    "enum": ["diamond", "pfam", "mmseqs"],
                     "default": "diamond",
                     "fa_icon": "fas fa-database"
                 },

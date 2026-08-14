@@ -11,16 +11,10 @@ process EGGNOGMAPPER_DOWNLOADDB {
         'community.wave.seqera.io/library/aria2_httpx_pigz_tenacity:0cf226d5365c27ae' }"
 
     input:
-        record(
-            taxid: Integer?
-        )
         eggnog_mapper_mode: String
 
     output:
-        record(
-            taxid: taxid,
-            eggnog_mapper_db: file("data", type: 'dir')
-        )
+        file("data", type: 'dir')
         
     topic:
         tuple("${task.process}", 'aria2', eval("aria2c -v | head -1 | sed 's/aria2 version //g'"))     >> 'versions'
@@ -28,10 +22,8 @@ process EGGNOGMAPPER_DOWNLOADDB {
         tuple("${task.process}", 'httpx', eval('python3 -c "import httpx; print(httpx.__version__)"')) >> 'versions'
 
     script:
-    def taxid_arg = taxid ? "--taxid ${taxid}" : ""
     // hardcoding a storeDir mechanism
-    def db_id = taxid ? "eggnogmapper_db_txid${taxid}" : "eggnogmapper_db"
-    def store_dir = file("${workflow.projectDir}/.nextflow/cache/${db_id}/")
+    def store_dir = file("${workflow.projectDir}/.nextflow/cache/eggnogmapper_db/")
     
     if ( store_dir.isDirectory() && store_dir.listDirectory().size() > 0 ) {
         """
@@ -43,7 +35,6 @@ process EGGNOGMAPPER_DOWNLOADDB {
     
         download_eggnog_data.modified.py \\
             --db ${eggnog_mapper_mode} \\
-            ${taxid_arg} \\
             --db-version 7.0.0 \\
             --out data \\
             --ncpus $task.cpus
@@ -51,7 +42,8 @@ process EGGNOGMAPPER_DOWNLOADDB {
         #########################
         # storing downloaded data
         #########################
-        
+
+        mkdir -p ${store_dir}
         mv data/*  ${store_dir}
         rm -rf data
         ln -s ${store_dir} data
