@@ -1,35 +1,41 @@
+nextflow.enable.types = true
+
 process OMARK_OMARK {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/cf/cf01ebcc6512d0cc98453f0556811e1e26dfa008b3e01c107971f47f179dce8a/data'
-        : 'community.wave.seqera.io/library/omark:0.4.1--22126bb9fb82176e'}"
+        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/a7/a7082d2bbe6948025958cd10031f313633a326e5b3c92b122af1224620de0e9c/data'
+        : 'community.wave.seqera.io/library/omark:0.5.0--a004ed2a54d1ff9a'}"
 
     input:
-    tuple val(meta), path(protome_fasta), path(omamer_file), path(isoform_file)
-    path omamer_db
+        record(
+            id: String,
+            fasta: Path,
+            omamer: Path,
+            transcript_isoforms: Path
+        )
+        omamer_db: Path
     
-    output:
-    tuple val(meta), path("${meta.id}_omark_out"), emit: results
-    // TODO: when done on OMArk's side, add dynamic retrieval of version
-    // https://github.com/DessimozLab/OMArk/issues/52
-    tuple val("${task.process}"), val('omark'), val('0.4.1'), topic: versions
+    topic:
+        tuple('omark', id, files("*_omark_out/*")) >> 'additional_results'
+        tuple("${task.process}", 'omark', eval('omark --version')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "$id"
     """
     # for matplotlib
     export MPLCONFIGDIR=\${PWD}
     
     omark \\
-        --file ${omamer_file} \\
+        --file ${omamer} \\
         --database ${omamer_db} \\
         --ete_ncbi_db \${PWD}/.etetoolkit \\
-        --isoform_file ${isoform_file} \\
-        --og_fasta ${protome_fasta} \\
-        --outputFolder ${meta.id}_omark_out \\
+        --isoform_file ${transcript_isoforms} \\
+        --og_fasta ${fasta} \\
+        --outputFolder ${prefix}_omark_out \\
         ${args}
     """
 
