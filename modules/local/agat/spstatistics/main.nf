@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process AGAT_SPSTATISTICS {
-    tag "$meta.id"
+    tag "$id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -8,23 +10,26 @@ process AGAT_SPSTATISTICS {
         'community.wave.seqera.io/library/agat_pyyaml:b4d19f33ad15b73b' }"
 
     input:
-    tuple val(meta), path(gff)
+        record(
+            id: String, 
+            gff: Path, 
+            genome_size: Integer?
+        )
 
     output:
-    tuple val(meta), path("*.txt"),                       emit: stats_txt
-    tuple val(meta), path("*.yaml"),                      emit: stats_yaml
-    tuple val(meta), path("*_with_isoforms_mrna_gff_stats.csv"),          topic: mqc_mrna_with_isoforms_gff_stats,          optional: true
-    tuple val(meta), path("*_with_isoforms_rna_gff_stats.csv"),           topic: mqc_rna_with_isoforms_gff_stats,           optional: true
-    tuple val(meta), path("*_with_isoforms_transcript_gff_stats.csv"),    topic: mqc_transcript_with_isoforms_gff_stats,    optional: true
-    tuple val(meta), path("*_without_isoforms_mrna_gff_stats.csv"),       topic: mqc_mrna_without_isoforms_gff_stats,       optional: true
-    tuple val(meta), path("*_without_isoforms_rna_gff_stats.csv"),        topic: mqc_rna_without_isoforms_gff_stats,        optional: true
-    tuple val(meta), path("*_without_isoforms_transcript_gff_stats.csv"), topic: mqc_transcript_without_isoforms_gff_stats, optional: true
-    tuple val("${task.process}"), val('agat'), eval("agat_sp_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'"), topic: versions
+        record(
+            id: id:
+            gff_stats: file("*.yaml")
+        )
+
+    topic:
+        tuple(id, files("*_gff_stats.csv", optional: true)) >> 'multiqc'
+        tuple("${task.process}", 'agat', eval("agat_sp_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
     def args   = task.ext.args   ?: ''
-    def prefix = meta.final_annotation ? "${meta.id}.final_annotation" : "${gff.simpleName}.intermediate_annotation"
-    def genome_size_arg = meta.genome_size ? "--gs ${meta.genome_size}" : ''
+    def prefix = task/ext/prefix ?: "$id"
+    def genome_size_arg = genome_size ? "--gs ${meta.genome_size}" : ''
     """
     agat_sp_statistics.pl \\
         --gff ${gff} \\
@@ -37,12 +42,5 @@ process AGAT_SPSTATISTICS {
     parse_gff_stat_file.py \\
         --gff ${prefix}.gtf_stats.txt.yaml \\
         --prefix ${prefix}
-    """
-
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    touch ${prefix}.stats.txt
-    touch ${prefix}.stats.yaml
     """
 }
