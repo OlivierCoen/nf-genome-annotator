@@ -8,22 +8,27 @@ include { INTERPROSCAN5_INTERPROSCAN as INTERPROSCAN5  } from '../../../modules/
 
 include { COMPLEMENT_GFF_WITH_INTERPROSCAN_GFF         } from '../../../modules/local/complement_gff_with_interproscan_gff'
 
-
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+record Input {
+    id: String
+    taxid: Integer
+    proteome: Path
+    gff: Path
+}
+
 workflow FUNCTIONAL_ANNOTATION {
 
     take:
-    ch_input
-    functional_annotators
-    eggnog_mapper_mode
-    interproscan5_db
-    interproscan5_db_url
+    ch_input: Channel<Input>
+    functional_annotators: Iterable<String>
+    eggnog_mapper_mode: String
+    interproscan5_db: String
+    interproscan5_db_url: String
 
     main:
 
