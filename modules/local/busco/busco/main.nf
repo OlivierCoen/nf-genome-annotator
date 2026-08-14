@@ -1,5 +1,7 @@
+nextflow.enable.types = true
+
 process BUSCO_BUSCO {
-    tag "${meta.id}"
+    tag "$id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -10,26 +12,31 @@ process BUSCO_BUSCO {
     // Try to restore it when upgrading Busco to a later version
 
     input:
-    tuple val(meta), path(fasta, stageAs: 'tmp_input/*'), val(lineage), path(busco_lineages_path)
-    // One of genome, proteins, or transcriptome
-    val mode
+        record(
+            id: String,
+            fasta: Iterable<Path>,
+            busco_lineage: String?
+            busco_download_path: Path?
+        )
+        mode: String
 
-    output:
-    tuple val(meta), path("*-busco.batch_summary.txt"),                                      emit: batch_summary
-    tuple val(meta), path("*-busco.log"),                                                    emit: log, optional: true
-    tuple val(meta),path("short_summaries/*.txt"),                                           topic: mqc_busco_short_summaries_txt
-    tuple val("${task.process}"), val('busco'), eval('busco --version | sed "s/^BUSCO //"'), topic: versions
+    stage:
+        stageAs fasta, 'tmp_input/*'
 
+    topic:
+        tuple(id, files("short_summaries/*.txt"))                                      >> 'multiqc'
+        tuple('busco', id, file("*-busco.batch_summary.txt"))                          >> 'additional_results'
+        tuple('busco', id, file('*-busco.log'))                                        >> 'logs'
+        tuple("${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = mode == 'genome' ? "${meta.id}.genome" : meta.final_annotation ? "${meta.id}.final_proteome" : "${fasta.baseName}.intermediate_proteome"
+    def prefix = task.ext.prefix ?: "${id}.${mode}"
     def intermediate_files = [
         './*-busco/*/auto_lineage',
         './*-busco/*/**/{miniprot,hmmer,.bbtools}_output',
         './*-busco/*/prodigal_output/predicted_genes/tmp/',
     ]
-
     def bbtools_memory_preferred = task.memory * 0.25
     def bbtools_memory_minimum = 120.Mb
     def bbtools_memory = bbtools_memory_preferred > bbtools_memory_minimum ? "${bbtools_memory_preferred.toGiga()}g" : "${bbtools_memory_minimum.toMega()}m"
