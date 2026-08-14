@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 process BUSCO_DOWNLOAD {
     tag "${lineage}"
     label 'process_low'
@@ -8,11 +10,16 @@ process BUSCO_DOWNLOAD {
         : 'community.wave.seqera.io/library/busco:6.1.0--6d1f7006d91892b3'}"
 
     input:
-    val lineage
+        lineage: String
 
     output:
-    tuple val(lineage), path("busco_downloads"), emit: download_dir
-    tuple val("${task.process}"), val('busco'), eval("busco --version 2> /dev/null | sed 's/BUSCO //g'"), emit: versions_busco, topic: versions
+        record(
+            busco_lineage: String,
+            busco_download_path: file("busco_downloads", type: 'dir')
+        )
+
+    topic:
+        tuple("${task.process}", 'busco', eval("busco --version 2> /dev/null | sed 's/BUSCO //g'")) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
@@ -20,10 +27,5 @@ process BUSCO_DOWNLOAD {
     busco \\
         --download ${lineage} \\
         ${args}
-    """
-
-    stub:
-    """
-    mkdir busco_downloads
     """
 }
