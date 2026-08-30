@@ -36,24 +36,12 @@ process EGGNOGMAPPER_EMAPPER {
     def prefix          = task.ext.prefix               ?: "$id"
     def is_compressed   = fasta.extension == '.gz'      ? true                              : false
     def fasta_name      = is_compressed                 ? fasta.baseName                    : "$fasta"
-    def ram_margin      = 5000 // keep at least 3 Go for the run itself
+    // Note: 
+    // eggnogmapper db 5.0.2 ~ 48G
+    // eggnogmapper db 7.0.0 ~ 42G
     """
     if [ "$is_compressed" == "true" ]; then
         gzip -c -d $fasta > $fasta_name
-    fi
-
-    
-    # when enough RAM is available, using the --dbmem arg makes it much faster
-    # and avoid some bugs:
-    # https://github.com/eggnogdb/eggnog-mapper/issues/380
-    db_size=\$(echo \$(du -d 1 -h -L --block-size=M data) | cut -d ' ' -f 1 | sed 's/M//g')
-    
-    threshold=\$(echo "\$db_size + $ram_margin" | bc)
-    if (( \$(echo "${task.memory.toMega()} > \$threshold " | bc -l) )) ; then
-        dbmem_arg="--dbmem"
-    else
-        echo "Not enough memory allocated to process to use --dbmem parameter"
-        dbmem_arg=""
     fi
 
     emapper.py \\
@@ -64,7 +52,6 @@ process EGGNOGMAPPER_EMAPPER {
         --report_orthologs \\
         --decorate_gff ${gff} \\
         --output ${prefix} \\
-        \$dbmem_arg \\
         ${args}
     """
 }

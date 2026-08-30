@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+
+from pathlib import Path
+import argparse
+import subprocess
+import logging
+import httpx
+from tenacity import (
+    before_sleep_log,
+    retry,
+    stop_after_delay,
+    wait_exponential,
+)
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+AVAILABLE_DBS = ['diamond', 'mmseqs', 'hmmer', 'no_search', 'cache']
+
+DB_VERSION = '5.0.2'
+
+BASE_URL = f'http://eggnog5.embl.de/download/emapperdb-{DB_VERSION}'
+EGGNOG_URL = 'http://eggnog5.embl.de/download/eggnog_5.0/per_tax_level'
+EGGNOG_DOWNLOADS_URL = 'http://eggnog5.embl.de/#/app/downloads'
+
+NCBI_API_URL = "https://api.ncbi.nlm.nih.gov/datasets/v2/taxonomy"
+NCBI_API_HEADERS = {"accept": "application/json", "content-type": "application/json"}
+
+
+#####################################################
+#####################################################
+# FUNCTIONS
+#####################################################
+#####################################################
+
+@retry(
+    stop=stop_after_delay(600),
+    wait=wait_exponential(multiplier=1, min=1, max=30),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+)
+def send_request_to_ncbi_taxonomy(taxid: str | int) -> dict:
+    taxons = [str(taxid)]
+    data = {"taxons": taxons}
+    headers = dict(NCBI_API_HEADERS)
+    response = httpx.post(NCBI_API_URL, headers=headers, json=data)
+    response.raise_for_status()
+    return response.json()
+
+
+def get_taxon_name(taxid: str | int) -> str:
+    try:
+        response = send_request_to_ncbi_taxonomy(taxid)
+        return response["taxonomy_nodes"][0]["taxonomy"]["organism_name"]
+    except Exception as e:
+        logger.error(f'Failed to get taxon name for tax ID {taxid}: {e}')
+        return f'hmmer_{taxid}'
+
+
+def run(cmd: list[str], shell: bool = False):
+    str_cmd = " ".join(cmd)
+    logger.info(f'Running command: {str_cmd}')
+    subprocess.run(cmd, shell=shell, check=True)
+
+
+def download(url: str, data_path: Path, ncpus: int):
+    cmd = [
+        'aria2c', 
+        '-s', str(ncpus), 
+        '-x', str(ncpus),  
+        '--optimize-concurrent-downloads', 
+        '--check-integrity=true', 
+        '--dir', 
+        str(data_path), 
+        url
+    ]
+    run(cmd)
+
+
+def decompress(file: Path):
+    cmd = ['pigz', '-df', str(file)]
+    run(cmd)
+
+
+def untar_decompress(file: Path, target_folder: Path):
+    cmd = ['tar', '-xzf', str(file), '-C', str(target_folder)]
+    run(cmd)
+    file.unlink()
+
+
+def download_and_decompress(url: str, data_path: Path, ncpus: int):
+    download(url, data_path, ncpus)
+    file = data_path / url.split('/')[-1]
+    decompress(file)
+
+
+##
+# Annotation DBs
+def download_annotations(data_path: Path, ncpus: int):
+    url = BASE_URL + '/eggnog.db.gz'
+    download_and_decompress(url, data_path, ncpus)
+
+
+##
+# Taxa DBs
+def download_taxa(data_path: Path, ncpus: int):
+    filename = 'eggnog.taxa.tar.gz'
+    url = BASE_URL + '/' + filename
+    download(url, data_path, ncpus)
+    untar_decompress(data_path / filename, data_path)
+
+
+##
+# Diamond DBs
+def download_diamond_db(data_path: Path, ncpus: int):
+    url = BASE_URL + '/eggnog_proteins.dmnd.gz'
+    download_and_decompress(url, data_path, ncpus)
+
+
+##
+# MMseqs2 DB
+def download_mmseqs_db(data_path: Path, ncpus: int):
+    url = BASE_URL + '/mmseqs.tar.gz'
+    download_and_decompress(url, data_path, ncpus)
+
+
+##
+# PFAM DB
+def download_pfam_db(data_path: Path, ncpus: int):
+    url = BASE_URL + '/pfam.tar.gz'
+    download_and_decompress(url, data_path, ncpus)
+
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--db', dest="database", required=True, choices=AVAILABLE_DBS,help='Database to download')
+    parser.add_argument("--out", dest="data_dir", required=True, type=Path, help='Directory to use for DATA_PATH.')
+    parser.add_argument("--ncpus", required=True, type=int, help='Number of CPUs to use for downloading.')
+    return parser.parse_args()
+
+
+#####################################################
+#####################################################
+# MAIN
+#####################################################
+#####################################################
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    data_path = args.data_dir
+    data_path.mkdir(parents=True, exist_ok=True)
+
+    # Annotation DB
+    download_annotations(data_path, args.ncpus)
+
+    # NCBI taxa
+    download_taxa(data_path, args.ncpus)
+
+    match args.database:
+        case 'diamond':
+            download_diamond_db(data_path, args.ncpus)
+        case 'mmseqs':
+            logger.info(f'Downloading MMseqs2 files " at {data_path}...')
+            download_mmseqs_db(data_path, args.ncpus)
+        case 'pfam':
+            download_pfam_db(data_path, args.ncpus)
+
+    logger.info("Finished")

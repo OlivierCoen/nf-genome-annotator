@@ -24,7 +24,6 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--db', dest="database", required=True, choices=AVAILABLE_DBS,help='Database to download')
-    parser.add_argument('--db-version', dest="db_version", required=True, type=str, help='Version of the database to download')
     parser.add_argument("--out", dest="data_dir", required=True, type=Path, help='Directory to use for DATA_PATH.')
     parser.add_argument("--ncpus", required=True, type=int, help='Number of CPUs to use for downloading.')
     return parser.parse_args()
