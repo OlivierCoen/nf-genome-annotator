@@ -33,9 +33,8 @@ process EGGNOGMAPPER_DOWNLOADDB {
         """
         mkdir data
     
-        download_eggnog_data.modified.py \\
+        download_eggnog_data.v2.py \\
             --db ${eggnog_mapper_mode} \\
-            --db-version 7.0.0 \\
             --out data \\
             --ncpus $task.cpus
 

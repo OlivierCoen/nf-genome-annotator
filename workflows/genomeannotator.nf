@@ -214,20 +214,17 @@ workflow GENOMEANNOTATOR {
         params.omamer_db_url,
         params.omamer_db
     )
-/*
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MULTIQC & OTHER REPORTING
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     REPORTING(
-        ch_versions,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,
         params.outdir
     )
-
-*/
 
     emit:
     results = ch_main

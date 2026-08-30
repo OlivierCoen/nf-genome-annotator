@@ -29,16 +29,15 @@ workflow EXTRACT_SEQUENCES {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // EXTRACT PROTEOME FROM ACTUAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    
     ch_proteome = EXTRACT_PROTEOME(
         ch_input,
         codon_usage_id
     )
-    ch_input = ch_input
-                .join( 
-                    ch_proteome.map { rec -> record(id: rec.id, proteome: rec.extracted_fasta) }, 
-                    by: 'id'
-                )
+    ch_input = ch_input.join( 
+        ch_proteome.map { rec -> record(id: rec.id, proteome: rec.extracted_fasta) }, 
+        by: 'id'
+    )
                 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,15 +50,15 @@ workflow EXTRACT_SEQUENCES {
         def interm_gffs = rec.intermediate_annotations ?: []
         def prev_gff = rec.previous_annotation ? [rec.previous_annotation]: []
         def other_gffs = alt_gff + interm_gffs + prev_gff
-        other_gffs.collect { gff -> record(id: rec.id, gff: gff, genome: rec.fasta) }
+        other_gffs.collect { gff_file -> record(id: rec.id, gff: gff_file, fasta: rec.fasta) }
     }
-                                    
+                                 
     ch_other_proteomes = EXTRACT_OTHER_PROTEOMES( 
         ch_others_input,
         codon_usage_id
     ) 
     
-    ch_other_proteomes = ch_other_proteomes.map { rec -> tuple(rec.id, rec.extracted.fasta) }
+    ch_other_proteomes = ch_other_proteomes.map { rec -> tuple(rec.id, rec.extracted_fasta) }
                             .groupTuple()
                             .map { id, fasta_list -> record(id: id, other_proteomes: fasta_list) }
 
@@ -70,14 +69,13 @@ workflow EXTRACT_SEQUENCES {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_cds = EXTRACT_CDS(
-        ch_input.map { rec -> record(id: rec.id, gff: rec.gff, genome: rec.fasta) },
+        ch_input.map { rec -> record(id: rec.id, gff: rec.gff, fasta: rec.fasta) },
         null
     )
-    ch_input = ch_input
-                .join( 
-                    ch_cds.map { rec -> record(id: rec.id, cds: rec.extracted_fasta) }, 
-                    by: 'id'
-                )
+    ch_input = ch_input.join( 
+        ch_cds.map { rec -> record(id: rec.id, cds: rec.extracted_fasta) }, 
+        by: 'id'    
+    )
 
     emit:
     ch_input

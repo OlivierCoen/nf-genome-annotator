@@ -19,7 +19,7 @@ process FASTP {
         )
 
     topic:
-        tuple(id, file('*.json'))                                                              >> 'fastp_multiqc'
+        tuple(id, file('*.json'))                                                              >> 'multiqc'
         tuple('fastp', id, file('*.fastp.log'))                                                >> 'logs'
         tuple("${task.process}", 'fastp', eval('fastp --version 2>&1 | sed -e "s/fastp //g"')) >> 'versions'
 

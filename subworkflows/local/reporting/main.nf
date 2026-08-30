@@ -1,3 +1,5 @@
+nextflow.enable.types = true
+
 include { MULTIQC                                } from '../../../modules/nf-core/multiqc'
 
 include { methodsDescriptionText                 } from '../utils_nfcore_genomeannotator_pipeline'
@@ -15,7 +17,6 @@ include { paramsSummaryMap                       } from 'plugin/nf-schema'
 workflow REPORTING {
 
     take:
-    ch_versions
     multiqc_config
     multiqc_logo
     multiqc_methods_description
@@ -24,25 +25,12 @@ workflow REPORTING {
     main:
 
     // ------------------------------------------------------------------------------------
-    // DATA
-    // ------------------------------------------------------------------------------------
-
-    ch_multiqc_files = channel.empty()
-                        .mix( channel.topic('hisat2_summary') )
-                        .mix( channel.topic('star_log_final') )
-                        .mix( channel.topic('mqc_busco_short_summaries_txt') )
-                        .mix( channel.topic('mqc_mrna_with_isoforms_gff_stats') )
-                        .mix( channel.topic('mqc_rna_with_isoforms_gff_stats') )
-                        .mix( channel.topic('mqc_transcript_with_isoforms_gff_stats') )
-                        .mix( channel.topic('mqc_mrna_without_isoforms_gff_stats') )
-                        .mix( channel.topic('mqc_rna_without_isoforms_gff_stats') )
-                        .mix( channel.topic('mqc_transcript_without_isoforms_gff_stats') )
-
-
-    // ------------------------------------------------------------------------------------
     // VERSIONS
     // ------------------------------------------------------------------------------------
 
+    // all modules send their versions to the 'versions' topic channel
+    ch_versions = channel.empty()
+    
     // Collate and save software versions
     //
     def topic_versions = channel.topic("versions")
@@ -82,6 +70,10 @@ workflow REPORTING {
         channel.fromPath(multiqc_config, checkIfExists: true) :
         channel.empty()
 
+    ch_multiqc_config_list = ch_multiqc_config
+                                .mix( ch_multiqc_custom_config )
+                                .map { files -> files.toSorted() }
+
     ch_multiqc_logo          = multiqc_logo ?
         channel.fromPath(multiqc_logo, checkIfExists: true) :
         channel.of([])
@@ -92,8 +84,7 @@ workflow REPORTING {
     )
     ch_workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
 
-    ch_multiqc_files = ch_multiqc_files
-        .mix( ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml') )
+    ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')
 
     ch_multiqc_custom_methods_description = multiqc_methods_description ?
         file(multiqc_methods_description, checkIfExists: true) :
@@ -103,44 +94,36 @@ workflow REPORTING {
         methodsDescriptionText(ch_multiqc_custom_methods_description)
     )
 
-                            
     // ------------------------------------------------------------------------------------
-    // ADDING KEY TO JOIN ON
+    // DATA
     // ------------------------------------------------------------------------------------
 
+    ch_multiqc_files = channel.topic('multiqc')
+
     ch_multiqc_file_list = ch_multiqc_files
-                            .mix( ch_collated_versions )
-                            .mix(
+                            .groupTuple()
+                            .combine( ch_collated_versions )
+                            .combine(
                                 ch_methods_description.collectFile(
                                     name: 'methods_description_mqc.yaml',
                                     sort: true
                                 )
                             )
-                            .flatten()
-                            .toSortedList()
-                            .map{ list -> [ [id: 'Final report'], list ] }
-
-    ch_multiqc_config_list = ch_multiqc_config
-                                .mix( ch_multiqc_custom_config )
-                                .toSortedList()
-                                .map{ list -> [ [id: 'Final report'], list ] }
-
-    ch_multiqc_logo = ch_multiqc_logo.map{ file -> [ [id: 'Final report'], file ] }
+                            .map { id, file_list -> 
+                                println file_list
+                                [ id, file_list.flatten().toSorted() ] } // flatten and sort
 
     // ------------------------------------------------------------------------------------
     // MULTIQC
     // ------------------------------------------------------------------------------------
 
     ch_multiqc_input = ch_multiqc_file_list
-                        .join( ch_multiqc_config_list )
-                        .join( ch_multiqc_logo )
+                        .combine( ch_multiqc_config_list )
+                        .combine( ch_multiqc_logo )
                         .map { meta, files, configs, logo -> [ meta, files, configs, logo , [], [] ] }
                         
-    
-    
     MULTIQC ( ch_multiqc_input )
     
-
     emit:
     report = MULTIQC.out.report
 }

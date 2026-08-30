@@ -19,8 +19,8 @@ record Input {
 
 def addGFFToIntermediateAnnotations( ch_input ){
     return ch_input.map { rec -> 
-        rec.intermediate_annotations = rec.intermediate_annotations + [rec.gff]
-        rec
+        def intermediate_annotations = rec.intermediate_annotations + [rec.gff]
+        rec + record(intermediate_annotations: intermediate_annotations)
     }
 }
 
@@ -38,7 +38,7 @@ workflow CLEAN_ANNOTATION {
     // for each modification, the workflow stores the version of the anntoation that is going to be replaced
     // in a specific list of intermediate GFFs
 
-    ch_input.map { rec -> rec + record(intermediate_annotations: [rec.structural_annotation]) }
+    ch_input = ch_input.map { rec -> rec + record(intermediate_annotations: [rec.structural_annotation]) }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MANDATORY CLEANUP
@@ -48,7 +48,7 @@ workflow CLEAN_ANNOTATION {
     ch_out = AGAT_CONVERT_TO_GFF ( 
         ch_input.map { rec -> record(id: rec.id, gxf: rec.structural_annotation)}
     )
-    ch_input = ch_input.join( ch_out, by: 'id' ).view()
+    ch_input = ch_input.join( ch_out, by: 'id' )
 
     // each record has now a gff entry, that will be used in the subsequent steps
 

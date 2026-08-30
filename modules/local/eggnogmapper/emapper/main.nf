@@ -29,41 +29,42 @@ process EGGNOGMAPPER_EMAPPER {
         tuple('eggnog-mapper', id, file("*.emapper.orthologs"))      >> 'additional_results'
         tuple('eggnog-mapper', id, file("*.emapper.seed_orthologs")) >> 'additional_results'
         tuple('eggnog-mapper', id, file("*.emapper.hits"))           >> 'additional_results'
-        
         tuple("${task.process}", 'eggnog-mapper', eval('emapper.py --version | grep -o "emapper-[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+" | sed "s/emapper-//"')) >> 'versions'
 
     script:
-    def common_args = task.ext.common_args ?: ''
-    def mode_args = ''
-    if ( eggnog_mapper_mode == "diamond" ) {
-        mode_args = task.ext.args_diamond
-    } else if ( eggnog_mapper_mode == "pfam" ) {
-        mode_args = task.ext.args_pfam
-    } else if ( eggnog_mapper_mode == "mmseqs" ) {
-        mode_args = task.ext.args_mmseqs
-    } else {
-        error "Invalid eggnog_mapper_mode: ${eggnog_mapper_mode}"
-    }
-    
+    def args            = task.ext.args                 ?: ''
     def prefix          = task.ext.prefix               ?: "$id"
     def is_compressed   = fasta.extension == '.gz'      ? true                              : false
     def fasta_name      = is_compressed                 ? fasta.baseName                    : "$fasta"
-    def dbmem           = task.memory.toMega() > 40000  ? '--dbmem'                         : ''
+    def ram_margin      = 5000 // keep at least 3 Go for the run itself
     """
     if [ "$is_compressed" == "true" ]; then
         gzip -c -d $fasta > $fasta_name
+    fi
+
+    
+    # when enough RAM is available, using the --dbmem arg makes it much faster
+    # and avoid some bugs:
+    # https://github.com/eggnogdb/eggnog-mapper/issues/380
+    db_size=\$(echo \$(du -d 1 -h -L --block-size=M data) | cut -d ' ' -f 1 | sed 's/M//g')
+    
+    threshold=\$(echo "\$db_size + $ram_margin" | bc)
+    if (( \$(echo "${task.memory.toMega()} > \$threshold " | bc -l) )) ; then
+        dbmem_arg="--dbmem"
+    else
+        echo "Not enough memory allocated to process to use --dbmem parameter"
+        dbmem_arg=""
     fi
 
     emapper.py \\
         --cpu ${task.cpus} \\
         -i ${fasta_name} \\
         -m $eggnog_mapper_mode \\
-        ${mode_args} \\
         --data_dir ${eggnog_mapper_db} \\
         --report_orthologs \\
         --decorate_gff ${gff} \\
         --output ${prefix} \\
-        ${dbmem} \\
-        ${common_args}
+        \$dbmem_arg \\
+        ${args}
     """
 }

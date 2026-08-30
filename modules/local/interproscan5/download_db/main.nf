@@ -49,7 +49,7 @@ process INTERPROSCAN5_DOWNLOADDB {
     
         echo "Checking md5"
         aria2c -c "${db_url}.md5"
-        md5sum -c --status ${filename}.md5 && echo "ok" || exit 100
+        md5sum -c --status ${filename}.md5 && echo "Checksum: OK" || exit 100
     
         echo "Extracting archive"
         tar -pxzf ${filename}
@@ -63,9 +63,9 @@ process INTERPROSCAN5_DOWNLOADDB {
         
         # searching for the data directory
         data_dir=""
-        ls -d */ | while read -r dir; do
-            if [ -d "\$dir/data" ]; then
-                data_dir="\$dir/data"
+        for folder in */; do
+            if [ -d "\${folder}data" ]; then
+                data_dir="\${folder}data"
                 break
             fi
         done
@@ -78,6 +78,7 @@ process INTERPROSCAN5_DOWNLOADDB {
         fi
 
         # moving directory and creating a symlink
+        mkdir -p ${store_dir}
         mv \${data_dir}/* ${store_dir}
         rm -rf \$data_dir
         ln -s ${store_dir} \$data_dir

@@ -19,7 +19,7 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
     output:
         record(
             id: id,
-            gff: file("*_incomplete_gene_models_fixed.gff")
+            gff: file("*.incomplete_gene_models_fixed.gff")
         )
 
     topic:
@@ -40,6 +40,6 @@ process AGAT_SPFILTERINCOMPLETEGENECODINGMODELS {
         --fasta $genome_fasta \\
         --add_flag \\
        ${args} \\
-        --output ${prefix}_incomplete_gene_models_fixed.gff
+        --output ${prefix}.incomplete_gene_models_fixed.gff
     """
 }

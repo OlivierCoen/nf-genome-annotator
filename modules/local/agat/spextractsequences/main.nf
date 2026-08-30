@@ -17,7 +17,7 @@ process AGAT_SPEXTRACTSEQUENCES {
         record(
             id: String,
             gff: Path,
-            genome: Path
+            fasta: Path
         )
         codon_usage_id: Integer?
 
@@ -34,15 +34,15 @@ process AGAT_SPEXTRACTSEQUENCES {
     def args        = task.ext.args   ?: ''
     def prefix      = "${gff.baseName}"
     
-    def is_compressed = genome.getExtension() == "gz" ? true : false
-    def genome_fasta = is_compressed ? genome.getBaseName() : genome
+    def is_compressed = fasta.getExtension() == "gz" ? true : false
+    def genome_fasta = is_compressed ? fasta.getBaseName() : fasta
 
-    def extract_proteins = args.contains("--proteins") ? true : false
+    def extract_proteins = args.contains("--protein") ? true : false
     def codon_usage_arg = extract_proteins ? "--codon $codon_usage_id" : ""
     def suffix          = extract_proteins ? "prot.faa" : "cds.fna"
     """
     if [ "${is_compressed}" == "true" ]; then
-        gzip -c -d ${genome} > ${genome_fasta}
+        gzip -c -d ${fasta} > ${genome_fasta}
     fi
 
     agat_sp_extract_sequences.pl \\

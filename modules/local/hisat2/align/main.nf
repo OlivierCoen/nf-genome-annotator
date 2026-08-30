@@ -23,6 +23,7 @@ process HISAT2_ALIGN {
         )
 
     topic:
+        tuple(id, '*.log')           >> 'multiqc'
         tuple('hisat2', id, '*.log') >> 'logs'
         tuple("${task.process}", 'hisat2', eval('hisat2 --version | grep -o "version [^ ]*" | cut -d " " -f 2')) >> 'versions'
         tuple("${task.process}", 'samtools', eval("samtools --version | sed -n '1s/samtools //p'"))              >> 'versions'

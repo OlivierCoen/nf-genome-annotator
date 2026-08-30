@@ -15,7 +15,7 @@ process AGAT_SPFIXOVERLAPPINGGENES {
     output:
         record(
             id: id,
-            gff: file("*_overlaps_fixed.gff") 
+            gff: file("*.overlaps_fixed.gff") 
         )
 
     topic:
@@ -28,6 +28,6 @@ process AGAT_SPFIXOVERLAPPINGGENES {
     agat_sp_fix_overlaping_genes.pl \\
         --gff $gff \\
        ${args} \\
-        --output ${prefix}_overlaps_fixed.gff
+        --output ${prefix}.overlaps_fixed.gff
     """
 }
