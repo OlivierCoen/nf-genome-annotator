@@ -35,12 +35,6 @@ process AGAT_SPFUNCTIONALSTATISTICS {
         --gff ${gff} \\
         ${genome_size_arg} \\
         --output ${prefix}.gtf_func_stats.txt \\
-        --yaml \\
         ${args}
-
-    # parse yaml file
-    parse_gff_stat_file.py \\
-        --gff ${prefix}.gtf_stats.txt.yaml \\
-        --prefix ${prefix}
     """
 }
