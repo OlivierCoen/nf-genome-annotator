@@ -171,7 +171,10 @@ def parse_attributes_as_dicts(ipr_lf: pl.LazyFrame) -> pd.DataFrame:
         for lst in ipr_lf.select("attribute_list").collect().to_series().to_list()
     ]
     # making a dataframe out of it: empty keys will be NaN
-    return pd.DataFrame(parsed_attributes)
+    parsed_attributes_df = pd.DataFrame(parsed_attributes)
+    for col in parsed_attributes_df.columns:
+        parsed_attributes_df[col] = parsed_attributes_df[col].str.replace('"', '')
+    return parsed_attributes_df
 
 
 def unite_multiple_sets(*sets) -> set:
@@ -351,11 +354,12 @@ def main():
     
     # parsing each list of attributes (one list per original row) into a dictionary
     ipr_attr_df = parse_attributes_as_dicts(ipr_lf)
-    
+    print(ipr_attr_df)
+
     # Names and aliases
     logger.info("Processing Names and Aliases...")
     formated_ipr_attr_df = get_names_and_aliases(ipr_attr_df)
-
+    
     if "Ontology_term" in ipr_attr_df.columns:
         logger.info("Processing Ontology_term (GO terms)...")
         goterms_df = get_go_terms(ipr_attr_df)
@@ -364,12 +368,12 @@ def main():
 
     if "Dbxref" in ipr_attr_df.columns:
         logger.info("Processing Dbxrefs...")
-        all_dbxrefs_df = get_dbxrefs(ipr_attr_df)
-        formated_ipr_attr_df = formated_ipr_attr_df.join(all_dbxrefs_df, on="seqname", how="left")
-        del all_dbxrefs_df
+        dbxrefs_df = get_dbxrefs(ipr_attr_df)
+        formated_ipr_attr_df = formated_ipr_attr_df.join(dbxrefs_df, on="seqname", how="left")
+        del dbxrefs_df
     
     del ipr_attr_df
-
+    
     ####################################################################
     # MERGING WITH STRUCTURAL GFF3
     ####################################################################
@@ -381,7 +385,11 @@ def main():
     final_annot_lf = add_new_attributes_to_annotation(annot_lf, merged_lf)
 
     # keep only the columns we need
-    final_annot_lf = final_annot_lf.select(GFF_COLUMNS)
+    final_annot_lf = (
+        final_annot_lf
+        .select(GFF_COLUMNS)
+        .sort(["seqname", "start", "end"])
+    )
 
     logger.info(f"Writing final annotation to {args.outfile}")
     # write final annotation to output file

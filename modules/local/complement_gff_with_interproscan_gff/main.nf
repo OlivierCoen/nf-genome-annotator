@@ -7,8 +7,8 @@ process COMPLEMENT_GFF_WITH_INTERPROSCAN_GFF {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/45/456dbad6a07daee9c47503388d128762d334d96e0574ea149bb3a2abcc0337ee/data':
-        'community.wave.seqera.io/library/pandas_polars_pyarrow_python:603d6d02549d908e' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/c0/c07a5b09c5b7388edfd0104ee8b33ff07ba74cf59ae10552e2f85a4c8ae97dfd/data':
+        'community.wave.seqera.io/library/python_polars_pandas_pyarrow:9d37415130a0bb7d' }"
 
     input:
         record(
