@@ -148,7 +148,7 @@ def get_name_and_aliases(name_set: set) -> dict[str, str | list[str]] | None:
     return {"name": real_name, "aliases": aliases}
 
 
-def get_names_and_aliases(parsed_attr_df: pd.DataFrame) -> pd.DataFrame:
+def get_names_and_aliases(parsed_attr_df: pd.DataFrame) -> pl.DataFrame:
     pfam_names = parsed_attr_df[pd.col("source") == "Pfam"].groupby("seqname")["Name"].apply(set)
     seqname_to_names_and_aliases = pfam_names.apply(lambda x: get_name_and_aliases(x))
     seqname_to_names_and_aliases_records = [
@@ -157,7 +157,7 @@ def get_names_and_aliases(parsed_attr_df: pd.DataFrame) -> pd.DataFrame:
     ]
     seqname_names_aliases_df = pd.DataFrame.from_records(seqname_to_names_and_aliases_records)
     seqname_names_aliases_df["Alias"] = seqname_names_aliases_df["Alias"].apply(','.join)
-    return seqname_names_aliases_df
+    return pl.from_pandas(seqname_names_aliases_df)
 
 
 def parse_attributes_as_dicts(ipr_lf: pl.LazyFrame) -> pd.DataFrame:
@@ -188,31 +188,17 @@ def get_grouped_set_dataframe(parsed_attr_df: pd.DataFrame, xref_col: str) -> pd
     return df
 
 
-def get_all_dbxrefs(parsed_attr_df: pd.DataFrame):
+def get_dbxrefs(parsed_attr_df: pd.DataFrame):
     # Dbxref (IPR entries, database accessions)
     dbxrefs_df = get_grouped_set_dataframe(parsed_attr_df, "Dbxref")
-    # Also store the hit accessions itself (e.g. PF00001, TIGR00001)
-    hit_accessions_df = get_grouped_set_dataframe(parsed_attr_df, "hit_accession")
-    hit_accession_aliases_df = get_grouped_set_dataframe(parsed_attr_df, "hit_accession_alias")
-    
-    all_dbxrefs_df = (
-        dbxrefs_df
-            .merge(hit_accessions_df, how="outer", on="seqname")
-            .merge(hit_accession_aliases_df, how="outer", on="seqname")
-    )
-    all_dbxrefs_df["all"] = all_dbxrefs_df.apply(
-        lambda row: unite_multiple_sets(row["Dbxref"], row["hit_accession"], row["hit_accession_alias"]), 
-        axis=1
-    )
-    all_dbxrefs_df["all"] = all_dbxrefs_df["all"].apply(','.join)
     # add dbxrefs column
-    return all_dbxrefs_df[["seqname", "all"]].rename(columns={"all": "Dbxref"})
+    return pl.from_pandas(dbxrefs_df[["seqname", "Dbxref"]])
 
 
-def get_go_terms(parsed_attr_df: pd.DataFrame):
+def get_go_terms(parsed_attr_df: pl.DataFrame):
     go_terms_df = get_grouped_set_dataframe(parsed_attr_df, "Ontology_term")
     go_terms_df["Ontology_term"] = go_terms_df["Ontology_term"].apply(','.join)
-    return go_terms_df
+    return pl.from_pandas(go_terms_df)
 
 
 def merge_new_attributes(transcript_attr_lf: pl.LazyFrame, formated_ipr_attr_df: pl.DataFrame) -> pl.LazyFrame:
@@ -365,36 +351,24 @@ def main():
     
     # parsing each list of attributes (one list per original row) into a dictionary
     ipr_attr_df = parse_attributes_as_dicts(ipr_lf)
-
-    # pre-format the hit accession
-    ipr_attr_df["hit_accession"] = ipr_attr_df["source"] + ":" + ipr_attr_df["Name"]
-    ipr_attr_df["hit_accession_alias"] = ipr_attr_df["source"] + ":" + ipr_attr_df["Alias"]
-
-    EXPECTED_COLUMNS = ["Name", "Ontology_term", "Alias", "Dbxref"]
-    for col in EXPECTED_COLUMNS:
-        if col not in ipr_attr_df.columns:
-            ipr_attr_df[col] = pd.NA
     
     # Names and aliases
     logger.info("Processing Names and Aliases...")
-    seqname_names_aliases_df = get_names_and_aliases(ipr_attr_df)
+    formated_ipr_attr_df = get_names_and_aliases(ipr_attr_df)
+
+    if "Ontology_term" in ipr_attr_df.columns:
+        logger.info("Processing Ontology_term (GO terms)...")
+        goterms_df = get_go_terms(ipr_attr_df)
+        formated_ipr_attr_df = formated_ipr_attr_df.join(goterms_df, on="seqname", how="left")
+        del goterms_df
+
+    if "Dbxref" in ipr_attr_df.columns:
+        logger.info("Processing Dbxrefs...")
+        all_dbxrefs_df = get_dbxrefs(ipr_attr_df)
+        formated_ipr_attr_df = formated_ipr_attr_df.join(all_dbxrefs_df, on="seqname", how="left")
+        del all_dbxrefs_df
     
-    logger.info("Processing Dbxrefs...")
-    all_dbxrefs_df = get_all_dbxrefs(ipr_attr_df)
-   
-    logger.info("Processing Ontology_term (GO terms)...")
-    goterms_df = get_go_terms(ipr_attr_df)
-
-    formated_ipr_attr_df = pl.from_pandas(
-        seqname_names_aliases_df
-        .merge(all_dbxrefs_df, on="seqname", how="left")
-        .merge(goterms_df, on="seqname", how="left")
-    )
-
     del ipr_attr_df
-    del seqname_names_aliases_df
-    del all_dbxrefs_df
-    del goterms_df
 
     ####################################################################
     # MERGING WITH STRUCTURAL GFF3
