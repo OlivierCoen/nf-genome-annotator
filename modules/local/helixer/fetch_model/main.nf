@@ -1,17 +1,20 @@
-process HELIXER_FASTQ2H5 {
+nextflow.enable.types = true
+
+process HELIXER_FETCHMODEL {
     tag "$meta.id"
-    label 'process_high'
+    label 'process_single'
 
     // Helixer does not provide a conda package
     container "docker.io/gglyptodon/helixer-docker:helixer_v0.3.6_cuda_12.2.2-cudnn8_1"
 
     input:
-    tuple val(meta), path(fasta)
-    val species
+        lineage: String
 
     output:
-    tuple val(meta), path("*.h5"), emit: h5
-    tuple val("${task.process}"), val('helixer'), eval(""),    topic: versions
+        record(
+            lineage: lineage,
+            model: file("models/${lineage}/*")
+        )
 
     script:
     def args   = task.ext.args   ?: ''
@@ -21,12 +24,9 @@ process HELIXER_FASTQ2H5 {
                  "Consider using Apptainer instead. See https://github.com/gglyptodon/helixer-docker for more information.")
     }
     """
-    fasta2h5.py \\
-        --species $species \\
-        --h5-output-path ${prefix}.h5 \\
-        --fasta-path $fasta \\
-        --subsequence-length
-    
+    Helixer/scripts/fetch_helixer_models.py \\
+        --lineage $lineage \\
+        --custom-path models
     """
 
 }

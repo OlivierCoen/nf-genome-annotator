@@ -175,7 +175,7 @@
                 "structural_annotator": {
                     "type": "string",
                     "description": "Tool to use for structural annotation",
-                    "enum": ["braker3", "metaeuk"],
+                    "enum": ["braker3", "helixer", "metaeuk"],
                     "default": "braker3"
                 }
             }

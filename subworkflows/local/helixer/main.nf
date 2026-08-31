@@ -1,7 +1,6 @@
-include { HELIXER_FASTQ2H5               } from '../../../modules/local/helixer/fastq2h5'
-include { HELIXER_HYBRIDMODEL            } from '../../../modules/local/helixer/hybridmodel'
-include { HELIXER_POSTBIN                } from '../../../modules/local/helixer/postbin'
+nextflow.enable.types = true
 
+include { HELIXER_HELIXER               } from '../../../modules/local/helixer/helixer'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -9,19 +8,42 @@ include { HELIXER_POSTBIN                } from '../../../modules/local/helixer/
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-/*
+record Input {
+    id: String
+    helixer_lineage: String
+    fasta: Path
+}
+
+
 workflow HELIXER {
 
     take:
-    ch_genome
+    ch_input: Channel<Input>
 
     main:
 
-    HELIXER_FASTQ2H5
+    // Printing message for each sample where no helixer lineage could be found
+    ch_input
+        .filter { rec -> rec.helixer_lineage == null }
+        .map { rec -> 
+            println "No Helixer lineage could be found for sample ${rec.id}. Skipping structural annotation for this sample."
+        }
 
-    
+    ch_helixer_input = ch_input
+                        .filter { rec -> rec.helixer_lineage != null }
+                        .map { rec -> record(
+                            id: rec.id,
+                            fasta: rec.fasta,
+                            lineage: rec.helixer_lineage,
+                            species: rec.species
+                        ) }
+
+    ch_helixer_out = HELIXER_HELIXER( ch_helixer_input )
+
+    // samples for which helixer_lineage is null will not be proceeded in the subsequent steps
     emit:
+    annotated = ch_input.join(ch_helixer_out, by: 'id')
     
 
 }
-*/
+

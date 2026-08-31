@@ -48,6 +48,14 @@ workflow TRAINING_PROTEIN_PREPARATION {
 
         ch_input = ch_input.map { rec -> rec + record(orthodb_hash: getOrthoDBHash(rec)) }
 
+        // Printing message for each sample where no orthodb clade could be found
+        ch_input
+            .filter { rec -> rec.orthodb_clade == null }
+            .map { rec -> 
+                println "No OrthoDB clade could be found for sample ${rec.id}. Skipping preparation of training proteins for this sample"
+            }
+
+        // Extracting all unique combinations of orthoDB clade / excldues clades / excluded species
         ch_orthodb_makecladedb_input = ch_input
                                         .filter { rec -> rec.orthodb_clade != null }
                                         .map { rec -> rec.subMap(['orthodb_clade', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }

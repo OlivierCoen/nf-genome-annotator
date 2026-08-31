@@ -1,6 +1,7 @@
 nextflow.enable.types = true
 
 include { BRAKER           } from '../braker'
+include { HELIXER          } from '../helixer'
 include { METAEUK          } from '../metaeuk'
 
 /*
@@ -45,6 +46,11 @@ workflow STRUCTURAL_ANNOTATION {
         )
         ch_annotated = BRAKER.out.annotated
 
+    } else if ( structural_annotator == "helixer" ) {
+
+        HELIXER( ch_input )
+        ch_annotated = HELIXER.out.annotated
+        
     } else if ( structural_annotator == "metaeuk" ) {
 
         METAEUK(
@@ -54,8 +60,7 @@ workflow STRUCTURAL_ANNOTATION {
             min_prot_db_seq_length
         )
         ch_annotated = METAEUK.out.annotated
-
-
+        
     }
 
     emit:

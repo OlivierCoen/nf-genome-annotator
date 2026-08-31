@@ -1,0 +1,53 @@
+nextflow.enable.types = true
+
+process HELIXER_HELIXER {
+
+    tag "${id} :: ${lineage}"
+    label 'process_high'
+    label 'process_gpu'
+
+    // Helixer does not provide a conda package
+    // Note: when using with docker, Nvidia docker toolkit should be installed
+    // https://github.com/usadellab/helixer-docker#installing-docker
+    container "docker.io/gglyptodon/helixer-docker:helixer_v0.3.6_cuda_12.2.2-cudnn8_1"
+
+    input:
+        record(
+            id: String,
+            species: String,
+            fasta: Path,
+            lineage: String
+        )
+
+    output:
+        record(
+            id: id,
+            gff: file("*.gff3")
+        )
+
+    topic:
+        tuple("${task.process}", 'helixer', eval("Helixer.py --version 2>&1 | grep 'Helixer.py' | cut -d' ' -f 2")) >> 'versions'
+
+    script:
+    def args   = task.ext.args   ?: ''
+    def prefix = task.ext.prefix ?: "${id}.helixer"
+    // Warning if Singularity is being used
+    if (workflow.containerEngine == 'singularity') {
+        log.warn("Running Helixer with Singularity is not recommended since you may encounter issues with permissions. " +
+                 "Consider using Apptainer instead. See https://github.com/gglyptodon/helixer-docker for more information.")
+    }
+    // Warning if not using GPUs
+    if ( !workflow.profile.contains('gpu') ) {
+        log.warn("Running Helixer without GPU(s) may take a very long time and lead to instability")
+    }
+    """
+    Helixer.py \\
+        --fasta-path $fasta \\
+        --lineage ${lineage} \\
+        --species $species \\
+        --gff-output-path ${prefix}.gff3 \\
+        ${args}
+    
+    """
+
+}
