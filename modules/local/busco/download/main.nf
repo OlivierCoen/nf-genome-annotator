@@ -14,7 +14,7 @@ process BUSCO_DOWNLOAD {
 
     output:
         record(
-            busco_lineage: String,
+            busco_lineage: lineage,
             busco_download_path: file("busco_downloads", type: 'dir')
         )
 

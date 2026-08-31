@@ -36,17 +36,26 @@ workflow QUALITY_CONTROLS {
     // DOWNLOAD NECESSARY BUSCO DATASETS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_busco_downloads = BUSCO_DOWNLOAD( 
-        ch_input. map { rec -> rec.busco_lineage }.unique()
+    ch_busco_input = ch_input.filter { rec -> rec.busco_lineage != null }
+
+    ch_busco_downloads = BUSCO_DOWNLOAD(
+        ch_busco_input.map { rec -> rec.busco_lineage }.unique()
     )
-    ch_input = ch_input.join( ch_busco_downloads, by: 'busco_lineage' )
+
+    ch_busco_input = ch_busco_input.join( ch_busco_downloads, by: 'busco_lineage' )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // BUSCO ON GENOME
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+   
     BUSCO_GENOME (
-        ch_input.map { rec -> rec.subMap(['id', 'fasta', 'busco_download_path']) },
+        ch_busco_input.map { rec -> record(
+                id: rec.id, 
+                fasta: rec.fasta, 
+                lineage: rec.busco_lineage, 
+                download_path: rec.busco_download_path
+            ) 
+        },
         'genome'
     )
 
@@ -55,7 +64,13 @@ workflow QUALITY_CONTROLS {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     BUSCO_PROTEOME (
-        ch_input.map { rec -> record(id: rec.id, fasta: [rec.proteome] + rec.other_proteomes, busco_download_path: rec.busco_download_path) },
+        ch_busco_input.map { rec -> record(
+            id: rec.id, 
+            fasta: [rec.proteome] + rec.other_proteomes, 
+            lineage: rec.busco_lineage, 
+            download_path: rec.busco_download_path
+            ) 
+        },
         'proteins'
     )
 

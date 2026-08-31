@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process BUSCO_BUSCO {
-    tag "$id"
+    tag "${id} :: ${lineage}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -15,8 +15,8 @@ process BUSCO_BUSCO {
         record(
             id: String,
             fasta: Iterable<Path>,
-            busco_lineage: String?,
-            busco_download_path: Path?
+            lineage: String,
+            download_path: Path
         )
         mode: String
 
@@ -78,7 +78,7 @@ process BUSCO_BUSCO {
         --in "\$INPUT_SEQS" \\
         --out ${prefix}-busco \\
         --mode ${mode} \\
-        --download_path ${busco_download_path} \\
+        --download_path ${download_path} \\
         ${args}
 
     # clean up

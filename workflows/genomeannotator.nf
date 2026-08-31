@@ -194,13 +194,15 @@ workflow GENOMEANNOTATOR {
         // storing the final structural annotation
         ch_main = ch_main.map { rec -> rec + record(final_structural_annotation: rec.gff) }
 
-        FUNCTIONAL_ANNOTATION (
+        ch_functional_annotation = FUNCTIONAL_ANNOTATION (
             ch_main,
             params.functional_annotators,
             params.eggnog_mapper_mode,
             params.interproscan5_db,
             params.interproscan5_db_url
         )
+
+        ch_main = ch_main.join( ch_functional_annotation, by: 'id' )
 
     }
 
@@ -220,6 +222,7 @@ workflow GENOMEANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     REPORTING(
+        ch_main,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,
