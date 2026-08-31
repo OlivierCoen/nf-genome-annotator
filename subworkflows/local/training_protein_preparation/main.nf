@@ -48,10 +48,13 @@ workflow TRAINING_PROTEIN_PREPARATION {
 
         ch_input = ch_input.map { rec -> rec + record(orthodb_hash: getOrthoDBHash(rec)) }
 
-        ch_orthodo_cladedb = ORTHODB_MAKECLADEDB(
-            ch_input.map { rec -> rec.subMap(['orthodb_clade', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }.unique()
-        )
+        ch_orthodb_makecladedb_input = ch_input
+                                        .filter { rec -> rec.orthodb_clade != null }
+                                        .map { rec -> rec.subMap(['orthodb_clade', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }
+                                        .unique()
 
+        ch_orthodo_cladedb = ORTHODB_MAKECLADEDB( ch_orthodb_makecladedb_input )
+   
         ch_input = ch_input
                     .join(
                         ch_orthodo_cladedb.map { rec -> rec + record(orthodb_hash: getOrthoDBHash(rec)) },

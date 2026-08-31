@@ -267,7 +267,7 @@ def get_helixer_lineage(taxid_lineage: list[int]) -> str | None:
             raise ValueError(f"Multiple Helixer lineages found for taxid lineage: {taxid_lineage}")
         found_lineage = candidate_lineages[0]
         logger.info(f"Found Helixer lineage: {found_lineage}")
-        return found_lineage[0]
+        return found_lineage
     else:
         logger.info("All candidate lineages were excluded")
         return None
