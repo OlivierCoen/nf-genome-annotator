@@ -31,24 +31,29 @@ workflow METAEUK {
     // PREPARE MMSEQS PROTEIN DB FROM THE CHOSEN MMSEQS DB AND CUSTOM PROTEIN FASTA FILES
     // ----------------------------------------------------------
 
-    MMSEQS_DB_PREPARATION(
+    ch_mmseqs_db = MMSEQS_DB_PREPARATION(
         ch_input.map { rec -> rec.subMap(['id', 'training_proteins', 'mmseqs_db']) },
         mmseqs_db,
         skip_mmseqs_db_download,
         min_prot_db_seq_length
     )
 
-    ch_input = ch_input.join( MMSEQS_DB_PREPARATION.out.db, by: 'id' )
+    ch_input = ch_input.join( ch_mmseqs_db, by: 'id' )
 
     // ----------------------------------------------------------
     // RUN METAEUK
     // ----------------------------------------------------------
 
-    METAEUK_EASYPREDICT(
+    ch_metaeuk_out = METAEUK_EASYPREDICT(
         ch_input.map{ rec -> record(id: rec.id, fasta: rec.fasta, db: rec.mmseqs_db)}
     )
 
+    ch_input = ch_input.join(
+        ch_metaeuk_out.map { rec -> record(id: rec.id, structural_annotation: rec.gff) },
+        by: 'id'
+    )
+
     emit:
-    annotated = METAEUK_EASYPREDICT.out
+    annotated = ch_input
 
 }

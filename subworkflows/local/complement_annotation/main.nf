@@ -34,10 +34,17 @@ workflow COMPLEMENT_ANNOTATION {
     ch_to_complement = ch_to_complement.map { rec -> rec + record(uncomplemented_annotation: rec.annotation) }
 
     ch_complemented = AGAT_SPCOMPLEMENTANNOTATIONS( 
-        ch_to_complement.map{ rec -> record(id: rec.id, ref_gff: rec.annotation, other_gff: rec.gff) }
-    ).map{ rec -> record(id: rec.id, annotation: rec.gff)}
+        ch_to_complement.map{ rec -> record(
+            id: rec.id, 
+            ref_gff: rec.structural_annotation, 
+            other_gff: rec.gff
+        ) }
+    )
 
-    ch_complemented = ch_to_complement.join( ch_complemented, by: 'id' )
+    ch_complemented = ch_to_complement.join( 
+        ch_complemented.map{ rec -> record(id: rec.id, annotation: rec.gff)}, 
+        by: 'id' 
+    )
 
 
     emit:

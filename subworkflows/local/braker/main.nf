@@ -102,8 +102,8 @@ workflow BRAKER {
     // MIXING MERGED AND NOT MERGED
     // ----------------------------------------------------------
 
-    ch_merged       = ch_merged.map      { rec -> rec + record(structural_annotation_gtf: rec.merged_gtf) }
-    ch_not_to_merge = ch_not_to_merge.map{ rec -> rec + record(structural_annotation_gtf: rec.braker_gtf) }
+    ch_merged       = ch_merged.map      { rec -> rec + record(structural_annotation: rec.merged_gtf) }
+    ch_not_to_merge = ch_not_to_merge.map{ rec -> rec + record(structural_annotation: rec.braker_gtf) }
 
     emit:
     annotated = ch_merged.mix( ch_not_to_merge )

@@ -9,14 +9,15 @@ process HELIXER_HELIXER {
     // Helixer does not provide a conda package
     // Note: when using with docker, Nvidia docker toolkit should be installed
     // https://github.com/usadellab/helixer-docker#installing-docker
-    container "docker.io/gglyptodon/helixer-docker:helixer_v0.3.6_cuda_12.2.2-cudnn8_1"
+    container "docker.io/gglyptodon/helixer-docker:helixer_v0.3.7_cuda_12.2.2-cudnn8_1"
 
     input:
         record(
             id: String,
             species: String,
             fasta: Path,
-            lineage: String
+            lineage: String,
+            models_path: Path
         )
 
     output:
@@ -38,14 +39,19 @@ process HELIXER_HELIXER {
     }
     // Warning if not using GPUs
     if ( !workflow.profile.contains('gpu') ) {
-        log.warn("Running Helixer without GPU(s) may take a very long time and lead to instability")
+        log.warn("Running Helixer without GPU(s) may take a long time")
     }
     """
+    mkdir tmp
+    
     Helixer.py \\
         --fasta-path $fasta \\
-        --lineage ${lineage} \\
-        --species $species \\
+        --lineage $lineage \\
+        --downloaded-model-path $models_path \\
+        --species "${species}" \\
         --gff-output-path ${prefix}.gff3 \\
+        --temporary-dir tmp \\
+        --deterministic \\
         ${args}
     
     """

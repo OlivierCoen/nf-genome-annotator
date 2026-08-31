@@ -17,13 +17,14 @@ include { paramsSummaryMap                       } from 'plugin/nf-schema'
 workflow REPORTING {
 
     take:
+    ch_input
     multiqc_config
     multiqc_logo
     multiqc_methods_description
     outdir
 
     main:
-
+    
     // ------------------------------------------------------------------------------------
     // VERSIONS
     // ------------------------------------------------------------------------------------
@@ -121,6 +122,7 @@ workflow REPORTING {
                         .combine( ch_multiqc_config_list )
                         .combine( ch_multiqc_logo )
                         .map { meta, files, configs, logo -> [ meta, files, configs, logo , [], [] ] }
+                        .view { v -> "multiqc $v"}
                         
     MULTIQC ( ch_multiqc_input )
     

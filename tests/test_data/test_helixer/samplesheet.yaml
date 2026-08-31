@@ -1,0 +1,12 @@
+- sample: test
+  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  species: arabidopsis thaliana
+  gff: tests/test_data/test_gtf_provided/braker.gtf
+  training_proteins:
+    - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
+  rnaseq:
+    bams:
+      - http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
+    fastqs:
+      - R1: tests/test_data/test_braker/RNAseq.1.fq.gz
+        R2: tests/test_data/test_braker/RNAseq.2.fq.gz

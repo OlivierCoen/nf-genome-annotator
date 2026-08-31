@@ -47,7 +47,7 @@ workflow DOWNLOAD_READS {
                             .map{ rec -> record(experiment_id: rec.id, reads: rec.reads) }
 
     // associating back to the corresponding sample IDs
-    // TODO: simplify when groupBy can handle reo
+    // TODO: simplify when groupBy can handle records
     ch_reads = ch_ids
                 .flatMap{
                     rec -> rec.rnaseq_experiment_ids.collect{ value -> record(id: rec.id, experiment_id: value) }

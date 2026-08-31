@@ -81,45 +81,54 @@ workflow GENOMEANNOTATOR {
         }
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // DOWNLOAD READS FROM SRA / ENA IF NEEDED
+        // WHEN NEEDED, DOWNLOAD READS FROM PUBLIC DATABASES AND MAP THEM TO THE GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        ch_downloaded_reads = DOWNLOAD_READS( ch_main ) 
-        ch_main = ch_main.join( ch_downloaded_reads, by: 'id' )
+        // only a subset of structural annotator can use RNAseq data 
+        if ( params.structural_annotator in ['braker'] ){
 
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // MAP RNASEQ READS TO GENOME
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // DOWNLOAD READS FROM SRA / ENA
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+            ch_downloaded_reads = DOWNLOAD_READS( ch_main ) 
+            ch_main = ch_main.join( ch_downloaded_reads, by: 'id', remainder: true )
+    
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // MAP RNASEQ READS TO GENOME
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+            ch_main = ch_main.map{ rec ->
+                def downloaded_rnaseq_fastqs = rec.downloaded_rnaseq_fastqs ?: []
+                rec + record(reads_to_map: rec.supplied_rnaseq_fastqs + downloaded_rnaseq_fastqs)
+            }
 
-        ch_main = ch_main.map{ rec ->
-            def downloaded_rnaseq_fastqs = rec.downloaded_rnaseq_fastqs ?: []
-            rec + record(reads_to_map: rec.supplied_rnaseq_fastqs + downloaded_rnaseq_fastqs)
+            ch_reads_mapped = MAP_RNASEQ_READS(
+                ch_main.filter{ rec -> rec.reads_to_map.size() > 0 }, // pass only samples for which there are reads
+                params.skip_fastqc,
+                params.skip_umi_extract,
+                params.skip_trimming,
+                params.rnaseq_mapper,
+                params.ignore_existing_gff_for_mapping
+            )
+            ch_main = ch_main.join( ch_reads_mapped, by: 'id' )
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+            ch_main = ch_main.map{ rec ->
+                def new_rnaseq_bams = rec.new_rnaseq_bams ?: []
+                rec + record(bams: rec.supplied_rnaseq_bams + new_rnaseq_bams)
+            }
+    
+            ch_sorted_bam = BAM_SORT_INDEX_STATS(
+                ch_main.map { rec -> rec.bams.size() > 0 }
+            )
+            ch_main = ch_main.join( ch_sorted_bam, by: 'id' )
+            
         }
-
-        ch_reads_mapped = MAP_RNASEQ_READS(
-            ch_main.filter{ rec -> rec.reads_to_map.size() > 0 }, // pass only samples for which there are reads
-            params.skip_fastqc,
-            params.skip_umi_extract,
-            params.skip_trimming,
-            params.rnaseq_mapper,
-            params.ignore_existing_gff_for_mapping
-        )
-        ch_main = ch_main.join( ch_reads_mapped, by: 'id' )
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        ch_main = ch_main.map{ rec ->
-            def new_rnaseq_bams = rec.new_rnaseq_bams ?: []
-            rec + record(bams: rec.supplied_rnaseq_bams + new_rnaseq_bams)
-        }
-
-        ch_sorted_bam = BAM_SORT_INDEX_STATS(
-            ch_main.map { rec -> rec.bams.size() > 0 }
-        )
-        ch_main = ch_main.join( ch_sorted_bam, by: 'id' )
-
+        
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // STRUCTURAL ANNOTATION
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

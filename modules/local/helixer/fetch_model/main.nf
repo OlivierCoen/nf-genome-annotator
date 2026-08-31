@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process HELIXER_FETCHMODEL {
-    tag "$meta.id"
+    tag "$lineage"
     label 'process_single'
 
     // Helixer does not provide a conda package
@@ -13,18 +13,18 @@ process HELIXER_FETCHMODEL {
     output:
         record(
             lineage: lineage,
-            model: file("models/${lineage}/*")
+            models_path: file("models")
         )
 
     script:
-    def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
     if (workflow.containerEngine == 'singularity') {
         log.warn("Running Helixer with Singularity is not recommended since you may encounter issues with permissions. " +
                  "Consider using Apptainer instead. See https://github.com/gglyptodon/helixer-docker for more information.")
     }
     """
-    Helixer/scripts/fetch_helixer_models.py \\
+    mkdir models 
+    
+    fetch_helixer_models.py \\
         --lineage $lineage \\
         --custom-path models
     """
