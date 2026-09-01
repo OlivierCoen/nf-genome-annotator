@@ -19,7 +19,7 @@ process SAMTOOLS_STATS {
         )
 
     topic:
-        //tuple(id, file("*.stats")) >> 'samtools_stat_multiqc'
+        tuple(id, file("*.stats")) >> 'samtools_stat_multiqc'
         tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:

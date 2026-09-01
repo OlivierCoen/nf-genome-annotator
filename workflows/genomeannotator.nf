@@ -136,7 +136,7 @@ workflow GENOMEANNOTATOR {
         ch_structural_annotation = STRUCTURAL_ANNOTATION (
             ch_main,
             params.structural_annotator,
-            params.mmseqs_db,
+            params.mmseqs_dbtaxo,
             params.skip_orthodb_download,
             params.skip_mmseqs_db_download,
             params.min_prot_db_seq_length
@@ -219,7 +219,7 @@ workflow GENOMEANNOTATOR {
     // VARIOUS QUALITY CONTROLS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    QUALITY_CONTROLS(
+    ch_qc = QUALITY_CONTROLS(
         ch_main,
         params.skip_busco,
         params.skip_omark,
@@ -227,16 +227,20 @@ workflow GENOMEANNOTATOR {
         params.omamer_db
     )
 
+    ch_main = ch_main.join( ch_qc, by: 'id' )
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MULTIQC & OTHER REPORTING
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    REPORTING(
+    ch_reporting = REPORTING(
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,
         params.outdir
     )
+
+    ch_main = ch_main.join( ch_reporting, by: 'id' )
 
     emit:
     results = ch_main

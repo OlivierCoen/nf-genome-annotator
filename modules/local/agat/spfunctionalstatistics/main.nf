@@ -23,7 +23,7 @@ process AGAT_SPFUNCTIONALSTATISTICS {
         )
         */
     topic:
-        //tuple(id, files("*_gff_stats.csv", optional: true)) >> 'agat_functional_annotation_stats_multiqc'
+        tuple(id, files("*_gff_stats.csv")) >> 'agat_functional_annotation_stats_multiqc'
         tuple("${task.process}", 'agat', eval("agat_sp_functional_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:

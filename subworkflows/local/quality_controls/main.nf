@@ -102,12 +102,15 @@ workflow QUALITY_CONTROLS {
     // METRICS OF STRUCTURAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // AGAT_GTF_STATISTICS ( ch_input )
+    AGAT_GTF_STATISTICS ( ch_input )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // METRICS OF FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     //AGAT_FUNCTIONAL_STATISTICS( ch_input )
+
+    emit:
+    ch_input
 
 }

@@ -24,7 +24,7 @@ process BUSCO_BUSCO {
         stageAs fasta, 'tmp_input/*'
 
     topic:
-        tuple(id, files("short_summaries/*.txt"))                                      >> 'busco_multiqc'
+        //tuple(id, files("short_summaries/*.txt"))                                      >> 'busco_multiqc'
         tuple('busco', id, file("*-busco.batch_summary.txt"))                          >> 'additional_results'
         tuple('busco', id, file('*-busco.log'))                                        >> 'logs'
         tuple("${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"')) >> 'versions'
