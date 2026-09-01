@@ -33,7 +33,7 @@ record Samplesheet {
     species: String
     gff: Path?
     supplied_rnaseq_bams: Iterable<Path>
-    supplied_rnaseq_fastqs: Iterable<Path>
+    supplied_rnaseq_fastqs: Iterable<Record>
     rnaseq_experiment_ids: Iterable<String>
     training_proteins: Iterable<Path>
     orthodb_excluded_clades: Iterable<String>
@@ -83,9 +83,9 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // WHEN NEEDED, DOWNLOAD READS FROM PUBLIC DATABASES AND MAP THEM TO THE GENOME
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+  
         // only a subset of structural annotator can use RNAseq data 
-        if ( params.structural_annotator in ['braker'] ){
+        if ( params.structural_annotator in ['braker3'] ){
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // DOWNLOAD READS FROM SRA / ENA
@@ -111,7 +111,7 @@ workflow GENOMEANNOTATOR {
                 params.rnaseq_mapper,
                 params.ignore_existing_gff_for_mapping
             )
-            ch_main = ch_main.join( ch_reads_mapped, by: 'id' )
+            ch_main = ch_main.join( ch_reads_mapped, by: 'id', remainder: true )
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
@@ -121,11 +121,11 @@ workflow GENOMEANNOTATOR {
                 def new_rnaseq_bams = rec.new_rnaseq_bams ?: []
                 rec + record(bams: rec.supplied_rnaseq_bams + new_rnaseq_bams)
             }
-    
+
             ch_sorted_bam = BAM_SORT_INDEX_STATS(
-                ch_main.map { rec -> rec.bams.size() > 0 }
+                ch_main.filter { rec -> rec.bams.size() > 0 }
             )
-            ch_main = ch_main.join( ch_sorted_bam, by: 'id' )
+            ch_main = ch_main.join( ch_sorted_bam, by: 'id', remainder: true )
             
         }
         

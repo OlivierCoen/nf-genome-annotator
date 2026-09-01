@@ -22,10 +22,11 @@ workflow BAM_SORT_INDEX_STATS {
     // INDEX FASTA
     // ------------------------------------------------------------------------------------
 
-    SAMTOOLS_FAIDX(
+    ch_fai = SAMTOOLS_FAIDX(
         ch_input.map { rec -> rec.subMap(['id', 'fasta']) }.unique()
     )
-    ch_input = ch_input.join( SAMTOOLS_FAIDX.out, by: 'id' )
+    
+    ch_input = ch_input.join( ch_fai, by: 'id' )
 
     // ------------------------------------------------------------------------------------
     // SORT BAMS AND MAKE INDEX
@@ -42,9 +43,9 @@ workflow BAM_SORT_INDEX_STATS {
             ) }
     }
 
-    SAMTOOLS_SORT_INDEX( ch_bam )
+    ch_sorted_bam = SAMTOOLS_SORT_INDEX( ch_bam )
 
-    ch_bam = ch_bam.join( SAMTOOLS_SORT_INDEX.out, by: 'id' )
+    ch_bam = ch_bam.join( ch_sorted_bam, by: 'id' )
 
     // ------------------------------------------------------------------------------------
     // MAPPING STATS

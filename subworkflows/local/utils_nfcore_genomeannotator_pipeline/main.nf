@@ -167,7 +167,10 @@ workflow PIPELINE_COMPLETION {
 
 // turning the map of fastq files into a list (all modules work with lists)
 def organiseRnaseqFastqFiles( rnaseq_fastqs_list: List<Map<String, Path>> ) {
-    return rnaseq_fastqs_list.collect { fastq_map -> fastq_map.R2 ? [ fastq_map.R1, fastq_map.R2 ] : [ fastq_map.R1 ] }
+    return rnaseq_fastqs_list.withIndex().collect { fastq_map, index -> 
+        def reads = fastq_map.R2 ? [ fastq_map.R1, fastq_map.R2 ] : [ fastq_map.R1 ] 
+        record(id: "user_reads_${index}", reads: reads)
+    }
 }
 
 def parseSamplesheet() {
@@ -176,7 +179,7 @@ def parseSamplesheet() {
             .map{ args ->
                 def meta = args[0]
                 record(
-                    id: meta.id,
+                    id: meta.id.replaceAll(/\s+/, "_"),
                     fasta: meta.fasta,
                     species: meta.species.toString(),
                     gff: meta.gff ?: null,

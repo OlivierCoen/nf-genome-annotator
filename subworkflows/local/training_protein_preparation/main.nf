@@ -17,8 +17,8 @@ def getOrthoDBHash(rec){
 
 def warnNoProteinsFound(rec: Record){
     log.warn(
-        "No proteins found for ${rec.id}. Structural annotation will be skipped for this sample. " +
-        "Please provide training proteins for this sample in the samplesheet, or unset the --skip_orthodb_download flag."
+        "No proteins found for ${rec.id}. In case you want to add training proteins for better gene evidence, " +
+        "please provide training proteins for this sample in the samplesheet, or unset the --skip_orthodb_download flag."
     )
 }
 

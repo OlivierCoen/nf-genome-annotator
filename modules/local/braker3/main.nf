@@ -68,7 +68,7 @@ process BRAKER3 {
 
     braker.pl \\
         --genome ${prefix}.genome.masked.fasta \\
-        --species ${species} \\
+        --species "${species.replaceAll(/\s+/, "_")}_${id}" \\
         --workingdir workdir \\
         --AUGUSTUS_CONFIG_PATH "\$(pwd)/augustus_config" \\
         --threads $nb_threads \\

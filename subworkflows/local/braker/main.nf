@@ -20,7 +20,7 @@ record Input {
     excluded_clades: Iterable<String>
     excluded_species: Iterable<String>
     training_proteins: Iterable<Path>
-    mappings: Iterable<Record>
+    mappings: Iterable<Record>?
     tsebra_gtfs: Iterable<Path>
     tsebra_hintsfiles: Iterable<Path>
 }
@@ -34,25 +34,29 @@ workflow BRAKER {
     min_prot_db_seq_length: Integer
 
     main:
-
+    
     // ----------------------------------------------------------
     // PREPARE PROTEIN TRAINING SET FOR BRAKER
     // ----------------------------------------------------------
 
     ch_proteins = TRAINING_PROTEIN_PREPARATION(
-        ch_input.map { rec -> rec.subMap(['id', 'clade', 'orthodb_clade', 'orthodb_excluded_clades', 'orthodb_excluded_species', 'training_proteins']) },
+        ch_input,
         skip_orthodb_download,
         min_prot_db_seq_length
     )
 
-    ch_input = ch_input.join( ch_proteins, by: 'id' )
+    // remainder true means a left outer join
+    ch_input = ch_input.join( ch_proteins, by: 'id', remainder: true )
+
+    ch_has_mappings   = ch_input.filter{ rec -> rec.mappings != null }
+    ch_leave_me_alone = ch_input.filter{ rec -> rec.mappings == null }
+    
+    ch_merge_me       = ch_has_mappings.filter{ rec -> rec.mappings.size() > 1 }
+    ch_not_no_merge   = ch_has_mappings.filter{ rec -> rec.mappings.size() <= 1 }
 
     // ----------------------------------------------------------
     // MERGE MULTIPLE BAM FILES INTO A SINGLE BAM WHEN NECESSARY
     // ----------------------------------------------------------
-
-    ch_merge_me       = ch_input.filter{ rec -> rec.mappings.size() > 1 }
-    ch_leave_me_alone = ch_input.filter{ rec -> rec.mappings.size() <= 1 }
 
     ch_samtools_merge_input = ch_merge_me.map{ rec ->
         def bams = rec.mappings.collect { r -> r.bam }
@@ -63,9 +67,9 @@ workflow BRAKER {
     ch_merged = SAMTOOLS_MERGE( ch_samtools_merge_input )
 
     ch_merge_me       = ch_merge_me.join( ch_merged, by: 'id' )
-    ch_leave_me_alone = ch_leave_me_alone.map { rec -> rec + record(bam: null) }
+    ch_not_no_merge   = ch_not_no_merge.map { rec -> rec + record(bam: rec.mappings[0].bam) }
 
-    ch_input = ch_leave_me_alone.mix( ch_merge_me )
+    ch_input = ch_leave_me_alone.mix( ch_not_no_merge ).mix( ch_merge_me )
 
     // ----------------------------------------------------------
     // RUN BRAKER3
