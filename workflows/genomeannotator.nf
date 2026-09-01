@@ -169,8 +169,8 @@ workflow GENOMEANNOTATOR {
     ch_cleaned = CLEAN_ANNOTATION (
         ch_main,
         params.gff_fix_feature_locations_duplicated,
-        params.skip_gff_fix_overlapping_genes,
-        params.skip_gff_filter_incomplete_gene_models
+        params.gff_fix_overlapping_genes,
+        params.gff_filter_incomplete_gene_models
     )
     ch_main = ch_main.join( ch_cleaned, by: 'id' )
 
@@ -221,6 +221,7 @@ workflow GENOMEANNOTATOR {
 
     QUALITY_CONTROLS(
         ch_main,
+        params.skip_busco,
         params.skip_omark,
         params.omamer_db_url,
         params.omamer_db

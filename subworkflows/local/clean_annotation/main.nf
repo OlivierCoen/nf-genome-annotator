@@ -30,8 +30,8 @@ workflow CLEAN_ANNOTATION {
     take:
     ch_input: Channel<Input>
     gff_fix_feature_locations_duplicated: Boolean
-    skip_gff_fix_overlapping_genes: Boolean
-    skip_gff_filter_incomplete_gene_models: Boolean
+    gff_fix_overlapping_genes: Boolean
+    gff_filter_incomplete_gene_models: Boolean
 
     main:
 
@@ -62,13 +62,13 @@ workflow CLEAN_ANNOTATION {
         ch_input = ch_input.join( ch_out, by: 'id' )
     }
 
-    if ( !skip_gff_fix_overlapping_genes ) {
+    if ( gff_fix_overlapping_genes ) {
         ch_input = addGFFToIntermediateAnnotations( ch_input )
         ch_out = AGAT_FIX_OVERLAPPING_GENES( ch_input )
         ch_input = ch_input.join( ch_out, by: 'id' )
     }
 
-    if ( !skip_gff_filter_incomplete_gene_models ) {
+    if ( gff_filter_incomplete_gene_models ) {
         ch_input = addGFFToIntermediateAnnotations( ch_input )
         ch_out = AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS( ch_input )
         ch_input = ch_input.join( ch_out, by: 'id' )
