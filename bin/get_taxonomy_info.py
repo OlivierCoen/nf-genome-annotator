@@ -184,6 +184,7 @@ def get_taxonomy(
         parent_organism_name = parent_metadata["organism_name"].lower()
         
         if parent_organism_name in lineages_to_busco_datasets:
+            print(parent_organism_name)
             logger.info(f"Found lineage match for BUSCO: {parent_organism_name} -> {lineages_to_busco_datasets[parent_organism_name]}")
             busco_lineage = lineages_to_busco_datasets[parent_organism_name]
 
@@ -228,7 +229,7 @@ def parse_busco_datasets(file_path: Path) -> dict[str, str]:
         if match := re.findall(r"\w+_odb\d+\.?\d+?", line):
             dataset = match[0]
             lineage = dataset.split("_")[0]
-            busco_datasets[lineage] = lineage
+            busco_datasets[lineage] = dataset
         else:
             logger.warning(f"Could not parse line: {line}")
     return busco_datasets
@@ -284,7 +285,7 @@ if __name__ == "__main__":
 
     lineages_to_busco_datasets = parse_busco_datasets(args.busco_datasets)
     logger.info(f"Parsed {len(lineages_to_busco_datasets)} busco lineages")
-
+    
     lineages_to_orthodb_clades = parse_orthodb_clades(args.orthodb_clades)
     logger.info(f"Parsed {len(lineages_to_orthodb_clades)} orthodb clades")
 

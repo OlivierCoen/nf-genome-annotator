@@ -14,7 +14,7 @@ process BUSCO_BUSCO {
     input:
         record(
             id: String,
-            fasta: Iterable<Path>,
+            fasta: Path,
             lineage: String,
             download_path: Path
         )
@@ -79,13 +79,13 @@ process BUSCO_BUSCO {
         --out ${prefix}-busco \\
         --mode ${mode} \\
         --lineage_dataset $lineage \\
-        --download_path ${download_path} \\
+        --download_path $download_path \\
         ${args}
 
     # clean up
     rm -rf "\$INPUT_SEQS"
     rm -fr ${intermediate_files.join(' ')}
-
+    
     # Move files to avoid staging/publishing issues
     mv ${prefix}-busco/batch_summary.txt ${prefix}-busco.batch_summary.txt
 
