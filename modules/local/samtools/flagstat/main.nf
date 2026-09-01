@@ -16,13 +16,8 @@ process SAMTOOLS_FLAGSTAT {
             bai: Path
         )
 
-    output:
-        record(
-            id: id,
-            flagstat: file("*.flagstat")
-        )
-
     topic:
+        //tuple(id, file("*.flagstat")) >> 'samtools_flagstat_multiqc'
         tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:

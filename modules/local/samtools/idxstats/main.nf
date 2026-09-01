@@ -16,13 +16,8 @@ process SAMTOOLS_IDXSTATS {
             bai: Path
         )
 
-    output:
-        record(
-            id: id,
-            idxstats: file("*.idxstats")
-        )
-
     topic:
+        tuple(id, file("*.idxstats")) >> 'samtools_idxstat_multiqc'
         tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:

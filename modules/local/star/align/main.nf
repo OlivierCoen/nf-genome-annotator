@@ -28,7 +28,7 @@ process STAR_ALIGN {
         )
 
     topic:
-        tuple(id, file('*Log.final.out'))         >> 'multiqc'
+        //tuple(id, file('*Log.final.out'))         >> 'star_multiqc'
         tuple('star', id, file('*Log.final.out')) >> 'logs'
         tuple("${task.process}", 'star', eval('STAR --version | sed "s/STAR_//g"')) >> 'versions'
 

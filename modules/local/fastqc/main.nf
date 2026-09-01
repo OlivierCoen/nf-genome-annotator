@@ -16,8 +16,8 @@ process FASTQC {
         stageAs reads, '?/*'
 
     topic:
+        //tuple('fastqc', id, files("*.zip"))                                                         >> 'fastqc_multiqc'
         tuple('fastqc', id, files("*.html"))                                                        >> 'additional_results'
-        tuple('fastqc', id, files("*.zip"))                                                         >> 'multiqc'
         tuple("${task.process}", 'fastqc', eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')) >> 'versions'
 
     script:

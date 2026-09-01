@@ -231,7 +231,6 @@ workflow GENOMEANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     REPORTING(
-        ch_main,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,

@@ -51,11 +51,11 @@ workflow BAM_SORT_INDEX_STATS {
     // MAPPING STATS
     // ------------------------------------------------------------------------------------
 
-    SAMTOOLS_STATS( ch_bam )
+    //SAMTOOLS_STATS( ch_bam )
 
-    SAMTOOLS_FLAGSTAT( ch_bam )
+    //SAMTOOLS_FLAGSTAT( ch_bam )
 
-    SAMTOOLS_IDXSTATS( ch_bam )
+    //SAMTOOLS_IDXSTATS( ch_bam )
 
     // ------------------------------------------------------------------------------------
     // ASSOCIATE SORTED BAM TO ORIGINAL DATA

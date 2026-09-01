@@ -18,13 +18,8 @@ process SAMTOOLS_STATS {
             fai: Path
         )
 
-    output:
-        record(
-            id: id,
-            stats: file("*.stats")
-        )
-
     topic:
+        //tuple(id, file("*.stats")) >> 'samtools_stat_multiqc'
         tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:
