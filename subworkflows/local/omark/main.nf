@@ -1,9 +1,9 @@
 nextflow.enable.types = true
 
-include { OMARK_DOWNLOADDB                       } from '../../../modules/local/omark/download_db'
-include { OMARK_OMAMERSEARCH                     } from '../../../modules/local/omark/omamer_search'
-include { OMARK_EXTRACT_TRANSCRIPT_ISOFORMS      } from '../../../modules/local/omark/extract_transcript_isoforms'
-include { OMARK_OMARK                            } from '../../../modules/local/omark/omark'
+include { OMARK_DOWNLOADDB as DOWNLOADDB                                        } from '../../../modules/local/omark/download_db'
+include { OMARK_OMAMERSEARCH as OMAMERSEARCH                                    } from '../../../modules/local/omark/omamer_search'
+include { OMARK_EXTRACT_TRANSCRIPT_ISOFORMS as EXTRACT_TRANSCRIPT_ISOFORMS      } from '../../../modules/local/omark/extract_transcript_isoforms'
+include { OMARK_OMARK as RUN_OMARK                                              } from '../../../modules/local/omark/omark'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,19 +36,19 @@ workflow OMARK {
         //log.info "Using the provided OMAMER database: ${omamer_db}"
         ch_omark_db = channel.fromPath( omamer_db, checkExists: true )
     } else {
-        ch_omark_db = OMARK_DOWNLOADDB( omamer_db_url )
+        ch_omark_db = DOWNLOADDB( omamer_db_url )
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // PREPARE OMARK RUN
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    ch_omamer_search_out = OMARK_OMAMERSEARCH(
+    ch_omamer_search_out = OMAMERSEARCH(
         ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome) },
         ch_omark_db
     )
 
-    ch_transcript_isoforms = OMARK_EXTRACT_TRANSCRIPT_ISOFORMS( ch_input )
+    ch_transcript_isoforms = EXTRACT_TRANSCRIPT_ISOFORMS( ch_input )
 
     ch_input = ch_input
                 .join( ch_omamer_search_out, by: 'id' )
@@ -58,7 +58,7 @@ workflow OMARK {
     // OMARK
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_omark_out = OMARK_OMARK( 
+    ch_omark_out = RUN_OMARK( 
         ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome, omamer: rec.omamer, transcript_isoforms: rec.transcript_isoforms) },
         ch_omark_db
     )

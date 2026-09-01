@@ -63,14 +63,19 @@ workflow QUALITY_CONTROLS {
     // BUSCO ON ALL PROTEOMES
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    BUSCO_PROTEOME (
-        ch_busco_input.map { rec -> record(
+    ch_busco_proteome_input = ch_busco_input.flatMap { rec -> 
+        def all_proteomes = [rec.proteome] + rec.other_proteomes
+        all_proteomes.collect { proteome -> record( 
             id: rec.id, 
-            fasta: [rec.proteome] + rec.other_proteomes, 
+            fasta: proteome, 
             lineage: rec.busco_lineage, 
             download_path: rec.busco_download_path
-            ) 
-        },
+        ) }
+        
+    }
+
+    BUSCO_PROTEOME (
+        ch_busco_proteome_input,
         'proteins'
     )
 

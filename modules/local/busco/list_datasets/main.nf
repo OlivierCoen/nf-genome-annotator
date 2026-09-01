@@ -6,8 +6,8 @@ process BUSCO_LISTDATASETS {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/96/963bad66c10646cf0adb1967cc462ad04d02789ddbfae4fbb94182291dbddf8c/data'
-            : 'community.wave.seqera.io/library/busco:6.1.0--6d1f7006d91892b3'}"
+            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/6f/6f67e816ab2f7ccc9cb2d40874dea1e2e1a8e88ef6a44750b66c0ee55fe8de6c/data'
+            : 'community.wave.seqera.io/library/busco:6.1.0--0e40710a525d8d44'}"
 
     input:
         _s: List // only used to enable caching

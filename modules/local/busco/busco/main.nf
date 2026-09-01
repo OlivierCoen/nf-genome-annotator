@@ -1,13 +1,13 @@
 nextflow.enable.types = true
 
 process BUSCO_BUSCO {
-    tag "${id} :: ${lineage}"
+    
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/96/963bad66c10646cf0adb1967cc462ad04d02789ddbfae4fbb94182291dbddf8c/data'
-            : 'community.wave.seqera.io/library/busco:6.1.0--6d1f7006d91892b3'}"
+            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/6f/6f67e816ab2f7ccc9cb2d40874dea1e2e1a8e88ef6a44750b66c0ee55fe8de6c/data'
+            : 'community.wave.seqera.io/library/busco:6.1.0--0e40710a525d8d44'}"
     // Note: one test had to be disabled when switching to Busco 6.0.0, cf https://github.com/nf-core/modules/pull/8781/files
     // Try to restore it when upgrading Busco to a later version
 
@@ -78,15 +78,13 @@ process BUSCO_BUSCO {
         --in "\$INPUT_SEQS" \\
         --out ${prefix}-busco \\
         --mode ${mode} \\
+        --lineage_dataset $lineage \\
         --download_path ${download_path} \\
         ${args}
 
     # clean up
     rm -rf "\$INPUT_SEQS"
     rm -fr ${intermediate_files.join(' ')}
-    
-    # find and remove broken symlinks from the cleanup
-    find . -xtype l -delete
 
     # Move files to avoid staging/publishing issues
     mv ${prefix}-busco/batch_summary.txt ${prefix}-busco.batch_summary.txt

@@ -15,7 +15,7 @@ process OMARK_DOWNLOADDB {
         db_url: String
 
     output:
-        file("omamer_db/", type: 'dir')
+        file("omamer_db/*")
 
     topic:
         tuple("${task.process}", 'aria2', eval("aria2c -v | head -1 | sed 's/aria2 version //g'")) >> 'versions'

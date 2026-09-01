@@ -11,7 +11,6 @@ include { HELIXER_FETCHMODEL as FETCH_MODEL       } from '../../../modules/local
 
 record Input {
     id: String
-    species: String
     helixer_lineage: String
     fasta: Path
 }
@@ -55,8 +54,7 @@ workflow HELIXER {
                             id: rec.id,
                             fasta: rec.fasta,
                             lineage: rec.helixer_lineage,
-                            models_path: rec.helixer_models_path,
-                            species: rec.species
+                            models_path: rec.helixer_models_path
                         ) }
 
     ch_helixer_out = RUN( ch_helixer_input )

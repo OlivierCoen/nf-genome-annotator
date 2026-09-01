@@ -14,7 +14,6 @@ process HELIXER_HELIXER {
     input:
         record(
             id: String,
-            species: String,
             fasta: Path,
             lineage: String,
             models_path: Path
@@ -39,7 +38,7 @@ process HELIXER_HELIXER {
     }
     // Warning if not using GPUs
     if ( !workflow.profile.contains('gpu') ) {
-        log.warn("Running Helixer without GPU(s) may take a long time")
+        log.warn("Running Helixer without GPU(s) may take a long time. Running with GPU(s) can be activated by adding 'gpu' to profiles.")
     }
     """
     mkdir tmp
@@ -48,12 +47,17 @@ process HELIXER_HELIXER {
         --fasta-path $fasta \\
         --lineage $lineage \\
         --downloaded-model-path $models_path \\
-        --species "${species}" \\
-        --gff-output-path ${prefix}.gff3 \\
+        --gff-output-path ${prefix}.uncleaned.gff3 \\
         --temporary-dir tmp \\
         --deterministic \\
         ${args}
-    
+
+    # all gene and transcript names start with '_X' because no species name is provided here
+    clean_helixer_gene_ids.py \\
+        --gff ${prefix}.uncleaned.gff3 \\
+        --out ${prefix}.gff3
+
+    rm ${prefix}.uncleaned.gff3
     """
 
 }

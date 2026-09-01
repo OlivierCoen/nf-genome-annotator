@@ -53,14 +53,16 @@ def parse_gff3(file: Path) -> pl.LazyFrame:
 
 
 def main():
+
+    logger.info("Extracting transcript isoforms per gene")
     
     args = parse_args()
 
     annot_lf = parse_gff3(args.annot_file)
-
+  
     (
     annot_lf
-        .filter(pl.col("feature") == "transcript")
+        .filter(pl.col("feature").is_in(["transcript", "mRNA"]))
         .with_columns(
             pl.col("attribute").str.extract(r"ID=(.+?)(?:;|$)", 1).alias("transcript_id"),
             pl.col("attribute").str.extract(r"Parent=(.+?)(?:;|$)", 1).alias("gene_id")

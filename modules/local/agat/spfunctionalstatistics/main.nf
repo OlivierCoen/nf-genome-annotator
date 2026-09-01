@@ -15,13 +15,13 @@ process AGAT_SPFUNCTIONALSTATISTICS {
             gff: Path, 
             genome_size: Integer?
         )
-
+    /*
     output:
         record(
             id: id,
             gff_stats: file("*.yaml")
         )
-
+        */
     topic:
         tuple(id, files("*_gff_stats.csv", optional: true)) >> 'multiqc'
         tuple("${task.process}", 'agat', eval("agat_sp_functional_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
