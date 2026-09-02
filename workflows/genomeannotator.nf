@@ -136,7 +136,7 @@ workflow GENOMEANNOTATOR {
         ch_structural_annotation = STRUCTURAL_ANNOTATION (
             ch_main,
             params.structural_annotator,
-            params.mmseqs_dbtaxo,
+            params.mmseqs_db,
             params.skip_orthodb_download,
             params.skip_mmseqs_db_download,
             params.min_prot_db_seq_length

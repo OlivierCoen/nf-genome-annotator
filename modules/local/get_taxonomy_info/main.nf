@@ -25,9 +25,9 @@ process GET_TAXONOMY_INFO {
         )
 
     topic:
-        tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )               >> 'versions1'
-        tuple( "${task.process}", 'httpx',  eval('python3 -c "import httpx; print(httpx.__version__)"') ) >> 'versions1'
-        tuple( "${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'") )              >> 'versions1'
+        tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") )               >> 'versions'
+        tuple( "${task.process}", 'httpx',  eval('python3 -c "import httpx; print(httpx.__version__)"') ) >> 'versions'
+        tuple( "${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'") )              >> 'versions'
 
     script:
     def busco_datasets = busco_datasets_list[0]

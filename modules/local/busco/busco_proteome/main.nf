@@ -1,6 +1,9 @@
 nextflow.enable.types = true
 
-process BUSCO_BUSCO {
+// Note: merge with other processes when bug is fixed:
+// https://github.com/nextflow-io/nextflow/issues/7573 
+
+process BUSCO_PROTEOME {
     
     label 'process_medium'
 
@@ -24,7 +27,7 @@ process BUSCO_BUSCO {
         stageAs fasta, 'tmp_input/*'
 
     topic:
-        //tuple(id, files("short_summaries/*.txt"))                                      >> 'busco_multiqc'
+        tuple(id, files("short_summaries/*.txt"))                                      >> 'busco_multiqc'
         tuple('busco', id, file("*-busco.batch_summary.txt"))                          >> 'additional_results'
         tuple('busco', id, file('*-busco.log'))                                        >> 'logs'
         tuple("${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"')) >> 'versions'

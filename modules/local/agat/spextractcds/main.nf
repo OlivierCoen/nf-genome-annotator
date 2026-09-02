@@ -1,6 +1,9 @@
 nextflow.enable.types = true
 
-process AGAT_SPEXTRACTSEQUENCES {
+// Note: merge with other processes when bug is fixed:
+// https://github.com/nextflow-io/nextflow/issues/7573 
+
+process EXTRACT_CDS {
 
     tag "${id} :: ${gff.baseName}"
     label 'process_single'

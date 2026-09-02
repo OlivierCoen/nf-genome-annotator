@@ -25,9 +25,9 @@ TRANSCRIPT_OUTFILE_SUFFIX = "transcript_gff_stats.csv"
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Clean GTF gene IDs")
+    parser = argparse.ArgumentParser(description="Parse structural annotation statistics")
     parser.add_argument(
-        "--gff", dest="gff_file", type=Path, required=True, help="Input GTF file"
+        "--stat", dest="stat_file", type=Path, required=True, help="Statistics file"
     )
     parser.add_argument("--prefix", type=str, required=True, help="Outfile name prefix")
     return parser.parse_args()
@@ -35,9 +35,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    logger.info(f"Parsing GTF file: {args.gff_file}")
+    logger.info(f"Parsing GTF file: {args.stat_file}")
 
-    with open(args.gff_file, "r") as fin:
+    with open(args.stat_file, "r") as fin:
         gff_data = yaml.safe_load(fin)
 
         for feature, suffix in zip(

@@ -16,12 +16,6 @@ process AGAT_SPSTATISTICS {
             genome_size: Integer?
         )
 
-    output:
-        record(
-            id: id,
-            gff_stats: file("*.yaml")
-        )
-
     topic:
         tuple(id, files("*_gff_stats.csv")) >> 'agat_structural_annotation_stats_multiqc'
         tuple("${task.process}", 'agat', eval("agat_sp_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
@@ -40,7 +34,7 @@ process AGAT_SPSTATISTICS {
 
     # parse yaml file
     parse_gff_stat_file.py \\
-        --gff ${prefix}.gtf_stats.txt.yaml \\
+        --stat ${prefix}.gtf_stats.txt.yaml \\
         --prefix ${prefix}
     """
 }

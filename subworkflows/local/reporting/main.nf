@@ -30,18 +30,16 @@ workflow REPORTING {
 
     // Collate and save software versions
     //
-    def topic_versions = channel.topic("versions")
-        
 
-    def topic_versions_string = topic_versions
+    def topic_versions_string = channel.topic("versions")
                                 .map { process, tool, version ->
                                     [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
                                 }
-                                .groupTuple(by:0)
+                                .groupTuple()
                                 .map { process, tool_versions ->
                                     tool_versions.unique().sort()
                                     "${process}:\n${tool_versions.join('\n')}"
-                                }.view{ v-> "1 $v"}
+                                }
 
     ch_collated_versions = topic_versions_string
                             .collectFile(
@@ -64,7 +62,8 @@ workflow REPORTING {
 
     ch_multiqc_config_list = ch_multiqc_config
                                 .mix( ch_multiqc_custom_config )
-                                .map { files -> files.toSorted() }
+                                .collect()
+                                .map { file_list -> file_list.toSorted() }
 
     ch_multiqc_logo          = multiqc_logo ?
         channel.fromPath(multiqc_logo, checkIfExists: true) :
@@ -99,12 +98,12 @@ workflow REPORTING {
                         .mix( channel.topic('samtools_idxstat_multiqc') )
                         .mix( channel.topic('samtools_flagstat_multiqc') )
                         .mix( channel.topic('agat_structural_annotation_stats_multiqc') )
-                        .mix( channel.topic('agat_functional_annotation_stats_multiqc') )
+                        .mix( channel.topic('agat_functional_annotation_stats_multiqc').flatMap{ id, files -> files.collect{ file -> [id, file] } } )
                         .mix( channel.topic('busco_multiqc') )
+                        .view()
 
     ch_multiqc_file_list = ch_multiqc_files
                             .groupTuple()
-                            .view{ v -> "grouped $v"}
                             .combine( ch_collated_versions )
                             .combine(
                                 ch_methods_description.collectFile(
@@ -112,9 +111,13 @@ workflow REPORTING {
                                     sort: true
                                 )
                             )
-                            .map { id, file_list -> 
-                                println file_list
-                                [ id, file_list.flatten().toSorted() ] } // flatten and sort
+                            .map { data, version_file, description_file -> 
+                                def id = data[0]
+                                def meta = [id: id]
+                                def file_list = data[1]
+                                def data_files = file_list + [version_file, description_file]
+                                [ meta, data_files.flatten().toSorted() ] 
+                            } // flatten and sort for reproducibility
 
     // ------------------------------------------------------------------------------------
     // MULTIQC
@@ -123,11 +126,14 @@ workflow REPORTING {
     ch_multiqc_input = ch_multiqc_file_list
                         .combine( ch_multiqc_config_list )
                         .combine( ch_multiqc_logo )
-                        .map { meta, files, configs, logo -> [ meta, files, configs, logo , [], [] ] }
-                        .view { v -> "multiqc $v"}
+                        .map { data, configs, logo -> 
+                            def meta = data[0]
+                            def data_files = data[1]
+                            [meta, data_files, configs, logo, [], []] 
+                        }
                         
     MULTIQC ( ch_multiqc_input )
     
     emit:
-    report = MULTIQC.out.report
+    report = MULTIQC.out.report.map{ meta, report -> record(id: meta.id, multiqc_report: report) }
 }
