@@ -3,6 +3,5 @@
 channels:
   - conda-forge
   - bioconda
-
 dependencies:
-  - bioconda::earlgrey=6.3.3
+  - bioconda::earlgrey=7.3.1

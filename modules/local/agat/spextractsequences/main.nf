@@ -1,9 +1,6 @@
-nextflow.enable.types = true
+nextflow.enable.types = true 
 
-// Note: merge with other processes when bug is fixed:
-// https://github.com/nextflow-io/nextflow/issues/7573 
-
-process EXTRACT_CDS {
+process AGAT_SPEXTRACTSEQUENCES {
 
     tag "${id} :: ${gff.baseName}"
     label 'process_single'
@@ -30,8 +27,8 @@ process EXTRACT_CDS {
             extracted_fasta: file("*.{faa,fna}")
         )
 
-    topic:
-        tuple("${task.process}", 'agat', eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
+    //topic:
+    //    tuple("${task.process}", 'agat', eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
     def args        = task.ext.args   ?: ''

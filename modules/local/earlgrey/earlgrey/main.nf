@@ -1,32 +1,46 @@
+nextflow.enable.types = true
+
 process EARLGREY_EARLGREY {
-    tag "$meta.id"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/16/16c8c9a119c6aaf7d52786859fe29f57480848c13a5a34d3127e392c1b366570/data':
-        'community.wave.seqera.io/library/earlgrey:6.3.3--4a2200a6b48c86ec' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/f7/f798eb5fb7d14db38bde92881b8c76e6843f22b88e61d7b2224be2b7a3fb60a4/data':
+        'community.wave.seqera.io/library/earlgrey:7.3.1--739efdc54cd5d7d9' }"
 
     input:
-    tuple val(meta), path(fasta), path(lib)
+        record(
+            id: String,
+            fasta: Path,
+            dfam_db: Path
+        )
 
     output:
-    tuple val(meta), path("${prefix}.masked"),                                                                        emit: masked
-    tuple val("${task.process}"), val('earlgrey'), eval("earlGrey | grep version | sed 's/earlGrey version //g'"),    topic: versions
+        record(
+            id: id,
+            softmasked: file("${prefix}.masked")
+        )
+  
+    topic:
+        tuple("${task.process}", 'earlgrey', eval("earlGrey | grep version | sed 's/earlGrey version //g'")) >> 'versions'
 
     script:
     def args    = task.ext.args     ?: ''
-    def prefix  = task.ext.prefix   ?: "${meta.id}"
+    def prefix  = task.ext.prefix   ?: "$id"
     """
-
+    # configuring RepeatMasker
+    BIN_DIR=\$(dirname \$(which RepeatMasker))
+    REPEATMASKER_SHARE_DIR=\$(dirname \$BIN_DIR)/share/RepeatMasker
+	perl \${REPEATMASKER_SHARE_DIR}/configure -libdir $dfam_db
 
     earlGrey \\
-        $args \\
         -g $fasta \\
         -o results \\
         -s ${prefix} \\
-        -t 16 \\
-        -d
+        -t ${task.cpus} \\
+        -d \\
+        ${args}
     """
 
 }

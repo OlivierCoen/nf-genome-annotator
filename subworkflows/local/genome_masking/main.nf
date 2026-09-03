@@ -6,8 +6,8 @@ include { REPEATMODELER_BUILDDATABASE as BUILDDATABASE              } from '../.
 include { REPEATMODELER_REPEATMODELER as REPEATMODELER              } from '../../../modules/local/repeatmodeler/repeatmodeler'
 include { REPEATMASKER_REPEATMASKER   as REPEATMASKER               } from '../../../modules/local/repeatmasker/repeatmasker'
 
-//include { EARLGREY_DOWNLOADDB                                       } from '../../../modules/local/earlgrey/download_db'
-//include { EARLGREY_EARLGREY as EARLGREY                             } from '../../../modules/local/earlgrey/earlgrey'
+include { FAMDB_DOWNLOAD_DFAM                                        } from '../../../modules/local/famdb/download_db'
+include { EARLGREY_EARLGREY as EARLGREY                             } from '../../../modules/local/earlgrey/earlgrey'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -17,6 +17,7 @@ include { REPEATMASKER_REPEATMASKER   as REPEATMASKER               } from '../.
 
 record Genome {
     id: String
+    taxid: Integer
     fasta: Path
 }
 
@@ -25,6 +26,7 @@ workflow GENOME_MASKING {
     take:
     ch_input: Channel<Genome>
     genome_masker: String
+    dfam_db: String
 
     main:
 
@@ -52,9 +54,14 @@ workflow GENOME_MASKING {
 
     } else if ( genome_masker == "earlgrey" ) {
 
-        //EARLGREY_DOWNLOADDB()
+        // downloading dfam db components related to the ptovided taxid
+        ch_dfam_db = FAMDB_DOWNLOADDFAM(
+            ch_input.map { rec -> rec.taxid }.unique()
+        )
 
-        //EARLGREY
+        ch_input = ch_input.join( ch_dfam_db, by: 'taxid' )
+
+        EARLGREY
 
 
     }
