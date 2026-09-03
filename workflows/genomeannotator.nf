@@ -75,7 +75,8 @@ workflow GENOMEANNOTATOR {
         if ( !params.skip_masking ) {
             ch_masked = GENOME_MASKING (
                 ch_main,
-                params.genome_masker
+                params.genome_masker,
+                params.dfam_db
             )
             ch_main = ch_main.join( ch_masked, by: 'id' )
         }

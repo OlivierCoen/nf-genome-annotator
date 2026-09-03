@@ -409,10 +409,10 @@ def process_one(base_url, out_dir, prefix, component, partition, ncpus: int, dry
             os.remove(gz)
             return False
         print(f"    MD5 OK: {gz_name}")
-
+        
     # Decompress
     print(f"    Decompressing {gz_name} ...", end=" ", flush=True)
-    _decompress(gz_name)
+    _decompress(gz)
 
     return True
 
@@ -490,6 +490,9 @@ def main():
     )
     ap.add_argument("--ncpus", required=True, type=int, help='Number of CPUs to use for downloading.')
     args = ap.parse_args()
+
+    if not args.fetch_root and not args.famdb_check_output_file:
+        raise RuntimeError("Either --fetch-root or --famdb-check-output must be specified")
 
     base_url = args.url.rstrip("/") + "/"
     print("#")

@@ -19,7 +19,7 @@ process EARLGREY_EARLGREY {
     output:
         record(
             id: id,
-            softmasked: file("${prefix}.masked")
+            softmasked: file("*.masked")
         )
   
     topic:
@@ -32,7 +32,9 @@ process EARLGREY_EARLGREY {
     # configuring RepeatMasker
     BIN_DIR=\$(dirname \$(which RepeatMasker))
     REPEATMASKER_SHARE_DIR=\$(dirname \$BIN_DIR)/share/RepeatMasker
-	perl \${REPEATMASKER_SHARE_DIR}/configure -libdir $dfam_db
+    cd \$REPEATMASKER_SHARE_DIR
+    perl ./configure \\
+        -libdir \${PWD}/${dfam_db}
 
     earlGrey \\
         -g $fasta \\

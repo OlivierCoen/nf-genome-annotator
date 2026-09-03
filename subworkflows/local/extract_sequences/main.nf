@@ -1,8 +1,8 @@
 nextflow.enable.types = true
 
-include { EXTRACT_PROTEOME             } from '../../../modules/local/agat/spextractproteome'
-include { EXTRACT_OTHER_PROTEOMES      } from '../../../modules/local/agat/spextractotherproteomes'
-include { EXTRACT_CDS                  } from '../../../modules/local/agat/spextractcds'
+include { AGAT_SPEXTRACTSEQUENCES as EXTRACT_PROTEOME             } from '../../../modules/local/agat/spextractsequences'
+include { AGAT_SPEXTRACTSEQUENCES as EXTRACT_OTHER_PROTEOMES      } from '../../../modules/local/agat/spextractsequences'
+include { AGAT_SPEXTRACTSEQUENCES as EXTRACT_CDS                  } from '../../../modules/local/agat/spextractsequences'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

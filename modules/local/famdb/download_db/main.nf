@@ -2,15 +2,16 @@ nextflow.enable.types = true
 
 process FAMDB_DOWNLOAD_DFAM {
 
+    tag "$taxid"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/67/6755e2639371d0a6846d9a85aff29825b665a005f46a750d92bc81abc1ef64ef/data':
-        'community.wave.seqera.io/library/aria2_pigz_python:670e1fc838fc6549' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/d5/d541c440f6e2784d52642407ef15b3b7fa16035473403a026caa9e4c8536fc1d/data':
+        'community.wave.seqera.io/library/aria2_pigz_python_h5py:4019bf13e8c1b4ad' }"
 
     input:
-        taxid: Integer
+        taxid: String
 
     output:
         record(
@@ -32,14 +33,14 @@ process FAMDB_DOWNLOAD_DFAM {
     
     # fetching root file
     download_dfam_4.0.py \\
-        --components 1 \\
+        --fetch-root \\
         --output-dir dfam \\
         --ncpus ${task.cpus}
 
     famdb.py \\
         -i dfam \\
         check $taxid \\
-        > famdb_check.out
+        | tee famdb_check.out
 
     download_dfam_4.0.py \\
         --famdb-check-output famdb_check.out \\
