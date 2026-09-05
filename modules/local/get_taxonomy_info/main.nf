@@ -19,6 +19,7 @@ process GET_TAXONOMY_INFO {
         taxonomy = record(
             species: species,
             taxid: env("TAXID"),
+            taxid_lineage: env("TAXID_LINEAGE"),
             busco_lineage: env("BUSCO_LINEAGE") == 'None' ? null : env("BUSCO_LINEAGE"),
             orthodb_clade: env("ORTHODB_CLADE") == 'None' ? null : env("ORTHODB_CLADE"),
             helixer_lineage: env("HELIXER_LINEAGE") == 'None' ? null: env("HELIXER_LINEAGE")
@@ -50,10 +51,11 @@ process GET_TAXONOMY_INFO {
         --busco-datasets busco_datasets.cleaned.txt \\
         --orthodb-clades ${orthodb_clades_file}
 
-    TAXID=\$(cat found_taxid.txt)
-    BUSCO_LINEAGE=\$(cat found_busco_lineage.txt)
-    ORTHODB_CLADE=\$(cat found_orthodb_clade.txt)
-    HELIXER_LINEAGE=\$(cat found_helixer_lineage.txt)
+    TAXID=\$(cat taxid.txt)
+    TAXID_LINEAGE=\$(cat taxid_lineage.txt)
+    BUSCO_LINEAGE=\$(cat busco_lineage.txt)
+    ORTHODB_CLADE=\$(cat orthodb_clade.txt)
+    HELIXER_LINEAGE=\$(cat helixer_lineage.txt)
     """
 
 }

@@ -11,8 +11,11 @@ process FAMDB_DOWNLOAD_DFAM {
         'community.wave.seqera.io/library/aria2_pigz_python_h5py:4019bf13e8c1b4ad' }"
 
     input:
-        taxid: String
-
+        record(
+            taxid: String,
+            taxid_lineage: String
+        )
+        
     output:
         record(
             taxid: taxid,
@@ -27,21 +30,51 @@ process FAMDB_DOWNLOAD_DFAM {
         tuple("${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'"))            >> 'versions'
 
     script:
-    //def store_dir = "${workflow.projectDir}/.nextflow/cache/dfam/${taxid}"
     """
     mkdir dfam
+
+    ##################################################
+    # DOWNLOADING DFAM ROOT FILE
+    ##################################################
     
-    # fetching root file
     download_dfam_4.0.py \\
         --fetch-root \\
         --output-dir dfam \\
         --ncpus ${task.cpus}
 
-    famdb.py \\
-        -i dfam \\
-        check $taxid \\
-        | tee famdb_check.out
+    ##################################################
+    # FETCHING DATA TO DOWNLOAD FOR THE SPECIES OF INTEREST
+    ##################################################
 
+    # looping through the whole lineage of taxids, starting from the species
+    # as soon as we found something in the Dfam db for this node, we break
+    
+    IFS=',' read -ra taxids <<< "$taxid_lineage"
+    
+    for lineage_txid in "\${taxids[@]}"; do
+
+        echo "Searching data in Dfam database for taxid \$lineage_txid"
+        
+        famdb.py \\
+            -i dfam \\
+            check "\$lineage_txid" \\
+            > famdb_check.out 2>&1
+    
+        if grep -q "No species found for search term" famdb_check.out; then
+            echo "No data found for taxid \$lineage_txid"
+            rm famdb_check.out
+            continue
+        else
+            echo "Found data for taxid \$lineage_txid"
+            cat famdb_check.out
+            break
+        fi
+    done
+
+    ##################################################
+    # DOWNLOADING DATA FOR THE SPECIES OF INTEREST
+    ##################################################
+    
     download_dfam_4.0.py \\
         --famdb-check-output famdb_check.out \\
         --output-dir dfam \\

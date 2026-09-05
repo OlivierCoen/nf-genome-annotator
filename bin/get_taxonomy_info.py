@@ -28,10 +28,11 @@ NCBI_TAXONOMY_API_URL = "https://api.ncbi.nlm.nih.gov/datasets/v2/taxonomy"
 NCBI_API_HEADERS = {"accept": "application/json", "content-type": "application/json"}
 STOP_RETRY_AFTER_DELAY = 120
 
-TAXID_OUTFILE = "found_taxid.txt"
-BUSCO_LINEAGE_OUTFILE = "found_busco_lineage.txt"
-ORTHODB_CLADES_OUTFILE = "found_orthodb_clade.txt"
-HELIXER_LINEAGE_OUTFILE = "found_helixer_lineage.txt"
+TAXID_OUTFILE = "taxid.txt"
+TAXID_LINEAGE_OUTFILE = "taxid_lineage.txt"
+BUSCO_LINEAGE_OUTFILE = "busco_lineage.txt"
+ORTHODB_CLADES_OUTFILE = "orthodb_clade.txt"
+HELIXER_LINEAGE_OUTFILE = "helixer_lineage.txt"
 
 HELIXER_LINEAGES = {
     "land_plant": {
@@ -61,7 +62,8 @@ HELIXER_LINEAGES = {
 @dataclass
 class Taxonomy:
     species: str
-    taxid: str | int
+    taxid: int
+    taxid_lineage: list[int]
     common_name: str
     lineage: list[int]
     busco_lineage: str | None
@@ -184,7 +186,6 @@ def get_taxonomy(
         parent_organism_name = parent_metadata["organism_name"].lower()
         
         if parent_organism_name in lineages_to_busco_datasets:
-            print(parent_organism_name)
             logger.info(f"Found lineage match for BUSCO: {parent_organism_name} -> {lineages_to_busco_datasets[parent_organism_name]}")
             busco_lineage = lineages_to_busco_datasets[parent_organism_name]
 
@@ -206,9 +207,14 @@ def get_taxonomy(
 
     common_name = metadata.get("common_name", metadata["organism_name"])
 
+    taxid = int(metadata["tax_id"])
+     # from the leaf to the root
+    taxid_lineage = [taxid] + [int(taxid) for taxid in lineage[::-1]]
+
     return Taxonomy(
         species=metadata["organism_name"],
-        taxid=int(metadata["tax_id"]),
+        taxid=taxid,
+        taxid_lineage=taxid_lineage,
         common_name=common_name,
         lineage=lineage,
         busco_lineage=busco_lineage,
@@ -299,6 +305,9 @@ if __name__ == "__main__":
 
     with open(TAXID_OUTFILE, "w") as fout:
         fout.write(str(taxonomy.taxid))
+
+    with open(TAXID_LINEAGE_OUTFILE, "w") as fout:
+        fout.write(','.join([str(taxid) for taxid in taxonomy.taxid_lineage]))
 
     with open(BUSCO_LINEAGE_OUTFILE, "w") as fout:
         fout.write(str(taxonomy.busco_lineage))
