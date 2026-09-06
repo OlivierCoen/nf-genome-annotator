@@ -17,7 +17,7 @@ include { EARLGREY_EARLGREY as EARLGREY                             } from '../.
 
 record Genome {
     id: String
-    taxid: Integer
+    taxid_lineage: Integer
     fasta: Path
 }
 
@@ -66,7 +66,7 @@ workflow GENOME_MASKING {
         
             // downloading dfam db components related to the ptovided taxid
             ch_dfam_db = FAMDB_DOWNLOAD_DFAM(
-                ch_input.map { rec -> rec.taxid }.unique()
+                ch_input.map { rec -> record(taxid: rec.taxid, taxid_lineage: rec.taxid_lineage) }.unique()
             )
 
             ch_input = ch_input.join( ch_dfam_db, by: 'taxid' )

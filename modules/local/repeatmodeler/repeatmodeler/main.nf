@@ -37,7 +37,7 @@ process REPEATMODELER_REPEATMODELER {
     def db_name = file(db[0]).getBaseName()
     def args_cli = args ? "--args ${args}" : ""
     """
-    run_repeatmodeler.sh \\
+    run_RepeatModeler.sh \\
         --database ${db_name} \\
         --threads ${task.cpus} \\
         --prefix ${prefix} \\
