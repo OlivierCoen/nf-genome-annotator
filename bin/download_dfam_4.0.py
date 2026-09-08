@@ -257,7 +257,6 @@ def _md5sum(path):
 
 
 def _run(cmd: list[str], shell: bool = False):
-    str_cmd = " ".join(cmd)
     subprocess.run(cmd, shell=shell, check=True)
 
 

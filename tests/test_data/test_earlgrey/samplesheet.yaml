@@ -1,8 +1,8 @@
-- sample: arabidopsis_X0
-  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  species: 3702
+#- sample: arabidopsis_X0
+#  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+#  species: 3702
 
-- sample: anasatum_scaff_25_head
-  genome: /home/olivier/repositories/nf-genome-annotator/tests/test_data/test_earlgrey/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
+- sample: anasatum_scaff_25_500000_700000
+  genome: tests/test_data/test_earlgrey/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
   species: 96803
 

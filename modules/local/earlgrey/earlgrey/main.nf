@@ -1,27 +1,15 @@
 nextflow.enable.types = true
 
-def getContainerOptions(taxid) {
-    def mapping = "${workflow.projectDir}/.nextflow/cache/dfam/${taxid}:/opt/conda/share/famdb-3.0.0/Libraries/"
-    if ( workflow.containerEngine in ['singularity', 'apptainer'] ) { 
-        return "-B $mapping"
-    } else {
-        return "-v $mapping"
-    }
-}
-
 process EARLGREY_EARLGREY {
     tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    //container "docker.io/tobybaril/earlgrey:latest-nodfam" // TODO: add specific version when available
 
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/2d/2dc6599afbe7feb0cf30bdaf768a492c565cfa1f141042ba222d38a38ea8b340/data':
-        '' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/1e/1e39da20f65a43bc87cf59e52c1946929e616dcb07085201aca2cc5fa67ab91a/data':
+        'community.wave.seqera.io/library/earlgrey_findutils_gzip_h5py_pruned:0e1759983126c6d4' }"
 
-
-    //containerOptions "${getContainerOptions(taxid)}"
     
     input:
         record(
@@ -38,6 +26,10 @@ process EARLGREY_EARLGREY {
         )
   
     topic:
+        tuple('earlgrey', id, file("results/*_EarlGrey/*_Database/*-families.fa",  optional: true)) >> 'additional_results'
+        tuple('earlgrey', id, file("results/*_EarlGrey/*_Database/*-families.stk", optional: true)) >> 'additional_results'
+        tuple('earlgrey', id, file("results/*_EarlGrey/*_Database/*-rmod.log",     optional: true)) >> 'additional_results'
+        tuple('earlgrey', id, files("results/*_EarlGrey/*_summaryFiles/*",         optional: true)) >> 'additional_results'
         tuple("${task.process}", 'earlgrey', eval("earlGrey | grep version | sed 's/earlGrey version //g'")) >> 'versions'
 
     script:
@@ -47,39 +39,66 @@ process EARLGREY_EARLGREY {
     def fasta_name    = is_compressed                   ? fasta.getBaseName() : fasta.name
     """
     ################################################
-    # CONFIGURATION OF REPEATMASKER.....
+    # CONFIGURATION OF REPEATMODELER / REPEATMASKER.....
     ################################################
-    # because RepeatMasker is old-fashioned and overly complicated to configure, we need to copy the script and its associated scripts to a writable location...
+    # because RepeatMasker / RepeatMasker are really old-fashioned and overly complicated to configure
+    # we need to copy the scripts and their helper scripts to a writable location...
     # then and only then we can configure it and eventually use it...
-    
-    # 1 - Copying
-    mkdir -p repeatmasker/bin repeatmasker/share/
-    BIN_DIR=\$(dirname \$(which RepeatMasker))
-    SHARE_DIR=\$(dirname \$BIN_DIR)/share
-    REPEATMASKER_SHARE_DIR=\${SHARE_DIR}/RepeatMasker
-    FAMDB_SHARE_DIR=\$(find \$SHARE_DIR -maxdepth 1 -type d -name "famdb-*" 2>/dev/null | sort -V | tail -n 1)
-    
-    cp \${BIN_DIR}/RepeatMasker repeatmasker/bin
-    cp -r \$REPEATMASKER_SHARE_DIR repeatmasker/share/
-    cp -r \$FAMDB_SHARE_DIR repeatmasker/share/
 
-    # 2 - Symlink to the Dfam db
-    FAMDB_DIRNAME=\$(basename \$FAMDB_SHARE_DIR)
-    mkdir -p repeatmasker/share/\${FAMDB_DIRNAME}/Libraries
-    cp -P ${dfam_db} repeatmasker/share/\${FAMDB_DIRNAME}/Libraries/famdb
+    WORKDIR=\$PWD
+    
+    # 1 - Copying binaries and software helper scripts / configurations
+    BIN_DIR=\$(realpath "\${WORKDIR}/bin")
+    SHARE_DIR=\$(realpath "\${WORKDIR}/share")
+    mkdir \$BIN_DIR \$SHARE_DIR
+    
+    CONDA_BIN_DIR=\$(dirname \$(which RepeatMasker))
+    CONDA_SHARE_DIR=\$(dirname \$CONDA_BIN_DIR)/share
+   
+    REPEATMODELER_CONDA_SHARE_DIR=\${CONDA_SHARE_DIR}/RepeatModeler
+    REPEATMASKER_CONDA_SHARE_DIR=\${CONDA_SHARE_DIR}/RepeatMasker
+    FAMDB_CONDA_SHARE_DIR=\$(find \$CONDA_SHARE_DIR -maxdepth 1 -type d -name "famdb-*" 2>/dev/null | sort -V | tail -n 1)
+    FAMDB_DIRNAME=\$(basename \$FAMDB_CONDA_SHARE_DIR)
 
-    # 3 - Configuring RepeatMasker
-    cd repeatmasker/share/RepeatMasker
+    # copying RepeatModeler / RepeatMasker / FamDB share directories (containing in particular the binaries) to the share directory
+    cp -r \$REPEATMODELER_CONDA_SHARE_DIR \${SHARE_DIR}/
+    cp -r \$REPEATMASKER_CONDA_SHARE_DIR \${SHARE_DIR}/
+    cp -r \$FAMDB_CONDA_SHARE_DIR \${SHARE_DIR}/
+
+    # 2 - Create newlinks to the real binaries in the new bin directory
+    ln -s \${SHARE_DIR}/RepeatModeler/RepeatModeler \${BIN_DIR}/RepeatModeler
+    ln -s \${SHARE_DIR}/RepeatModeler/BuildDatabase \${BIN_DIR}/BuildDatabase
+    ln -s \${SHARE_DIR}/RepeatMasker/RepeatMasker \${BIN_DIR}/RepeatMasker
+    
+    # 3 - Symlink to the Dfam db
+    mkdir -p \${SHARE_DIR}/RepeatMasker/Libraries
+    cp -P ${dfam_db} \${SHARE_DIR}/RepeatMasker/Libraries/famdb
+
+    # 4 - Setting path to FamDB in famdb.conf (for RepeatClassifier)
+    sed -i "s|# FAMDB_DATA_DIR = /path/to/famdb/directory|FAMDB_DATA_DIR=\${SHARE_DIR}/RepeatMasker/Libraries/famdb|g" \${SHARE_DIR}/\${FAMDB_DIRNAME}/famdb.conf
+
+    # 5 - Configuring RepeatMasker
+    cd \${SHARE_DIR}/RepeatMasker
     echo 'Y' | perl ./configure \\
-        -trf_prgm \${BIN_DIR}/trf \\
-        -rmblast_dir \$BIN_DIR \\
-        -hmmer_dir \$BIN_DIR \\
+        -famdb_dir \${SHARE_DIR}/\${FAMDB_DIRNAME} \\
+        -trf_prgm \${CONDA_BIN_DIR}/trf \\
+        -rmblast_dir \$CONDA_BIN_DIR \\
+        -hmmer_dir \$CONDA_BIN_DIR \\
         -default_search_engine rmblast
-    cd ..; cd ..; cd ..
+    cd \$WORKDIR
 
-    # 4 - Changing PATH
-    export PATH=\$PWD/repeatmasker/bin:\$PATH
+    # 6 - Configuring RepeatModeler
+    cd \${SHARE_DIR}/RepeatModeler
+    perl ./configure \\
+        -repeatmasker_dir \${SHARE_DIR}/RepeatMasker \\
+        -famdb_dir \${SHARE_DIR}/\${FAMDB_DIRNAME} \\
+        -no_prompt
+    cd \$WORKDIR
 
+    # 7 - Modifying PATHS
+    export PATH=\${BIN_DIR}:\${SHARE_DIR}/RepeatModeler:\${SHARE_DIR}/RepeatMasker:\${SHARE_DIR}/\${FAMDB_DIRNAME}:\$PATH
+    export PERL5LIB="\${SHARE_DIR}/RepeatModeler:\${SHARE_DIR}/RepeatMasker:\${PERL5LIB:-}"
+    
     ################################################
     # UNGZIP FASTA IF NEEDED
     ################################################
@@ -91,6 +110,8 @@ process EARLGREY_EARLGREY {
     ################################################
     # RUN EARLGREY
     ################################################
+
+    exit_code=0
     
     run_earlGrey.sh \\
         -g $fasta_name \\
@@ -105,7 +126,13 @@ process EARLGREY_EARLGREY {
     SOFTMASKED_OUTFILE=${prefix}.softmasked.fa
     
     if [ \$exit_code -eq 0 ]; then
-        cp \${SOFTMASKED_OUTDIR}/*.fa */ \$SOFTMASKED_OUTFILE
+        if find \${SOFTMASKED_OUTDIR} -maxdepth 1 -name "*.softmasked.fasta" -print -quit | grep -q .; then
+            echo "Found softmasked output, moving to \${SOFTMASKED_OUTFILE}"
+            mv \${SOFTMASKED_OUTDIR}/*.softmasked.fasta \$SOFTMASKED_OUTFILE
+        else
+            echo "No softmasked output found, copying unmasked fasta to softmasked output"
+            cp $fasta_name \$SOFTMASKED_OUTFILE
+        fi
     elif [ \$exit_code -eq 100 ]; then
         echo "Copying unmasked fasta to softmasked output"
         cp $fasta_name \$SOFTMASKED_OUTFILE
@@ -116,6 +143,8 @@ process EARLGREY_EARLGREY {
 
     echo "Compressing softmasked output"
     gzip \$SOFTMASKED_OUTFILE
+
+    rm -rf \$BIN_DIR \$SHARE_DIR
     """
 
 }

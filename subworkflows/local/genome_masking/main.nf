@@ -56,7 +56,7 @@ workflow GENOME_MASKING {
 
         if ( dfam_db ) {
         
-            ch_dfam_db = channel.fromPath( dfam_db, checkExists: true )
+            ch_dfam_db = channel.fromPath( dfam_db, checkIfExists: true )
 
             ch_input = ch_input
                         .combine( ch_dfam_db )

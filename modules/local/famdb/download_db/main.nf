@@ -2,6 +2,9 @@ nextflow.enable.types = true
 
 process FAMDB_DOWNLOAD_DFAM {
 
+    // TODO: remove when nb of cpus per task is taken into account for apptainer
+    maxForks 1
+
     tag "$taxid"
     label 'process_high'
 
