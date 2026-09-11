@@ -1,3 +1,7 @@
-- sample: braker_proteins
-  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  species: "3702"
+- sample: armadillidium nasatum
+  genome: tests/test_data/data/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
+  species: 96803
+
+- sample: arabidpsis thaliana
+  genome: tests/test_data/data/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
+  species: 3702

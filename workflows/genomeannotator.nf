@@ -9,6 +9,7 @@ nextflow.enable.types = true
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { TAXONOMY_INFO                                                 } from '../subworkflows/local/taxonomy_info'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
+include { FETCH_SRA_IDS                                                 } from '../subworkflows/local/fetch_sra_ids'
 include { DOWNLOAD_READS                                                } from '../subworkflows/local/download_reads'
 include { MAP_RNASEQ_READS                                              } from '../subworkflows/local/map_rnaseq_reads'
 include { BAM_SORT_INDEX_STATS                                          } from '../subworkflows/local/bam_sort_index_stats'
@@ -86,7 +87,20 @@ workflow GENOMEANNOTATOR {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
         // only a subset of structural annotator can use RNAseq data 
-        if ( params.structural_annotator in ['braker3'] ){
+        if ( params.structural_annotator in ['braker3', 'tiberius'] ){
+
+            if ( params.fetch_sra_rnaseq ) {
+
+                ch_sra_ids = FETCH_SRA_IDS( 
+                    ch_main,
+                    params.nb_short_read_sra_datasets,
+                    params.nb_long_read_sra_datasets,
+                    params.sra_allow_single_end,
+                    params.sra_random_seed
+                )
+               // ch_main = ch_main.join( ch_sra_ids, by: 'id', remainder: true )
+                
+            }
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // DOWNLOAD READS FROM SRA / ENA
@@ -142,6 +156,10 @@ workflow GENOMEANNOTATOR {
             params.skip_mmseqs_db_download,
             params.min_prot_db_seq_length
         )
+
+        // NOTE: in case the structural annotation was performed
+        // samples for which annotation could not be performed
+        // are not kept for the following steps
         ch_main = ch_main.join( ch_structural_annotation, by: 'id')
 
     } else {

@@ -68,6 +68,45 @@
                 }
             }
         },
+        "ncbi_sra_options": {
+            "title": "Options for fetching RNAseq data from NCBI SRA",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for structural annotation",
+            "properties": {
+                "fetch_sra_rnaseq": {
+                    "type": "boolean",
+                    "description": "Allow automatic fetching of RNAseq data from NCBI SRA.",
+                    "fa_icon": "fas fa-hand-scissors",
+                    "help_text": "A random set of RNAseq SRA datasets will be downloaded. The number of such datasets can be adjusted with --nb_fetched_sra_datasets."
+                },
+                "nb_short_read_sra_datasets": {
+                    "type": "integer",
+                    "description": "Number of short read RNAseq SRA datasets to fetch.",
+                    "default": 5,
+                    "mininum": 0,
+                    "help_text": "When more short read datasets are available than the specified value, a random subset will be selected. Set to 0 to disable download of short read datasets."
+                },
+                "nb_long_read_sra_datasets": {
+                    "type": "integer",
+                    "description": "Number of long read RNAseq SRA datasets to fetch.",
+                    "mininum": 0,
+                    "default": 5,
+                    "help_text": "When more long read datasets are available than the specified value, a random subset will be selected. Set to 0 to disable download of long read datasets."
+                },
+                "sra_allow_single_end": {
+                    "type": "boolean",
+                    "description": "For short read RNAseq SRA datasets, allow fetching single end datasets when not enough paired-end data are found.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "sra_random_seed": {
+                    "type": "integer",
+                    "description": "Random seed for selecting SRA datasets.",
+                    "default": 42,
+                    "help_text": "Change this seed to get a different random selection of SRA datasets."
+                }
+            }
+        },
         "rnaseq_mapping_options": {
             "title": "Options for mapping RNA-seq reads to genome",
             "type": "object",
@@ -156,6 +195,7 @@
               "min_prot_db_seq_length": {
                   "type": "integer",
                   "description": "Minimum sequence length for protein database",
+                  "minimum": 1,
                   "fa_icon": "fas fa-database",
                   "help_text": "Minimum sequence length for protein database (after all protein fasta files have been concatenated)"
               }
@@ -194,11 +234,16 @@
             }
         },
         "cleaning_options": {
-            "title": "Options for skipping specific steps",
+            "title": "Options for cleaning of annotation",
             "type": "object",
             "fa_icon": "fas fa-terminal",
-            "description": "Options for skipping specific steps",
+            "description": "Options for cleaning of annotation (new structural annotation or annotation provided by the user)",
             "properties": {
+                "skip_gff_cleaning": {
+                    "type": "boolean",
+                    "description": "Skip annotation cleaning.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
                 "gff_fix_feature_locations_duplicated": {
                     "type": "boolean",
                     "description": "Fix feature locations duplicated in structural annotation",
@@ -212,6 +257,19 @@
                 "gff_filter_incomplete_gene_models": {
                     "type": "boolean",
                     "description": "Skip processing of GFF to filter incomplete gene models",
+                    "fa_icon": "fas fa-hand-scissors"
+                }
+            }
+        },
+        "alternative_annotations_options": {
+            "title": "Options related to alternative annotations",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options related to alternative annotations",
+            "properties": {
+                "skip_alternative_annotations": {
+                    "type": "boolean",
+                    "description": "Skip making alternative annotations.",
                     "fa_icon": "fas fa-hand-scissors"
                 }
             }
@@ -263,6 +321,11 @@
             "fa_icon": "fas fa-terminal",
             "description": "Options for quality control",
             "properties": {
+              "skip_qc": {
+                "type": "boolean",
+                "description": "Skip all quality controls.",
+                "fa_icon": "fas fa-hand-scissors"
+              },
               "skip_busco": {
                 "type": "boolean",
                 "description": "Skip BUSCO",
@@ -397,6 +460,9 @@
             "$ref": "#/$defs/masking_options"
         },
         {
+            "$ref": "#/$defs/ncbi_sra_options"
+        },
+        {
             "$ref": "#/$defs/rnaseq_mapping_options"
         },
         {
@@ -412,13 +478,13 @@
             "$ref": "#/$defs/cleaning_options"
         },
         {
+            "$ref": "#/$defs/alternative_annotations_options"
+        },
+        {
             "$ref": "#/$defs/functional_annotation_options"
         },
         {
             "$ref": "#/$defs/quality_control_options"
-        },
-        {
-            "$ref": "#/$defs/dev_options"
         },
         {
             "$ref": "#/$defs/generic_options"
