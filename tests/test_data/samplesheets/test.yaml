@@ -4,4 +4,4 @@
   training_proteins:
     - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
   rnaseq:
-    fastqs:
+    reads:

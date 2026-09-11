@@ -66,17 +66,19 @@ workflow FETCH_SRA_IDS {
     ch_short_read_sra_ids = ch_short_read_sra_id_files
                             .map { rec -> record(
                                 taxid: rec.taxid, 
-                                fetched_short_read_experiment_ids: rec.sampled.splitText().collect{ s -> s.strip() } 
+                                fetched_short_read_sra_ids: rec.sampled.splitText().collect{ s -> s.strip() } 
                             ) }
 
     ch_long_read_sra_ids = ch_long_read_sra_id_files
                             .map { rec -> record(
                                 taxid: rec.taxid, 
-                                fetched_long_read_experiment_ids: rec.sampled.splitText().collect{ s -> s.strip() } 
+                                fetched_long_read_sra_ids: rec.sampled.splitText().collect{ s -> s.strip() } 
                             ) }
-                        
+
+    ch_input = ch_input
+                .join( ch_short_read_sra_ids, by: 'taxid', remainder: true )
+                .join( ch_long_read_sra_ids, by: 'taxid', remainder: true )
 
     emit:
-    short_read_sra_ids  = ch_short_read_sra_ids
-    long_read_sra_ids   = ch_long_read_sra_ids
+    ch_input
 }

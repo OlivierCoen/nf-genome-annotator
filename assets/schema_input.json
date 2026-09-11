@@ -39,7 +39,7 @@
             "rnaseq": {
                 "type": "object",
                 "properties": {
-                    "bams": {
+                    "bam": {
                         "type": "array",
                         "items": {
                             "type": "string",
@@ -50,42 +50,72 @@
                         },
                         "meta": ["rnaseq_bams"]
                     },
-                    "fastqs": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "R1": {
+                    "reads": {
+                        "type": "object",
+                        "properties": {
+                            "short": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "R1": {
+                                            "type": "string",
+                                            "description": "Forward fastq file (paired-end) or single fastq file (single-end). Mandatory field.",
+                                            "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
+                                            "format": "file-path",
+                                            "exists": true,
+                                            "errorMessage": "Forward / single fastq file must be provided, cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
+                                        },
+                                        "R2": {
+                                            "type": "string",
+                                            "description": "Reverse fastq file.",
+                                            "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
+                                            "format": "file-path",
+                                            "exists": true,
+                                            "errorMessage": "Reverse fastq file cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
+                                        }
+                                    },
+                                    "dependentRequired": {
+                                        "R2": ["R1"]
+                                    }
+                                },
+                                "meta": ["short_reads"]
+                            },
+                            "long": {
+                                "type": "array",
+                                "items": {
                                     "type": "string",
                                     "description": "Forward fastq file (paired-end) or single fastq file (single-end). Mandatory field.",
                                     "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
                                     "format": "file-path",
                                     "exists": true,
-                                    "errorMessage": "Forward / single fastq file for must be provided, cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
+                                    "errorMessage": "Fastq file must be provided, cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
                                 },
-                                "R2": {
+                                "meta": ["long_reads"]
+                            }
+                        }
+                    },
+                    "sra": {
+                        "type": "object",
+                        "properties": {
+                            "short_reads": {
+                                "type": "array",
+                                "items": {
                                     "type": "string",
-                                    "description": "Reverse fastq file.",
-                                    "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
-                                    "format": "file-path",
-                                    "exists": true,
-                                    "errorMessage": "Reverse fastq file cannot contain spaces and must have extension `.fq` or `.fastq` (`gzipped` if possible)."
+                                    "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
+                                    "errorMessage": "SRA IDs must start with 'SR', 'ER' or 'DR'. For now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
                                 }
                             },
-                            "dependentRequired": {
-                                "R2": ["R1"]
+                            "long_reads": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
+                                    "errorMessage": "SRA IDs must start with 'SR', 'ER' or 'DR'. For now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
+                                }
                             }
                         },
-                        "meta": ["rnaseq_fastqs"]
-                    },
-                    "experiment_ids": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "pattern": "^(SR|ER|DR)[A-Z0-9]+$",
-                            "errorMessage": "READ IDs must start with 'SR' or 'ER'. Hor now, only SRA and ENA IDs are supported. If you encounter issues or if your reads come from other databases, please consider using nf-core/fetchngs first."
-                        },
-                        "meta": ["rnaseq_experiment_ids"]
+                        "meta": ["sra"]
                     }
                 }
             },

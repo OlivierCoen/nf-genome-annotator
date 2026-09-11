@@ -98,13 +98,22 @@ workflow GENOMEANNOTATOR {
                     params.sra_allow_single_end,
                     params.sra_random_seed
                 )
-               // ch_main = ch_main.join( ch_sra_ids, by: 'id', remainder: true )
+               ch_main = ch_main.join( ch_sra_ids, by: 'id', remainder: true )
                 
             }
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // DOWNLOAD READS FROM SRA / ENA
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            // merging supplied and fetched SRA IDs
+            ch_main = ch_main
+                        .map { rec ->
+                            rec + record(
+                                short_read_sra_ids: rec.supplied_short_read_sra_ids + rec.fetched_short_read_sra_ids,
+                                long_read_sra_ids: rec.supplied_long_read_sra_ids + rec.fetched_long_read_sra_ids
+                            )
+                        }
     
             ch_downloaded_reads = DOWNLOAD_READS( ch_main ) 
             ch_main = ch_main.join( ch_downloaded_reads, by: 'id', remainder: true )
@@ -114,9 +123,13 @@ workflow GENOMEANNOTATOR {
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
             ch_main = ch_main.map{ rec ->
-                def downloaded_rnaseq_fastqs = rec.downloaded_rnaseq_fastqs ?: []
-                rec + record(reads_to_map: rec.supplied_rnaseq_fastqs + downloaded_rnaseq_fastqs)
-            }
+                def downloaded_short_reads = rec.downloaded_short_reads ?: []
+                def downloaded_long_reads = rec.downloaded_long_reads ?: []
+                rec + record(
+                    short_reads: rec.supplied_short_reads + downloaded_short_reads,
+                    long_reads: rec.supplied_long_reads + downloaded_long_reads
+                )
+            }.view{v->"main $v"}
 
             ch_reads_mapped = MAP_RNASEQ_READS(
                 ch_main.filter{ rec -> rec.reads_to_map.size() > 0 }, // pass only samples for which there are reads

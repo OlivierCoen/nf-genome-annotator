@@ -15,19 +15,24 @@ record ExperimentIDs {
 workflow DOWNLOAD_READS {
 
     take:
-    ch_ids: Channel<ExperimentIDs>
+    ch_input: Channel<ExperimentIDs>
 
     main:
 
     // creating a channel containing unique public ids (SRA / ENA)
-    ch_experiment_ids = ch_ids.flatMap{ rec -> rec.rnaseq_experiment_ids.collect() }.unique()
+    // for both short reads and long reads
+    ch_all_sra_ids = ch_input
+                        .map { rec -> rec.short_read_sra_ids + rec.long_read_sra_ids }
+                        .flatMap{ sra_ids -> sra_ids.collect() }
+                        .filter{ sra_id -> sra_id != null }
+                        .unique()
 
     // ------------------------------------------------------------------------------------
     // DOWNLOAD SRA DATA
     // ------------------------------------------------------------------------------------
 
     DOWNLOAD_SRA(
-        ch_experiment_ids.filter{ id -> id.startsWith('SR') || id.startsWith('DR') }
+        ch_all_sra_ids.filter{ id -> id.startsWith('SR') || id.startsWith('DR') }
     )
 
     // ------------------------------------------------------------------------------------
@@ -35,7 +40,7 @@ workflow DOWNLOAD_READS {
     // ------------------------------------------------------------------------------------
 
     DOWNLOAD_ENA(
-        ch_experiment_ids.filter{ id -> id.startsWith('ER') }
+        ch_all_sra_ids.filter{ id -> id.startsWith('ER') }
     )
 
     // ------------------------------------------------------------------------------------
@@ -44,27 +49,46 @@ workflow DOWNLOAD_READS {
 
     ch_downloaded_reads = DOWNLOAD_SRA.out.reads
                             .mix( DOWNLOAD_ENA.out.reads )
-                            .map{ rec -> record(experiment_id: rec.id, reads: rec.reads) }
+                            .map{ rec -> record(sra_id: rec.id, reads: rec.reads) }
 
     // associating back to the corresponding sample IDs
     // TODO: simplify when groupBy can handle records
-    ch_reads = ch_ids
+
+    // SHORT READS
+    ch_input = ch_input
                 .flatMap{
-                    rec -> rec.rnaseq_experiment_ids.collect{ value -> record(id: rec.id, experiment_id: value) }
+                    rec -> rec.short_read_sra_ids.collect{ value -> record(id: rec.id, sra_id: value) }
                 }
-                .join(ch_downloaded_reads, by: 'experiment_id')
+                .join(ch_downloaded_reads, by: 'sra_id')
                 .map{ rec -> tuple(rec.id, [rec.experiment_id, rec.reads]) }
                 .groupTuple()
                 .map{ id, tuples ->
                     record(
                         id: id,
-                        downloaded_rnaseq_fastqs: tuples.collect{ tup ->
+                        downloaded_short_reads: tuples.collect{ tup ->
+                            record(id: tup[0], reads: tup[1].flatten())
+                        }
+                    )
+                }
+
+    // LONG READS
+    ch_input = ch_input
+                .flatMap{
+                    rec -> rec.long_read_sra_ids.collect{ value -> record(id: rec.id, sra_id: value) }
+                }
+                .join(ch_downloaded_reads, by: 'sra_id')
+                .map{ rec -> tuple(rec.id, [rec.experiment_id, rec.reads]) }
+                .groupTuple()
+                .map{ id, tuples ->
+                    record(
+                        id: id,
+                        downloaded_long_reads: tuples.collect{ tup ->
                             record(id: tup[0], reads: tup[1].flatten())
                         }
                     )
                 }
 
     emit:
-    reads = ch_reads
+    ch_input
 
 }
