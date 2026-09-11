@@ -1,0 +1,4 @@
+- sample: test_12_ctg
+  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  species: "3702"
+  gff: /home/olivier/repositories/nf-genome-annotator/tests/test_data/samplesheets/test_func_annot.yaml

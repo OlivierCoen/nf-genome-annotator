@@ -1,3 +1,4 @@
-- sample: gtf_from_previous_braker
+- sample: test
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  gff: tests/test_data/test_gtf_provided/braker.gtf
+  species: arabidopsis thaliana
+  

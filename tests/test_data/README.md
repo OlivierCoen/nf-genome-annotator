@@ -1,1 +1,4 @@
-ngranulosis.fna ([GCA_015832245.1_ASM1583224v1_genomic.fna](https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_015832245.1/)) was obtained from NCBI
+tests/test_data/data/RNAseq.[1,2}.fq.gz were obtained with:
+TODO: complete
+
+http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam

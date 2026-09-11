@@ -3,6 +3,6 @@
 #  species: 3702
 
 - sample: anasatum_scaff_25_500000_700000
-  genome: tests/test_data/test_earlgrey/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
+  genome: tests/test_data/data/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
   species: 96803
 

@@ -1,3 +1,0 @@
-- sample: test_12_ctg
-  genome: tests/test_data/test_metaeuk/ngranulosis.ctg1_12.fna.gz
-  gff: tests/test_data/test_metaeuk/current_annot.gtf

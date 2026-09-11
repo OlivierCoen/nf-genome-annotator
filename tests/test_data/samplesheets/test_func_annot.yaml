@@ -1,0 +1,4 @@
+- sample: from_braker
+  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  species: 3702
+  gff: tests/test_data/data/braker.sample.gtf
