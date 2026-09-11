@@ -1,8 +1,7 @@
 nextflow.enable.types = true
 
-include { AGAT_SPEXTRACTSEQUENCES as EXTRACT_PROTEOME             } from '../../../modules/local/agat/spextractsequences'
-include { AGAT_SPEXTRACTSEQUENCES as EXTRACT_OTHER_PROTEOMES      } from '../../../modules/local/agat/spextractsequences'
-include { AGAT_SPEXTRACTSEQUENCES as EXTRACT_CDS                  } from '../../../modules/local/agat/spextractsequences'
+include { GFFREAD as FROM_MAIN_ANNOTATION             } from '../../../modules/local/gffread'
+include { GFFREAD as FROM_OTHER_ANNOTATIONS           } from '../../../modules/local/gffread'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,7 +21,6 @@ workflow EXTRACT_SEQUENCES {
 
     take:
     ch_input: Channel<Input>
-    codon_usage_id: Integer
 
     main:
 
@@ -30,15 +28,12 @@ workflow EXTRACT_SEQUENCES {
     // EXTRACT PROTEOME FROM ACTUAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    ch_proteome = EXTRACT_PROTEOME(
-        ch_input,
-        codon_usage_id
-    )
+    ch_proteome = FROM_MAIN_ANNOTATION( ch_input )
+    
     ch_input = ch_input.join( 
-        ch_proteome.map { rec -> record(id: rec.id, proteome: rec.extracted_fasta) }, 
+        ch_proteome.map { rec -> record(id: rec.id, proteome: rec.proteins) }, 
         by: 'id'
-    )
-                
+    ) 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GETTING PROTEOMES FOR ALL INTERMEDIATES + ALTERNATIVES [ + PREVIOUS ONE ] ) ANNOTATIONS
@@ -53,29 +48,13 @@ workflow EXTRACT_SEQUENCES {
         other_gffs.collect { gff_file -> record(id: rec.id, gff: gff_file, fasta: rec.fasta) }
     }
                                  
-    ch_other_proteomes = EXTRACT_OTHER_PROTEOMES( 
-        ch_others_input,
-        codon_usage_id
-    ) 
+    ch_other_proteomes = FROM_OTHER_ANNOTATIONS( ch_others_input )
     
-    ch_other_proteomes = ch_other_proteomes.map { rec -> tuple(rec.id, rec.extracted_fasta) }
+    ch_other_proteomes = ch_other_proteomes.map { rec -> tuple(rec.id, rec.proteins) }
                             .groupTuple()
                             .map { id, fasta_list -> record(id: id, other_proteomes: fasta_list) }
 
     ch_input = ch_input.join( ch_other_proteomes, by: 'id' )
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // GETTING CDS SEQUENCES FOR THE MAIN ANNOTATION ONLY
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    ch_cds = EXTRACT_CDS(
-        ch_input.map { rec -> record(id: rec.id, gff: rec.gff, fasta: rec.fasta) },
-        null
-    )
-    ch_input = ch_input.join( 
-        ch_cds.map { rec -> record(id: rec.id, cds: rec.extracted_fasta) }, 
-        by: 'id'    
-    )
 
     emit:
     ch_input

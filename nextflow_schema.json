@@ -286,21 +286,6 @@
               }
             }
         },
-        "dev_options": {
-            "title": "Dev purposes options",
-            "type": "object",
-            "fa_icon": "fas fa-terminal",
-            "description": "Options for dev purposes only",
-            "properties": {
-                "codon_usage_id": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "ID of the codon usage table to use (as defined in perl's Bio::Tools::CodonTable).",
-                    "fa_icon": "fas fa-hand-scissors",
-                    "help_text": "For invertebrates / vertebrates / fungi, you should skip this parameter. It is important for mitochondrial genomes. For an extensive list of codon usage IDs, see https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi#SG1"
-                }
-            }
-        },
         "generic_options": {
             "title": "Generic options",
             "type": "object",
