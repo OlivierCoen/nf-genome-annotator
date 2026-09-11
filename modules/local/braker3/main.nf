@@ -21,8 +21,8 @@ process BRAKER3 {
     output:
         record(
             id: id,
-            braker_gtf: file("workdir/braker.gtf"),
-            braker_hintsfile: file("workdir/hintsfile.gff"),
+            braker_gtf: file("workdir/braker.gtf", optional: true),
+            braker_hintsfile: file("workdir/hintsfile.gff", optional: true),
         )
 
     topic:

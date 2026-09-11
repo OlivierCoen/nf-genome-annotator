@@ -79,6 +79,14 @@ workflow BRAKER {
         ch_input.map { rec -> rec.subMap(['id', 'species', 'fasta', 'proteins_fasta', 'bam']) }
     )
 
+    ch_braker_out = ch_braker_out
+            .filter { rec -> 
+                if ( rec.braker_gtf == null ) {
+                    log.warn("Braker3 failed to predict any gene model for sample ${rec.id}. Skipping this sample.")
+                }
+                rec.braker_gtf != null
+            }
+
     ch_input = ch_input.join(ch_braker_out, by: 'id')
 
     // ----------------------------------------------------------
