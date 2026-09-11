@@ -31,7 +31,7 @@ workflow COMPLEMENT_ANNOTATION {
     ch_leave_me_alone = ch_input.filter{ rec -> rec.gff == null }
 
     // saving the uncomplemented annotation
-    ch_to_complement = ch_to_complement.map { rec -> rec + record(uncomplemented_annotation: rec.annotation) }
+    ch_to_complement = ch_to_complement.map { rec -> rec + record(uncomplemented_annotation: rec.structural_annotation) }
 
     ch_complemented = AGAT_SPCOMPLEMENTANNOTATIONS( 
         ch_to_complement.map{ rec -> record(

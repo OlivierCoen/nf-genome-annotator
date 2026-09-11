@@ -1,6 +1,6 @@
 nextflow.enable.types = true
 
-include { RED_RED as RED                                            } from '../../../modules/local/red/red'
+include { RED                                                       } from '../../../modules/local/red'
 
 include { REPEATMODELER_BUILDDATABASE as BUILDDATABASE              } from '../../../modules/local/repeatmodeler/builddatabase'
 include { REPEATMODELER_REPEATMODELER as REPEATMODELER              } from '../../../modules/local/repeatmodeler/repeatmodeler'

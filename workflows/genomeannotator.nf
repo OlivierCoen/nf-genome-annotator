@@ -162,56 +162,69 @@ workflow GENOMEANNOTATOR {
         // are not kept for the following steps
         ch_main = ch_main.join( ch_structural_annotation, by: 'id')
 
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+        if ( params.complement_annotation ) {
+            ch_complemented = COMPLEMENT_ANNOTATION( ch_main )
+            ch_main = ch_main.join( ch_complemented, by: 'id' )
+        }
+
     } else {
         // when skipping the structural annotation, the provided gff becomes the structural annotation
         ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.gff)}
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    if ( params.complement_annotation ) {
-        ch_complemented = COMPLEMENT_ANNOTATION( ch_main )
-        ch_main = ch_main.join( ch_complemented, by: 'id' )
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // CLEANING OF GTF
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     // storing the provided gff (if any)
-    ch_main = ch_main.map { rec -> 
-        rec.gff ? rec + record(previous_annotation: rec.gff) : rec
-    }
-    
-    ch_cleaned = CLEAN_ANNOTATION (
-        ch_main,
-        params.gff_fix_feature_locations_duplicated,
-        params.gff_fix_overlapping_genes,
-        params.gff_filter_incomplete_gene_models
-    )
-    ch_main = ch_main.join( ch_cleaned, by: 'id' )
+    // filtering to keep only records that have at least a structural annotation or a gff
+    ch_main = ch_main
+                .filter { rec -> rec.structural_annotation != null }
+                .map { rec -> rec.gff ? rec + record(previous_annotation: rec.gff) : rec }
 
-    // NOTE: now the annotation is under the 'gff' key
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // CLEANING OF GFF
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if ( !params.skip_gff_cleaning ) {
+    
+        ch_cleaned = CLEAN_ANNOTATION (
+            ch_main,
+            params.gff_fix_feature_locations_duplicated,
+            params.gff_fix_overlapping_genes,
+            params.gff_filter_incomplete_gene_models
+        )
+        ch_main = ch_main.join( ch_cleaned, by: 'id' )
+    
+        // NOTE: now the annotation is under the 'gff' key
+
+    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE ALTERNATIVE ANNOTATIONS (LONGEST ISOFORMS ONLY, ...)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_alternative_annotations = ALTERNATIVE_ANNOTATIONS( ch_main )
-    ch_main = ch_main.join( ch_alternative_annotations, by: 'id' )
+    if ( !params.skip_alternative_annotations ) {
+
+        ch_alternative_annotations = ALTERNATIVE_ANNOTATIONS( ch_main )
+        ch_main = ch_main.join( ch_alternative_annotations, by: 'id' )
+
+    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // MAKE PROTEOME
+    // MAKE PROTEOME 
+    // (ONLY IF FUNCTIONAL ANNOTATION OR QUALITY CONTROLS ARE TO BE RUN)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_extracted_sequences = EXTRACT_SEQUENCES (
-        ch_main,
-        params.codon_usage_id
-    )
+    if ( !(params.skip_functional_annotation && params.skip_qc) ) {
+    
+        ch_extracted_sequences = EXTRACT_SEQUENCES (
+            ch_main
+        )
+    
+        ch_main = ch_main.join( ch_extracted_sequences, by: 'id' )
 
-    ch_main = ch_main.join( ch_extracted_sequences, by: 'id' )
+    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
@@ -238,15 +251,17 @@ workflow GENOMEANNOTATOR {
     // VARIOUS QUALITY CONTROLS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_qc = QUALITY_CONTROLS(
-        ch_main,
-        params.skip_busco,
-        params.skip_omark,
-        params.omamer_db_url,
-        params.omamer_db
-    )
+    if ( !params.skip_qc ) {
 
-    ch_main = ch_main.join( ch_qc, by: 'id' )
+        ch_qc = QUALITY_CONTROLS(
+            ch_main,
+            params.skip_busco,
+            params.skip_omark,
+            params.omamer_db_url,
+            params.omamer_db
+        )
+
+    }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MULTIQC & OTHER REPORTING

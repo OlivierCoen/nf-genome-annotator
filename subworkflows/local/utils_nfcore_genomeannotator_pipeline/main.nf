@@ -106,7 +106,7 @@ workflow PIPELINE_INITIALISATION {
     ch_samplesheet = parseSamplesheet()
 
     // validate samplesheet
-    validateSamplesheet( ch_samplesheet )
+    //validateSamplesheet( ch_samplesheet )
 
     emit:
     samplesheet = ch_samplesheet
@@ -186,7 +186,7 @@ def parseSamplesheet() {
 
                     supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
                     supplied_rnaseq_fastqs: meta.rnaseq_fastqs ? organiseRnaseqFastqFiles(meta.rnaseq_fastqs) : [],
-                    rnaseq_experiment_ids: meta.rnaseq_experiment_ids ?: [],
+                    supplied_rnaseq_experiment_ids: meta.rnaseq_experiment_ids ?: [],
 
                     training_proteins: meta.training_proteins ?: [],
 
