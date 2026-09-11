@@ -33,6 +33,7 @@ TAXID_LINEAGE_OUTFILE = "taxid_lineage.txt"
 BUSCO_LINEAGE_OUTFILE = "busco_lineage.txt"
 ORTHODB_CLADES_OUTFILE = "orthodb_clade.txt"
 HELIXER_LINEAGE_OUTFILE = "helixer_lineage.txt"
+TIBERIUS_LINEAGE_OUTFILE = "tiberius_lineage.txt"
 
 HELIXER_LINEAGES = {
     "land_plant": {
@@ -53,6 +54,41 @@ HELIXER_LINEAGES = {
     }
 }
 
+# models available for version 2.0.7
+# see https://github.com/Gaius-Augustus/Tiberius/tree/v2.0.7/model_cfg
+
+TIBERIUS_LINEAGES = {
+    "angiosperms": {
+        "included": 1437183, #Mesangiospermae
+        "excluded": None
+    },
+    "chlorophyta": {
+        "included": 3041, #Chlorophyta
+        "excluded": None
+    },
+    "diatoms": {
+        "included": 2836, # Bacillariophyta
+        "excluded": None
+    },
+    "fungi":  {
+        "included": 4751, #Fungi
+        "excluded": None
+    },
+    "insecta":  {
+        "included": 50557, #Insecta
+        "excluded": None
+    },
+    "mammalia_nosofttmasking_v2":  {
+        "included": 40674, #Mammalia
+        "excluded": None
+    },
+    "vertebrates":  {
+        "included": 7742, #Vertebrata
+        "excluded": None
+    }
+}
+
+
 #####################################################
 #####################################################
 # CLASSES
@@ -69,6 +105,7 @@ class Taxonomy:
     busco_lineage: str | None
     orthodb_clade: str | None
     helixer_lineage: str | None
+    tiberius_lineage: str | None
 
     def __str__(self) -> str:
         return f"{self.species} [{self.common_name}] (taxid: {self.taxid})"
@@ -204,6 +241,7 @@ def get_taxonomy(
         logger.warning(f"No orthodb clade match found for species {species} and lineage {' '.join([str(l) for l in lineage[::-1]])}.")
 
     helixer_lineage = get_helixer_lineage(lineage)
+    tiberius_lineage = get_tiberius_lineage(lineage)
 
     common_name = metadata.get("common_name", metadata["organism_name"])
 
@@ -219,7 +257,8 @@ def get_taxonomy(
         lineage=lineage,
         busco_lineage=busco_lineage,
         orthodb_clade=orthodb_clade,
-        helixer_lineage=helixer_lineage
+        helixer_lineage=helixer_lineage,
+        tiberius_lineage=tiberius_lineage
     )
 
 
@@ -249,34 +288,45 @@ def parse_orthodb_clades(file_path: Path) -> dict[str, str]:
 
 
 def get_helixer_lineage(taxid_lineage: list[int]) -> str | None:
+    return get_tool_lineage(taxid_lineage, 'Helixer', HELIXER_LINEAGES)
+
+
+def get_tiberius_lineage(taxid_lineage: list[int]) -> str | None:
+    return get_tool_lineage(taxid_lineage, 'Tiberius', TIBERIUS_LINEAGES)
+
+
+def get_tool_lineage(taxid_lineage: list[int], tool: str, model_lineages: dict) -> str | None:
+    """
+    Wrapper function that finds the best model given a lineage
+    """
     # searching for a candidate lineage
     # looping from the most general to the most specific (species level or below)
     candidate_lineages = []
     for taxid in taxid_lineage:
-        for lineage, lineage_dict in HELIXER_LINEAGES.items():
+        for lineage, lineage_dict in model_lineages.items():
             if taxid == lineage_dict["included"]:
                 candidate_lineages.append(lineage)
                 
     if candidate_lineages:
-        logger.info(f"Helixer candidate lineages: {candidate_lineages}")
+        logger.info(f"{tool} candidate lineages: {candidate_lineages}")
     else:
-        logger.info("No candidate lineage found for Helixer")
+        logger.info(f"No candidate lineage found for {tool}")
         return None
         
     # among the candidate lineages, searching for the ones that are excluded
     for taxid in taxid_lineage:
         for lineage in candidate_lineages:
-            if taxid == HELIXER_LINEAGES[lineage]["excluded"]:
+            if taxid == model_lineages[lineage]["excluded"]:
                 del candidate_lineages[lineage]
 
     if candidate_lineages:
         if len(candidate_lineages) > 1:
-            raise ValueError(f"Multiple Helixer lineages found for taxid lineage: {taxid_lineage}")
+            raise ValueError(f"Multiple {tool} lineages found for taxid lineage: {taxid_lineage}")
         found_lineage = candidate_lineages[0]
-        logger.info(f"Found Helixer lineage: {found_lineage}")
+        logger.info(f"Found {tool} lineage: {found_lineage}")
         return found_lineage
     else:
-        logger.info("All candidate lineages were excluded")
+        logger.info(f"All candidate lineages were excluded for {tool}")
         return None
 
 #####################################################
@@ -317,5 +367,8 @@ if __name__ == "__main__":
 
     with open(HELIXER_LINEAGE_OUTFILE, "w") as fout:
         fout.write(str(taxonomy.helixer_lineage))
+
+    with open(TIBERIUS_LINEAGE_OUTFILE, "w") as fout:
+        fout.write(str(taxonomy.tiberius_lineage))
 
     logger.info("Done")

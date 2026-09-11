@@ -22,7 +22,8 @@ process GET_TAXONOMY_INFO {
             taxid_lineage: env("TAXID_LINEAGE"),
             busco_lineage: env("BUSCO_LINEAGE") == 'None' ? null : env("BUSCO_LINEAGE"),
             orthodb_clade: env("ORTHODB_CLADE") == 'None' ? null : env("ORTHODB_CLADE"),
-            helixer_lineage: env("HELIXER_LINEAGE") == 'None' ? null: env("HELIXER_LINEAGE")
+            helixer_lineage: env("HELIXER_LINEAGE") == 'None' ? null: env("HELIXER_LINEAGE"),
+            tiberius_lineage: env("TIBERIUS_LINEAGE") == 'None' ? null: env("TIBERIUS_LINEAGE")
         )
 
     topic:
@@ -56,6 +57,7 @@ process GET_TAXONOMY_INFO {
     BUSCO_LINEAGE=\$(cat busco_lineage.txt)
     ORTHODB_CLADE=\$(cat orthodb_clade.txt)
     HELIXER_LINEAGE=\$(cat helixer_lineage.txt)
+    TIBERIUS_LINEAGE=\$(cat tiberius_lineage.txt)
     """
 
 }

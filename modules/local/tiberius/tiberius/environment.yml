@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::tiberius=2.0.7
+  - bioconda::nextflow=26.04.6 
+  - pip:
+      - 'bricks2marble[tf]==0.1.0'
