@@ -5,3 +5,4 @@ channels:
   - bioconda
 dependencies:
   - bioconda::red=2018.09.10
+  - conda-forge::gzip=1.14
