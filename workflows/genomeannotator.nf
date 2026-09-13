@@ -9,10 +9,7 @@ nextflow.enable.types = true
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { TAXONOMY_INFO                                                 } from '../subworkflows/local/taxonomy_info'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
-include { FETCH_SRA_IDS                                                 } from '../subworkflows/local/fetch_sra_ids'
-include { DOWNLOAD_READS                                                } from '../subworkflows/local/download_reads'
-include { MAP_RNASEQ_READS                                              } from '../subworkflows/local/map_rnaseq_reads'
-include { BAM_SORT_INDEX_STATS                                          } from '../subworkflows/local/bam_sort_index_stats'
+include { PREPARE_RNASEQ_DATA                                           } from '../subworkflows/local/prepare_rnaseq_data'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { COMPLEMENT_ANNOTATION                                         } from '../subworkflows/local/complement_annotation'
 include { CLEAN_ANNOTATION                                              } from '../subworkflows/local/clean_annotation'
@@ -67,100 +64,47 @@ workflow GENOMEANNOTATOR {
     )
     ch_main = ch_main.join( ch_taxonomy, by: 'species' )
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // GENOME MASKING
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if ( !params.skip_masking ) {
+        ch_masked = GENOME_MASKING (
+            ch_main,
+            params.genome_masker,
+            params.dfam_db
+        )
+        ch_main = ch_main.join( ch_masked, by: 'id' )
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // PREPARATION (QC / CLEANING / MAPPING) OF RNASEQ DATA (SHORT / LONG READS)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // only a subset of structural annotator can use RNAseq data 
+    def structural_annotator_needing_rnaseq = ['braker3', 'tiberius']
+    if ( params.structural_annotator in structural_annotator_needing_rnaseq || params.force_prepare_rnaseq ){
+
+        ch_prepared_rnaseq_data = PREPARE_RNASEQ_DATA( 
+            ch_main,
+            params.skip_fastqc,
+            params.skip_fastqc_raw,
+            params.skip_fastqc_cleaned,
+            params.skip_umi_extract,
+            params.skip_short_read_cleaning,
+            params.short_read_mapper,
+            params.ignore_existing_gff_for_mapping
+        )
+        ch_main = ch_main.join( ch_prepared_rnaseq_data, by: 'id', remainder: true )
+
+    }
+    
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // STRUCTURAL ANNOTATION
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     if ( !params.skip_structural_annotation ) {
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // GENOME MASKING
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        if ( !params.skip_masking ) {
-            ch_masked = GENOME_MASKING (
-                ch_main,
-                params.genome_masker,
-                params.dfam_db
-            )
-            ch_main = ch_main.join( ch_masked, by: 'id' )
-        }
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // WHEN NEEDED, DOWNLOAD READS FROM PUBLIC DATABASES AND MAP THEM TO THE GENOME
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
-        // only a subset of structural annotator can use RNAseq data 
-        if ( params.structural_annotator in ['braker3', 'tiberius'] ){
-
-            if ( params.fetch_sra_rnaseq ) {
-
-                ch_sra_ids = FETCH_SRA_IDS( 
-                    ch_main,
-                    params.nb_short_read_sra_datasets,
-                    params.nb_long_read_sra_datasets,
-                    params.sra_allow_single_end,
-                    params.sra_random_seed
-                )
-               ch_main = ch_main.join( ch_sra_ids, by: 'id', remainder: true )
-                
-            }
-
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // DOWNLOAD READS FROM SRA / ENA
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            // merging supplied and fetched SRA IDs
-            ch_main = ch_main
-                        .map { rec ->
-                            rec + record(
-                                short_read_sra_ids: rec.supplied_short_read_sra_ids + rec.fetched_short_read_sra_ids,
-                                long_read_sra_ids: rec.supplied_long_read_sra_ids + rec.fetched_long_read_sra_ids
-                            )
-                        }
     
-            ch_downloaded_reads = DOWNLOAD_READS( ch_main ) 
-            ch_main = ch_main.join( ch_downloaded_reads, by: 'id', remainder: true )
-    
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // MAP RNASEQ READS TO GENOME
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-            ch_main = ch_main.map{ rec ->
-                def downloaded_short_reads = rec.downloaded_short_reads ?: []
-                def downloaded_long_reads = rec.downloaded_long_reads ?: []
-                rec + record(
-                    short_reads: rec.supplied_short_reads + downloaded_short_reads,
-                    long_reads: rec.supplied_long_reads + downloaded_long_reads
-                )
-            }.view{v->"main $v"}
-
-            ch_reads_mapped = MAP_RNASEQ_READS(
-                ch_main.filter{ rec -> rec.reads_to_map.size() > 0 }, // pass only samples for which there are reads
-                params.skip_fastqc,
-                params.skip_umi_extract,
-                params.skip_trimming,
-                params.rnaseq_mapper,
-                params.ignore_existing_gff_for_mapping
-            )
-            ch_main = ch_main.join( ch_reads_mapped, by: 'id', remainder: true )
-
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-            ch_main = ch_main.map{ rec ->
-                def new_rnaseq_bams = rec.new_rnaseq_bams ?: []
-                rec + record(bams: rec.supplied_rnaseq_bams + new_rnaseq_bams)
-            }
-
-            ch_sorted_bam = BAM_SORT_INDEX_STATS(
-                ch_main.filter { rec -> rec.bams.size() > 0 }
-            )
-            ch_main = ch_main.join( ch_sorted_bam, by: 'id', remainder: true )
-            
-        }
-        
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // STRUCTURAL ANNOTATION
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         ch_structural_annotation = STRUCTURAL_ANNOTATION (
             ch_main,
             params.structural_annotator,
@@ -170,23 +114,24 @@ workflow GENOMEANNOTATOR {
             params.min_prot_db_seq_length
         )
 
-        // NOTE: in case the structural annotation was performed
-        // samples for which annotation could not be performed
-        // are not kept for the following steps
+        // NOTE: in case the structural annotation is performed,
+        // samples for which annotation could not be performed are not kept for the following steps
         ch_main = ch_main.join( ch_structural_annotation, by: 'id')
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-        if ( params.complement_annotation ) {
-            ch_complemented = COMPLEMENT_ANNOTATION( ch_main )
-            ch_main = ch_main.join( ch_complemented, by: 'id' )
-        }
 
     } else {
         // when skipping the structural annotation, the provided gff becomes the structural annotation
         ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.gff)}
+    }
+    
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // complementation can only be done using the new structural annotation
+
+    if ( params.complement_annotation ) {
+        ch_complemented = COMPLEMENT_ANNOTATION( ch_main )
+        ch_main = ch_main.join( ch_complemented, by: 'id' )
     }
 
     // storing the provided gff (if any)

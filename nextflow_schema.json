@@ -68,18 +68,62 @@
                 }
             }
         },
-        "ncbi_sra_options": {
-            "title": "Options for fetching RNAseq data from NCBI SRA",
+        "rnaseq_general_options": {
+            "title": "General options for RNA-seq reads",
             "type": "object",
             "fa_icon": "fas fa-terminal",
-            "description": "Options for structural annotation",
+            "description": "General options for RNA-seq reads",
             "properties": {
+                "force_prepare_rnaseq": {
+                    "type": "boolean",
+                    "description": "Force preparation of RNA-seq data",
+                    "fa_icon": "fas fa-hand-scissors",
+                    "help_text": "By default, preparation (cleaning and / or mapping) is performed only when a structural annotator that uses such data is selected. You can chose set this flag to force the downloading / preprocessing / mapping of RNA-seq data in any case."
+                },
                 "fetch_sra_rnaseq": {
                     "type": "boolean",
                     "description": "Allow automatic fetching of RNAseq data from NCBI SRA.",
                     "fa_icon": "fas fa-hand-scissors",
                     "help_text": "A random set of RNAseq SRA datasets will be downloaded. The number of such datasets can be adjusted with --nb_fetched_sra_datasets."
                 },
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "description": "Skip all FastQC steps for RNA-seq reads.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_fastqc_raw": {
+                    "type": "boolean",
+                    "description": "Skip FastQC for raw RNA-seq reads.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_fastqc_cleaned": {
+                    "type": "boolean",
+                    "description": "Skip FastQC for cleaned RNA-seq reads.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_umi_extract": {
+                    "type": "boolean",
+                    "description": "Skip UMI extract for RNA-seq reads.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_short_read_cleaning": {
+                    "type": "boolean",
+                    "description": "Skip cleaning (trimming / adapter removal) for short RNA-seq reads.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_long_read_cleaning": {
+                    "type": "boolean",
+                    "description": "Skip cleaning (trimming / adapter removal) for long RNA-seq reads.",
+                    "fa_icon": "fas fa-hand-scissors"
+                }
+            }
+        },
+        "rnaseq_sra_options": {
+            "title": "Options for fetching RNAseq data from NCBI SRA",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for structural annotation",
+            "properties": {
                 "nb_short_read_sra_datasets": {
                     "type": "integer",
                     "description": "Number of short read RNAseq SRA datasets to fetch.",
@@ -107,67 +151,60 @@
                 }
             }
         },
-        "rnaseq_mapping_options": {
-            "title": "Options for mapping RNA-seq reads to genome",
+        "rnaseq_umi_options": {
+            "title": "Options for UMI extraction of RNA-seq reads",
             "type": "object",
             "fa_icon": "fas fa-terminal",
-            "description": "Options for genome masking",
+            "description": "Options for UMI extraction of RNA-seq reads",
             "properties": {
-              "skip_fastqc": {
-                  "type": "boolean",
-                  "description": "Skip FastQC for RNA-seq reads.",
-                  "fa_icon": "fas fa-hand-scissors"
-              },
-              "skip_umi_extract": {
-                  "type": "boolean",
-                  "description": "Skip UMI extract for RNA-seq reads.",
-                  "fa_icon": "fas fa-hand-scissors"
-              },
-              "umitools_extract_method": {
+                "umitools_extract_method": {
+                    "type": "string",
+                    "default": "string",
+                    "fa_icon": "fas fa-barcode",
+                    "description": "UMI pattern to use. Can be either 'string' (default) or 'regex'.",
+                    "help_text": "Detailed information can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method)."
+                },
+                "umitools_bc_pattern": {
+                    "type": "string",
+                    "minLength": 1,
+                    "fa_icon": "fas fa-barcode",
+                    "help_text": "Detailed information can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method).",
+                    "description": "The UMI barcode pattern to use e.g. 'NNNNNN' indicates that the first 6 nucleotides of the read are from the UMI."
+                },
+                "umitools_bc_pattern2": {
+                    "type": "string",
+                    "minLength": 1,
+                    "fa_icon": "fas fa-barcode",
+                    "description": "The UMI barcode pattern to use if the UMI is located in read 2."
+                },
+                "umitools_umi_separator": {
+                    "type": "string",
+                    "pattern": "^\\S+$",
+                    "minLength": 1,
+                    "maxLength": 1,
+                    "errorMessage": "The UMI separator must not contain spaces and must be a single character (e.g., ':').",
+                    "fa_icon": "fas fa-star-half-alt",
+                    "description": "The character that separates the UMI in the read name. Most likely a colon if you skipped the extraction with UMI-tools and used other software."
+                }
+            }
+        },
+        "rnaseq_mapping_options": {
+            "title": "Options for mapping of RNA-seq reads",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Options for mapping of RNA-seq reads",
+            "properties": {
+                "short_read_mapper": {
                   "type": "string",
-                  "default": "string",
-                  "fa_icon": "fas fa-barcode",
-                  "description": "UMI pattern to use. Can be either 'string' (default) or 'regex'.",
-                  "help_text": "Detailed information can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method)."
-              },
-              "umitools_bc_pattern": {
-                  "type": "string",
-                  "minLength": 1,
-                  "fa_icon": "fas fa-barcode",
-                  "help_text": "Detailed information can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method).",
-                  "description": "The UMI barcode pattern to use e.g. 'NNNNNN' indicates that the first 6 nucleotides of the read are from the UMI."
-              },
-              "umitools_bc_pattern2": {
-                  "type": "string",
-                  "minLength": 1,
-                  "fa_icon": "fas fa-barcode",
-                  "description": "The UMI barcode pattern to use if the UMI is located in read 2."
-              },
-              "umitools_umi_separator": {
-                  "type": "string",
-                  "pattern": "^\\S+$",
-                  "minLength": 1,
-                  "maxLength": 1,
-                  "errorMessage": "The UMI separator must not contain spaces and must be a single character (e.g., ':').",
-                  "fa_icon": "fas fa-star-half-alt",
-                  "description": "The character that separates the UMI in the read name. Most likely a colon if you skipped the extraction with UMI-tools and used other software."
-              },
-              "skip_trimming": {
-                  "type": "boolean",
-                  "description": "Skip trimming / cleaning (Fastp) for RNA-seq reads.",
-                  "fa_icon": "fas fa-hand-scissors"
-              },
-              "rnaseq_mapper": {
-                "type": "string",
-                "description": "Tool to use for RNA-seq read mapping.",
-                "enum": ["hisat2", "star"],
-                "default": "hisat2"
-              },
-              "ignore_existing_gff_for_mapping": {
-                  "type": "boolean",
-                  "description": "Ignore existing GTF (when provided) for guiding RNA-seq read mapping.",
-                  "fa_icon": "fas fa-hand-scissors"
-              }
+                  "description": "Tool to use for RNA-seq read mapping.",
+                  "enum": ["hisat2", "star"],
+                  "default": "hisat2"
+                },
+                "ignore_existing_gff_for_mapping": {
+                    "type": "boolean",
+                    "description": "Ignore existing GTF (when provided) for guiding RNA-seq read mapping.",
+                    "fa_icon": "fas fa-hand-scissors"
+                }
             }
         },
         "protein_db_build_options": {
@@ -176,29 +213,29 @@
             "fa_icon": "fas fa-terminal",
             "description": "Options for genome masking",
             "properties": {
-              "skip_orthodb_download": {
-                  "type": "boolean",
-                  "description": "Skip download of OrthoDB protein database.",
-                  "fa_icon": "fas fa-hand-scissors"
-              },
-              "skip_mmseqs_db_download": {
-                  "type": "boolean",
-                  "description": "Skip download of MMseqs2 protein database.",
-                  "fa_icon": "fas fa-hand-scissors"
-              },
-              "mmseqs_db": {
-                  "type": "string",
-                  "default": null,
-                  "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. Set to `UniRef50` by default.",
-                  "help_text": "mmseqs2 lists a large number of databases, not all of which are appropriate for use with MetaEuk. MetaEuk requires protein inputs, so you should select one of the Aminoacid or Profile options."
-              },
-              "min_prot_db_seq_length": {
-                  "type": "integer",
-                  "description": "Minimum sequence length for protein database",
-                  "minimum": 1,
-                  "fa_icon": "fas fa-database",
-                  "help_text": "Minimum sequence length for protein database (after all protein fasta files have been concatenated)"
-              }
+                "skip_orthodb_download": {
+                    "type": "boolean",
+                    "description": "Skip download of OrthoDB protein database.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "skip_mmseqs_db_download": {
+                    "type": "boolean",
+                    "description": "Skip download of MMseqs2 protein database.",
+                    "fa_icon": "fas fa-hand-scissors"
+                },
+                "mmseqs_db": {
+                    "type": "string",
+                    "default": null,
+                    "description": "A string containing the name of one of the databases listed in the [mmseqs2 documentation](https://github.com/soedinglab/MMseqs2/wiki#downloading-databases). This database will be downloaded and formatted for eukaryotic genome annotation. Set to `UniRef50` by default.",
+                    "help_text": "mmseqs2 lists a large number of databases, not all of which are appropriate for use with MetaEuk. MetaEuk requires protein inputs, so you should select one of the Aminoacid or Profile options."
+                },
+                "min_prot_db_seq_length": {
+                    "type": "integer",
+                    "description": "Minimum sequence length for protein database",
+                    "minimum": 1,
+                    "fa_icon": "fas fa-database",
+                    "help_text": "Minimum sequence length for protein database (after all protein fasta files have been concatenated)"
+                }
             }
         },
         "structural_annotation_options": {
@@ -458,9 +495,15 @@
         },
         {
             "$ref": "#/$defs/masking_options"
+        },    
+        {
+            "$ref": "#/$defs/rnaseq_general_options"
         },
         {
-            "$ref": "#/$defs/ncbi_sra_options"
+            "$ref": "#/$defs/rnaseq_sra_options"
+        },
+        {
+            "$ref": "#/$defs/rnaseq_umi_options"
         },
         {
             "$ref": "#/$defs/rnaseq_mapping_options"
