@@ -17,6 +17,7 @@ process GET_SRA_METADATA {
         taxid: String
         nb_short_read_sra_datasets: Integer
         nb_long_read_sra_datasets: Integer
+        sra_max_size: String
         sra_allow_single_end: Boolean
 
     output:
@@ -40,7 +41,7 @@ process GET_SRA_METADATA {
         --taxid $taxid \\
         --max-short-reads $nb_short_read_sra_datasets \\
         --max-long-reads $nb_long_read_sra_datasets \\
-        --ncpus ${task.cpus} \\
+        --max-size $sra_max_size \\
         $paired_only_arg
     """
 
