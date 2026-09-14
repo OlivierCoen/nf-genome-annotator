@@ -5,7 +5,6 @@
 import argparse
 import json
 import logging
-from multiprocessing import Pool
 from enum import Enum
 import xml.etree.ElementTree as ET
 
@@ -88,8 +87,10 @@ def parse_args():
     parser.add_argument("--max-short-reads", required=True,dest="max_short_reads_data", type=int, help="Maximum number of short read sequencing data to fetch")
     parser.add_argument("--max-long-reads", required=True, dest="max_long_reads_data", type=int, help="Maximum number of short read sequencing data to fetch")
     parser.add_argument("--paired-only", dest="paired_only", action='store_true', help="For short reads, fetch only paired-end sequencing data")
-    parser.add_argument("--ncpus", required=True, type=int, help="Number of CPUs to use for parallel processing")
+    parser.add_argument("--max-size", dest="max_size", type=str, help="Maximum size (in Mb / Gb) for an experiment. Must end with 'Mb' or 'Gb'. Example: 10Mb / 2Gb")
+    
     return parser.parse_args()
+    
 
 
 class RateLimitException(Exception):
@@ -177,7 +178,7 @@ def parse_sra_accessions_from_xml(xml_string: str) -> list[dict]:
     if isinstance(experiments, dict):
         experiments = [experiments]
     return [
-        experiment_dict["EXPERIMENT"]
+        experiment_dict
         for experiment_dict in experiments
         if isinstance(experiment_dict, dict)
     ]
@@ -219,14 +220,12 @@ def fetch_sra_experiments_for_ids(sra_uids: list[str]) -> list[dict]:
     return parse_sra_accessions_from_xml(xml_string)
 
 
-def fetch_sra_experiments_chunks(sra_uids_with_index: tuple[int, list[str]]) -> list[dict]:
+def fetch_sra_experiments_chunks(sra_uids: list[str]) -> list[dict]:
     """
     Fetch SRA experiment metadata for a list of SRA experiment IDs
     :param sra_uids: list of SRA experiment IDs
     :return: list of dictionaries, each one containing experiment metadata for a specific SRA ID
     """
-    chunk_id, sra_uids = sra_uids_with_index
-    logger.info(f"Fetching chunk {chunk_id + 1}")
     try:
         return fetch_sra_experiments_for_ids(sra_uids)
     except requests.exceptions.HTTPError as e:
@@ -236,34 +235,66 @@ def fetch_sra_experiments_chunks(sra_uids_with_index: tuple[int, list[str]]) -> 
                 f"Too long request URI with {len(sra_uids)} SRA IDs: dividing in 2 and sending 2 separates requests"
             )
             # dividing into 2 chunks and launching new requests recursively
-            sra_uids_part_1 = (chunk_id, sra_uids[: len(sra_uids) // 2])
-            sra_uids_part_2 = (chunk_id, sra_uids[len(sra_uids) // 2 :])
+            sra_uids_part_1 = sra_uids[: len(sra_uids) // 2]
+            sra_uids_part_2 = sra_uids[len(sra_uids) // 2 :]
             return fetch_sra_experiments_chunks(sra_uids_part_1) + fetch_sra_experiments_chunks(
                 sra_uids_part_2
             )
         else:
             raise
 
-def fetch_sra_experiments(sra_uids: list[str], read_type: str, ncpus: int):
+def fetch_sra_experiments(sra_uids: list[str], read_type: str):
     experiments = []
-    sra_ids_chunks_with_index = [
-        (i // CHUNKSIZE, short_read_sra_raw_ids[i : i + CHUNKSIZE]) 
+    sra_ids_chunks = [
+        short_read_sra_raw_ids[i : i + CHUNKSIZE]
         for i in range(0, len(short_read_sra_raw_ids), CHUNKSIZE)
     ]
     logger.info(
-        f"Fetching sra experiment metadata for each {read_type} SRA experiment ID ({len(sra_ids_chunks_with_index)} chunks in total)"
+        f"Fetching sra experiment metadata for each {read_type} SRA experiment ID ({len(sra_ids_chunks)} chunks in total)"
     )
-    with Pool(processes=ncpus) as pool:
-        results = pool.map(fetch_sra_experiments_chunks, sra_ids_chunks_with_index)
-        for result in results:
-            experiments += result
+    for i, sra_ids_chunk in enumerate(sra_ids_chunks):
+        logger.info(f"Fetching chunk {i + 1}")
+        result = fetch_sra_experiments_chunks(sra_ids_chunk)
+        experiments += result
     return experiments
+
+
+def parse_max_size(max_size: str) -> float:
+    error_msg = f"Invalid max size: {max_size}. Must end with 'Mb' or 'Gb'. Example: 10Mb / 2.1Gb"
+    try:
+        if max_size.endswith('Mb'):
+            return 1e6 * float(max_size.replace('Mb', '')) 
+        elif max_size.endswith('Gb'):
+            return 1e9 * float(max_size.replace('Gb', ''))
+        else:
+            raise ValueError(error_msg)
+    except ValueError:
+        raise ValueError(error_msg)
+
+
+def get_srrs(experiments: list[dict], max_size) -> list[dict]:
+    filtered_experiments = []
+    if max_size:
+        max_size_bytes = parse_max_size(max_size)
+        filtered_experiments = []
+        for exp in short_read_experiments:
+            try:
+                size_in_bytes = float(exp["RUN_SET"]["@bytes"])
+            except (ValueError, KeyError):
+                srr = exp["EXPERIMENT"]["@accession"]
+                logger.warning(f"Could not get size in bytes for {srr}")
+                continue
+            if size_in_bytes and size_in_bytes <= max_size_bytes:
+                filtered_experiments.append(exp)
+    else:
+        filtered_experiments = experiments
+    return [exp["EXPERIMENT"]["@accession"] for exp in filtered_experiments]
     
 
 #####################################################
 #####################################################
 # MAIN
-#####################################################
+#####################################################srrs = get_srrs(long_read_experiments, args.max_size)
 #####################################################
 
 if __name__ == "__main__":
@@ -307,19 +338,19 @@ if __name__ == "__main__":
 
     short_read_experiments = []
     if short_read_sra_raw_ids:
-        short_read_experiments = fetch_sra_experiments(short_read_sra_raw_ids, read_type='short read', ncpus=args.ncpus)
-
+        short_read_experiments = fetch_sra_experiments(short_read_sra_raw_ids, read_type='short read')
+    
     long_read_experiments = []
     if long_read_sra_raw_ids:
-        long_read_experiments = fetch_sra_experiments(long_read_sra_raw_ids, read_type='long read', ncpus=args.ncpus)
-
-     #####################################################
-     # EXPORTING DATA
-     #####################################################
+        long_read_experiments = fetch_sra_experiments(long_read_sra_raw_ids, read_type='long read')
+    
+    #####################################################
+    # EXPORTING DATA
+    #####################################################
 
     if short_read_experiments:
         logger.info(f"Writing short read SRA IDs to {SHORT_READ_SRA_IDS_OUTFILE}")
-        srrs = [exp["@accession"] for exp in short_read_experiments]
+        srrs = get_srrs(short_read_experiments, args.max_size)
         with open(SHORT_READ_SRA_IDS_OUTFILE, "w") as fout:
             fout.writelines([f"{srr}\n" for srr in srrs])
     
@@ -329,12 +360,12 @@ if __name__ == "__main__":
 
     if long_read_experiments:
         logger.info(f"Writing long read SRA IDs to {LONG_READ_SRA_IDS_OUTFILE}")
+        srrs = get_srrs(long_read_experiments, args.max_size)
         with open(LONG_READ_SRA_IDS_OUTFILE, "w") as fout:
-            fout.writelines([f"{sra_id}\n" for sra_id in long_read_sra_raw_ids])
+            fout.writelines([f"{srr}\n" for srr in srrs])
     
         logger.info(f"Writing metadata of long read SRAs to {LONG_READ_METADATA_OUTFILE}")
-        srrs = [exp["@accession"] for exp in long_read_experiments]
         with open(LONG_READ_METADATA_OUTFILE, "w") as fout:
-            fout.writelines([f"{srr}\n" for srr in srrs])
+            json.dump(long_read_experiments, fout)
 
     logger.info("Done")
