@@ -1,7 +1,9 @@
 nextflow.enable.types = true
 
-include { DOWNLOAD_SRA           } from '../download_sra'
-include { DOWNLOAD_ENA           } from '../download_ena'
+include { DOWNLOAD_SRA                              } from '../download_sra'
+include { DOWNLOAD_ENA                              } from '../download_ena'
+
+include { SEQTK_SAMPLE as SAMPLE_READS              } from '../../../modules/local/seqtk/sample'
 
 // ----------------------------------------------------------------------------
 // DOWNLOAD READS FROM PUBLIC DATABASES
@@ -9,13 +11,14 @@ include { DOWNLOAD_ENA           } from '../download_ena'
 
 record ExperimentIDs {
     id: String
-    rnaseq_experiment_ids: Iterable<String>
+    rnaseq_experiment_ids: List<String>
 }
 
 workflow DOWNLOAD_READS {
 
     take:
     ch_input: Channel<ExperimentIDs>
+    read_sampling_size: Float
 
     main:
 
@@ -44,15 +47,30 @@ workflow DOWNLOAD_READS {
     )
 
     // ------------------------------------------------------------------------------------
-    // ASSOCIATE DOWNLOADED READS BACK TO SAMPLE IDS
+    // SAMPLE READS
     // ------------------------------------------------------------------------------------
 
-    ch_downloaded_reads = ch_downloaded_sra
-                            .mix( ch_downloaded_ena )
-                            .map{ rec -> record(sra_id: rec.id, reads: rec.reads) }
-                        
+    ch_downloaded_reads = ch_downloaded_sra.mix( ch_downloaded_ena ).view()
+
+    // if read_sampling_size equals 1, it means that we don't need to sample
+    if ( read_sampling_size ) {
+
+        ch_sampled_reads = SAMPLE_READS(
+            ch_downloaded_reads,
+            read_sampling_size
+        )
+        ch_downloaded_reads = ch_downloaded_reads.join( ch_sampled_reads, by: 'read_id' )
+    
+    }
+    
+    // ------------------------------------------------------------------------------------
+    // ASSOCIATE DOWNLOADED READS BACK TO SAMPLE IDS
+    // ------------------------------------------------------------------------------------
+     
     // associating back to the corresponding sample IDs
     // TODO: simplify when groupBy can handle records
+
+    ch_downloaded_reads = ch_downloaded_reads.map{ rec -> record(sra_id: rec.id, reads: rec.reads) }
 
     // SHORT READS
     ch_downloaded_short_reads = ch_input

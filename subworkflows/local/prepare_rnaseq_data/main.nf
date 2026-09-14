@@ -43,6 +43,7 @@ workflow PREPARE_RNASEQ_DATA {
     sra_max_size: String
     sra_allow_single_end: Boolean
     sra_random_seed: Integer
+    read_sampling_size: Float
     short_read_mapper: String
     ignore_existing_gff_for_mapping: Boolean
     
@@ -80,7 +81,10 @@ workflow PREPARE_RNASEQ_DATA {
                     )
                 }
 
-    ch_downloaded_reads = DOWNLOAD_READS( ch_input ) 
+    ch_downloaded_reads = DOWNLOAD_READS( 
+        ch_input,
+        read_sampling_size
+    ) 
     ch_input = ch_input.join( ch_downloaded_reads, by: 'id', remainder: true )
     
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

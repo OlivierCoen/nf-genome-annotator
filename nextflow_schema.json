@@ -154,7 +154,13 @@
                     "description": "Random seed for selecting SRA datasets.",
                     "default": 42,
                     "help_text": "Change this seed to get a different random selection of SRA datasets."
-                }
+                },
+                "read_sampling_size": {
+                    "type": ["integer", "number"],
+                    "description": "Subsample reads using the specified number of reads / fraction of total reads.",
+                    "default": 1,
+                    "help_text": "Set an integer in order to select this amount of reads. Set a float between 0 and 1 to select a certain proportion of reads. If unset, no sampling is performed (default)."
+                },
             }
         },
         "rnaseq_umi_options": {

@@ -28,17 +28,17 @@ record Samplesheet {
     fasta: Path
     species: String
     gff: Path?
-    supplied_short_read_bams: Iterable<Path>
-    supplied_short_reads: Iterable<Record>
-    supplied_long_reads: Iterable<Record>
-    supplied_short_read_sra_ids: Iterable<String>
-    supplied_long_read_sra_ids: Iterable<String>
-    training_proteins: Iterable<Path>
-    orthodb_excluded_clades: Iterable<String>
-    orthodb_excluded_species: Iterable<String>
+    supplied_short_read_bams: Set<Path>
+    supplied_short_reads: Set<Record>
+    supplied_long_reads: Set<Record>
+    supplied_short_read_sra_ids: List<String>
+    supplied_long_read_sra_ids: List<String>
+    training_proteins: Set<Path>
+    orthodb_excluded_clades: List<String>
+    orthodb_excluded_species: List<String>
     mmseqs_db: String
-    tsebra_gtfs: Iterable<Path>
-    tsebra_hintsfiles: Iterable<Path>
+    tsebra_gtfs: Set<Path>
+    tsebra_hintsfiles: Set<Path>
 }
 
 
@@ -98,6 +98,7 @@ workflow GENOMEANNOTATOR {
             params.sra_max_size,
             params.sra_allow_single_end,
             params.sra_random_seed,
+            params.read_sampling_size,
             params.short_read_mapper,
             params.ignore_existing_gff_for_mapping
         )
