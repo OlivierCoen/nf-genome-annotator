@@ -25,7 +25,7 @@ record Input {
     supplied_short_read_sra_ids: List<String>
     supplied_long_read_sra_ids: List<String>    
     fasta: Path
-    gff: Path
+    reference_gff: Path
 }
 
 

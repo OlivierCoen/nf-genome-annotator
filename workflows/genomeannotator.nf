@@ -122,12 +122,14 @@ workflow GENOMEANNOTATOR {
 
         // NOTE: in case the structural annotation is performed,
         // samples for which annotation could not be performed are not kept for the following steps
-        ch_main = ch_main.join( ch_structural_annotation, by: 'id')
+        ch_main = ch_main.join( ch_structural_annotation, by: 'id' )
 
     } else {
-        // when skipping the structural annotation, the provided gff becomes the structural annotation
-        ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.gff)}
+        // IMPORTANT: when skipping the structural annotation, the provided reference gff becomes the structural annotation
+        ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.reference_gff) }
     }
+
+    // At this step, structural annotations are under the 'structural_annotation' key
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // POST-PROCESS STRUCTURAL ANNOTATION
@@ -135,7 +137,8 @@ workflow GENOMEANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_post_processed_annotation = POST_PROCESS_ANNOTATION(
-        ch_main,
+        ch_main.filter { rec -> rec.structural_annotation != null },
+        params.complementation_use_ref_as_template,
         params.complement_annotation,
         params.skip_gff_cleaning,
         params.skip_alternative_annotations,
@@ -143,7 +146,9 @@ workflow GENOMEANNOTATOR {
         params.gff_fix_overlapping_genes,
         params.gff_filter_incomplete_gene_models
     )
-    ch_main = ch_main.join( ch_post_processed_annotation, by: 'id' )
+    ch_main = ch_main.join( ch_post_processed_annotation, by: 'id', remainder: true )
+
+    // At this step, cleaned structural annotations are under the 'gff' key
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME 
@@ -152,12 +157,13 @@ workflow GENOMEANNOTATOR {
 
     if ( !(params.skip_functional_annotation && params.skip_qc) ) {
     
-        ch_extracted_sequences = EXTRACT_SEQUENCES( ch_main)
+        ch_extracted_sequences = EXTRACT_SEQUENCES(
+            ch_main.filter { rec -> rec.gff != null }
+        )
         ch_main = ch_main.join( ch_extracted_sequences, by: 'id' )
 
     }
 
-    
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,7 +174,7 @@ workflow GENOMEANNOTATOR {
         ch_main = ch_main.map { rec -> rec + record(final_structural_annotation: rec.gff) }
 
         ch_functional_annotation = FUNCTIONAL_ANNOTATION (
-            ch_main,
+            ch_main.filter { rec -> rec.proteome != null },
             params.functional_annotators,
             params.eggnog_mapper_mode,
             params.interproscan5_db,

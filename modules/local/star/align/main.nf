@@ -13,10 +13,8 @@ process STAR_ALIGN {
         record(
             id: String,
             reads: Iterable<Path>,
-            index: Path,
-            gtf: Path?
+            index: Path
         )
-        ignore_existing_gtf: Boolean
 
     stage:
         stageAs reads, "input*/*"
@@ -35,7 +33,6 @@ process STAR_ALIGN {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "$id"
-    def gtf_arg = ignore_existing_gtf ? "" : gtf ? "--sjdbGTFfile $gtf": ""
     def read_file_command_arg = reads[0].extension == 'gz' ? "--readFilesCommand zcat": ''
     """
     # Note: '--outSAMstrandField intronMotif' is required for BRAKER
@@ -48,7 +45,6 @@ process STAR_ALIGN {
         --outSAMstrandField intronMotif \\
         --outSAMtype BAM Unsorted \\
         --outSAMattributes All \\
-        $gtf_arg \\
         $args
     """
 }

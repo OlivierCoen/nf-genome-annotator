@@ -273,6 +273,12 @@
                     "type": "boolean",
                     "description": "Perform complementation of structural annotation using existing annotation.",
                     "fa_icon": "fas fa-hand-scissors"
+                },
+                "complementation_use_ref_as_template": {
+                    "type": "boolean",
+                    "description": "Use the provided `GFF` / `GTF` annotation file as the template for the complementation.",
+                    "fa_icon": "fas fa-hand-scissors",
+                    "help_text": "By default, the new structural annotation is used as the template (the reference) for the complementation. If this flag is set, the provided reference  `GFF` / `GTF` annotation file is used instead. Use this option if you trust your existing annotation and want to enrich it with new annotations."
                 }
             }
         },

@@ -15,10 +15,10 @@ process FASTQC {
     stage:
         stageAs reads, '?/*'
 
-    topic:
+    //topic:
         //tuple('fastqc', id, files("*.zip"))                                                         >> 'fastqc_multiqc'
-        tuple('fastqc', id, files("*.html"))                                                        >> 'additional_results'
-        tuple("${task.process}", 'fastqc', eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')) >> 'versions'
+        //tuple('fastqc', id, files("*.html"))                                                        >> 'additional_results'
+        //tuple("${task.process}", 'fastqc', eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''

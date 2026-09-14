@@ -182,7 +182,7 @@ def parseSamplesheet() {
                     id: meta.id.replaceAll(/\s+/, "_"),
                     fasta: meta.fasta,
                     species: meta.species.toString(),
-                    gff: meta.gff ?: null,
+                    reference_gff: meta.gff ?: null,
 
                     supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
                     

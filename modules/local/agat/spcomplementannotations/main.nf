@@ -12,8 +12,8 @@ process AGAT_SPCOMPLEMENTANNOTATIONS {
     input:
         record(
             id: String, 
-            ref_gff: Path,
-            other_gff: Path
+            gff: Path,
+            reference_gff: Path
         )
 
     output:
@@ -30,8 +30,8 @@ process AGAT_SPCOMPLEMENTANNOTATIONS {
     def prefix = task.ext.prefix ?: "${id}"
     """
     agat_sp_complement_annotations.pl \\
-        --ref $ref_gff \\
-        --add $other_gff \\
+        --ref $gff \\
+        --add $reference_gff \\
        ${args} \\
         --output ${prefix}_complemented.gff
     """

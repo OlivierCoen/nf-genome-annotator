@@ -9,7 +9,7 @@ record MappingInput {
     id: String
     reads: List<Path>
     fasta: Path
-    gtf: Path
+    reference_gtf: Path
 }
 
 workflow FASTQ_ALIGN_HISAT2 {
@@ -27,20 +27,20 @@ workflow FASTQ_ALIGN_HISAT2 {
     if ( !ignore_existing_gff_for_mapping ) {
 
         ch_input_with_gtf = ch_input
-                                .filter{ rec -> rec.gtf != null }
-                                .map{ rec -> rec.subMap(['sample_id', 'gtf']) }
+                                .filter{ rec -> rec.reference_gtf != null }
+                                .map{ rec -> record(id: rec.id, gtf: rec.reference_gtf) }
                                 .unique()
 
-        HISAT2_EXTRACTSPLICESITES( ch_input_with_gtf )
+        ch_splice_sites = HISAT2_EXTRACTSPLICESITES( ch_input_with_gtf )
 
-        HISAT2_EXTRACTEXONS( ch_input_with_gtf )
+        ch_exons = HISAT2_EXTRACTEXONS( ch_input_with_gtf )
 
         ch_input_with_gtf = ch_input_with_gtf
-                                .join(HISAT2_EXTRACTSPLICESITES.out, by: 'sample_id')
-                                .join(HISAT2_EXTRACTEXONS.out, by: 'sample_id')
+                                .join(ch_splice_sites, by: 'id')
+                                .join(ch_exons, by: 'id')
 
         ch_input_without_gtf = ch_input
-                                .filter{ rec -> rec.gtf == null }
+                                .filter{ rec -> rec.reference_gtf == null }
                                 .map{ rec -> rec + record(splice_sites: null, exons: null) }
 
         ch_input = ch_input_with_gtf.mix( ch_input_without_gtf )
@@ -53,22 +53,16 @@ workflow FASTQ_ALIGN_HISAT2 {
     // INDEX GENOME FOR HISAT2
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_fasta_to_build = ch_input
-                            .map { rec -> rec.subMap(['sample_id', 'fasta', 'splice_sites', 'exons']) }
-                            .unique()
-
-    HISAT2_BUILD( ch_fasta_to_build )
-
-    ch_input = ch_input.join(HISAT2_BUILD.out, by: 'sample_id')
+    ch_hisat2_index = HISAT2_BUILD( ch_input )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAP READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    HISAT2_ALIGN(
-        ch_input.join(HISAT2_BUILD.out, by: 'sample_id')
+    ch_aligned = HISAT2_ALIGN(
+        ch_input.join(ch_hisat2_index, by: 'id')
     )
 
     emit:
-    mapped = ch_input.join(HISAT2_ALIGN.out, by: 'id')
+    mapped = ch_input.join(ch_aligned, by: 'id')
 }

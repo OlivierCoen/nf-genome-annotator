@@ -21,7 +21,7 @@ record Input {
     id: String
     short_reads: List<Read>
     fasta: Path
-    gff: Path
+    reference_gff: Path
 }
 
 
@@ -45,12 +45,18 @@ workflow SHORT_READ_PREPARATION {
 
     if ( !ignore_existing_gff_for_mapping ) {
 
-        ch_input_with_gff    = ch_input.filter{ rec -> rec.gff != null }
-        ch_input_without_gff = ch_input.filter{ rec -> rec.gff == null }
+        ch_input_with_gff    = ch_input.filter{ rec -> rec.reference_gff != null }
+        ch_input_without_gff = ch_input.filter{ rec -> rec.reference_gff == null }
 
-        ch_converted = CONVERT_TO_GTF( ch_input_with_gff )
+        ch_converted = CONVERT_TO_GTF(
+            ch_input_with_gff.map { rec -> record(id: rec.id, gff: rec.reference_gff) }
+        )
 
-        ch_input_with_gff = ch_input_with_gff.join( ch_converted, by: 'id')
+        ch_input_with_gff = ch_input_with_gff.join(
+            ch_converted.map{ rec -> record(id: rec.id, reference_gtf: rec.gtf) },
+            by: 'id'
+        )
+        
         ch_input = ch_input_without_gff.mix( ch_input_with_gff )
 
     } else {

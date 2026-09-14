@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process HISAT2_BUILD {
-    tag "$sample_id"
+    tag "$id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -11,7 +11,7 @@ process HISAT2_BUILD {
 
     input:
         record(
-            sample_id: String,
+            id: String,
             fasta: Path,
             splice_sites: Path?,
             exons: Path?
@@ -19,7 +19,7 @@ process HISAT2_BUILD {
 
     output:
         record(
-            sample_id: sample_id,
+            id: id,
             index: file("hisat2", type: 'dir')
         )
 
@@ -44,7 +44,7 @@ process HISAT2_BUILD {
         ${exon_arg} \\
         ${args} \\
         ${fasta_name} \\
-        hisat2/${sample_id}
+        hisat2/${id}
 
     if [ "${is_compressed}" == "true" ]; then
         rm ${fasta_name}

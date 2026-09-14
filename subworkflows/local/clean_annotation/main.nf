@@ -14,6 +14,7 @@ include { AGAT_SPFILTERINCOMPLETEGENECODINGMODELS as AGAT_FILTER_INCOMPLETE_GENE
 record Input {
     id: String
     structural_annotation: Path
+    reference_gff: Path?
     fasta: Path
 }
 
@@ -35,11 +36,19 @@ workflow CLEAN_ANNOTATION {
 
     main:
 
-    // for each modification, the workflow stores the version of the anntoation that is going to be replaced
+    // NOTE: for each modification, the workflow stores the version of the anntoation that is going to be replaced
     // in a specific list of intermediate GFFs
 
-    ch_input = ch_input.map { rec -> rec + record(intermediate_annotations: [rec.structural_annotation]) }
-
+    // storing the current uncleaned annotation in the list of intermediate annotations
+    // storing the reference gff too (if provided)
+    ch_input = ch_input.map { rec -> 
+        if ( rec.reference_gff ) {
+            rec + record(intermediate_annotations: [rec.structural_annotation, rec.reference_gff])
+        } else {
+            rec + record(intermediate_annotations: [rec.structural_annotation])
+        }
+    }
+                
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MANDATORY CLEANUP
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

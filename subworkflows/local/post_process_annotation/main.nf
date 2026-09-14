@@ -14,6 +14,7 @@ record Input {
     id: String
     structural_annotation: Path
     fasta: Path
+    reference_gff: Path
 }
 
 
@@ -21,6 +22,7 @@ workflow POST_PROCESS_ANNOTATION {
 
     take:
     ch_input: Channel<Input>
+    complementation_use_ref_as_template: Boolean
     complement_annotation: Boolean
     skip_gff_cleaning: Boolean
     skip_alternative_annotations: Boolean
@@ -30,7 +32,6 @@ workflow POST_PROCESS_ANNOTATION {
 
     main:
 
-    
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,15 +39,15 @@ workflow POST_PROCESS_ANNOTATION {
     // complementation can only be done using the new structural annotation
 
     if ( complement_annotation ) {
-        ch_complemented = COMPLEMENT_ANNOTATION( ch_input )
+        ch_complemented = COMPLEMENT_ANNOTATION(
+            ch_input,
+            complementation_use_ref_as_template
+        )
         ch_input = ch_input.join( ch_complemented, by: 'id' )
     }
 
-    // storing the provided gff (if any)
     // filtering to keep only records that have at least a structural annotation or a gff
-    ch_input = ch_input
-                .filter { rec -> rec.structural_annotation != null }
-                .map { rec -> rec.gff ? rec + record(previous_annotation: rec.gff) : rec }
+    ch_input = ch_input.filter { rec -> rec.structural_annotation != null }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEANING OF GFF
@@ -63,7 +64,6 @@ workflow POST_PROCESS_ANNOTATION {
         ch_input = ch_input.join( ch_cleaned, by: 'id' )
     
         // NOTE: now the annotation is under the 'gff' key
-
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +76,6 @@ workflow POST_PROCESS_ANNOTATION {
         ch_input = ch_input.join( ch_alternative_annotations, by: 'id' )
 
     }
-
 
     emit:
     ch_input

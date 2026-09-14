@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process HISAT2_EXTRACTEXONS {
-    tag "$sample_id"
+    tag "$id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -11,13 +11,13 @@ process HISAT2_EXTRACTEXONS {
 
     input:
         record(
-            sample_id: String,
+            id: String,
             gtf: Path
         )
 
     output:
         record(
-            sample_id: sample_id,
+            id: id,
             exons: file("*.exons.txt")
         )
 
@@ -31,6 +31,6 @@ process HISAT2_EXTRACTEXONS {
     hisat2_extract_exons.py \\
         $args \\
         $gtf \\
-        > ${sample_id}.exons.txt
+        > ${id}.exons.txt
     """
 }

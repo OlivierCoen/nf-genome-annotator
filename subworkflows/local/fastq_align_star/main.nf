@@ -7,7 +7,7 @@ record MappingInput {
     id: String
     reads: List<Path>
     fasta: Path
-    gtf: Path
+    reference_gtf: Path
 }
 
 workflow FASTQ_ALIGN_STAR {
@@ -22,8 +22,8 @@ workflow FASTQ_ALIGN_STAR {
     // INDEX GENOME FOR STAR
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    STAR_GENOMEGENERATE(
-        ch_input,
+    ch_star_index = STAR_GENOMEGENERATE(
+        ch_input.map { rec -> record(id: rec.id, fasta: rec.fasta, gtf: rec.reference_gtf) },
         ignore_existing_gff_for_mapping
     )
 
@@ -31,12 +31,11 @@ workflow FASTQ_ALIGN_STAR {
     // MAP READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    STAR_ALIGN(
-        ch_input.join(STAR_GENOMEGENERATE.out, by: 'id'),
-        ignore_existing_gff_for_mapping
+    ch_aligned = STAR_ALIGN(
+        ch_input.join(ch_star_index, by: 'id')
     )
 
     emit:
-    mapped = ch_input.join(STAR_ALIGN.out, by: 'id')
+    mapped = ch_input.join(ch_aligned, by: 'id')
 
 }
