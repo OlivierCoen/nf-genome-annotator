@@ -15,13 +15,13 @@ record Input {
     species: String
     fasta: Path
     orthodb_clade: String
-    excluded_clades: Iterable<String>
-    excluded_species: Iterable<String>
+    excluded_clades: List<String>
+    excluded_species: List<String>
     mmseqs_db: String
-    training_proteins: Iterable<Path>
-    short_read_sorted_bams_bais: Iterable<Record>
-    tsebra_gtfs: Iterable<Path>
-    tsebra_hintsfiles: Iterable<Path>
+    training_proteins: Set<Path>
+    short_read_sorted_bams_bais: Set<Record>
+    tsebra_gtfs: Set<Path>
+    tsebra_hintsfiles: Set<Path>
 }
 
 

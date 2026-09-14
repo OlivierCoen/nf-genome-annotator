@@ -21,7 +21,7 @@ process REPEATMODELER_REPEATMODELER {
         'community.wave.seqera.io/library/repeatmodeler:2.0.9--7529329ebd736619' }"
 
     input:
-        record(id: String, db: Iterable<Path>)
+        record(id: String, db: Set<Path>)
 
     output:
         record(id: id, lib: file("*.fa", optional: true))

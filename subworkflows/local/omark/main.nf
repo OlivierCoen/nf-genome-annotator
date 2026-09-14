@@ -16,7 +16,7 @@ record Input {
     gff: Path
     busco_lineage: String
     proteome: Path
-    other_proteomes: Iterable<Path>
+    other_proteomes: Set<Path>
 }
 
 workflow OMARK {

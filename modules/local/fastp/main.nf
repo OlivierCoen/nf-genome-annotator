@@ -14,7 +14,7 @@ process FASTP {
         record(
             id: String, 
             read_id: String,
-            reads: Iterable<Path>
+            reads: Set<Path>
         )
 
     output:

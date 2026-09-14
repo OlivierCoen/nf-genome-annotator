@@ -12,8 +12,8 @@ include { GFFREAD as FROM_OTHER_ANNOTATIONS           } from '../../../modules/l
 record Input {
     id: String
     gff: Path
-    intermediate_annotations: Iterable<Path>
-    alternative_annotations: Iterable<Path>
+    intermediate_annotations: Set<Path>
+    alternative_annotations: Set<Path>
     previous_annotation: Path?
 }
 

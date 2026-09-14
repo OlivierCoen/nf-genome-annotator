@@ -4,8 +4,8 @@
   rnaseq:
     sra:
       short_reads:
-        - SRX30583970 # paired-end
-        - DRX552466 # single-end
+        - SRX10300987 # paired-end
+        - DRX645493 # single-end
       long_reads: 
         - ERX16538129
       

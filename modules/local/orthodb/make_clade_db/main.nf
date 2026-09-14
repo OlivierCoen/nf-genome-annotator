@@ -13,8 +13,8 @@ process ORTHODB_MAKECLADEDB {
     input:
         record(
             orthodb_clade: String,
-            orthodb_excluded_clades: Iterable<String>,
-            orthodb_excluded_species: Iterable<String>
+            orthodb_excluded_clades: List<String>,
+            orthodb_excluded_species: List<String>
         )
 
     output:

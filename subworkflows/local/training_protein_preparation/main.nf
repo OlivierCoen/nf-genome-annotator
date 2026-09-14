@@ -25,9 +25,9 @@ def warnNoProteinsFound(rec: Record){
 record Input {
     id: String
     orthodb_clade: String
-    excluded_clades: Iterable<String>
-    excluded_species: Iterable<String>
-    training_proteins: Iterable<Path>
+    excluded_clades: List<String>
+    excluded_species: List<String>
+    training_proteins: Set<Path>
 }
 
 

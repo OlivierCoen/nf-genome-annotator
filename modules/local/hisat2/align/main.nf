@@ -12,7 +12,7 @@ process HISAT2_ALIGN {
     input:
         record(
             id: String,
-            reads: Iterable<Path>,
+            reads: Set<Path>,
             read_id: String,
             index: Path
         )

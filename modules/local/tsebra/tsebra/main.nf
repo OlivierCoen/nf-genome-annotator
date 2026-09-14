@@ -13,8 +13,8 @@ process TSEBRA_TSEBRA {
     input:
         record(
             id: String,
-            gtfs: Iterable<Path>,
-            hintsfiles: Iterable<Path>
+            gtfs: Set<Path>,
+            hintsfiles: Set<Path>
         )
 
     output:

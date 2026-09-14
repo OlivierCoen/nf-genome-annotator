@@ -12,7 +12,7 @@ process SEQKIT_CONCAT {
     input:
         record(
             id: String,
-            fasta_files: Iterable<Path>
+            fasta_files: Set<Path>
         )
 
     stage:

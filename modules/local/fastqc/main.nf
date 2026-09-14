@@ -13,7 +13,7 @@ process FASTQC {
         record(
             id: String, 
             read_id: String,
-            reads: Iterable<Path>
+            reads: Set<Path>
         )
 
     stage:

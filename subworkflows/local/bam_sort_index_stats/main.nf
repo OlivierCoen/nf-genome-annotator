@@ -8,7 +8,7 @@ include { SAMTOOLS_FLAGSTAT                        } from '../../../modules/loca
 
 record Bams {
     id: String
-    short_read_bams: Iterable<Path>
+    short_read_bams: Set<Path>
 }
 
 workflow BAM_SORT_INDEX_STATS {

@@ -17,12 +17,12 @@ record Input {
     fasta: Path
     species: String
     orthodb_clade: String
-    excluded_clades: Iterable<String>
-    excluded_species: Iterable<String>
-    training_proteins: Iterable<Path>
-    short_read_sorted_bams_bais: Iterable<Record>?
-    tsebra_gtfs: Iterable<Path>
-    tsebra_hintsfiles: Iterable<Path>
+    excluded_clades: List<String>
+    excluded_species: List<String>
+    training_proteins: Set<Path>
+    short_read_sorted_bams_bais: Set<Record>?
+    tsebra_gtfs: Set<Path>
+    tsebra_hintsfiles: Set<Path>
 }
 
 

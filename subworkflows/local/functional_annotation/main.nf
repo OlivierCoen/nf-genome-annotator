@@ -24,7 +24,7 @@ workflow FUNCTIONAL_ANNOTATION {
 
     take:
     ch_input: Channel<Input>
-    functional_annotators: Iterable<String>
+    functional_annotators: List<String>
     eggnog_mapper_mode: String
     interproscan5_db: String
     interproscan5_db_url: String
