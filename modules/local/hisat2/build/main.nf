@@ -30,14 +30,24 @@ process HISAT2_BUILD {
     def args = task.ext.args ?: ''
     def splice_site_arg = splice_sites ? "--ss ${splice_sites}" : ""
     def exon_arg = exons ? "--exon ${exons}" : ""
+    def is_compressed = fasta.getExtension() == "gz" ? true : false
+    def fasta_name = is_compressed ? fasta.getBaseName() : fasta.name
     """
+    if [ "${is_compressed}" == "true" ]; then
+        gzip -c -d ${fasta} > ${fasta_name}
+    fi
+    
     mkdir hisat2
     hisat2-build \\
         -p ${task.cpus} \\
         ${splice_site_arg} \\
         ${exon_arg} \\
         ${args} \\
-        ${fasta} \\
+        ${fasta_name} \\
         hisat2/${sample_id}
+
+    if [ "${is_compressed}" == "true" ]; then
+        rm ${fasta_name}
+    fi
     """
 }
