@@ -11,9 +11,7 @@ include { TAXONOMY_INFO                                                 } from '
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { PREPARE_RNASEQ_DATA                                           } from '../subworkflows/local/prepare_rnaseq_data'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
-include { COMPLEMENT_ANNOTATION                                         } from '../subworkflows/local/complement_annotation'
-include { CLEAN_ANNOTATION                                              } from '../subworkflows/local/clean_annotation'
-include { ALTERNATIVE_ANNOTATIONS                                       } from '../subworkflows/local/alternative_annotation'
+include { POST_PROCESS_ANNOTATION                                       } from '../subworkflows/local/post_process_annotation'
 include { EXTRACT_SEQUENCES                                             } from '../subworkflows/local/extract_sequences'
 include { FUNCTIONAL_ANNOTATION                                         } from '../subworkflows/local/functional_annotation'
 include { QUALITY_CONTROLS                                              } from '../subworkflows/local/quality_controls'
@@ -31,8 +29,10 @@ record Samplesheet {
     species: String
     gff: Path?
     supplied_rnaseq_bams: Iterable<Path>
-    supplied_rnaseq_fastqs: Iterable<Record>
-    rnaseq_experiment_ids: Iterable<String>
+    supplied_short_reads: Iterable<Record>
+    supplied_long_reads: Iterable<Record>
+    supplied_short_read_sra_ids: Iterable<String>
+    supplied_long_read_sra_ids: Iterable<String>
     training_proteins: Iterable<Path>
     orthodb_excluded_clades: Iterable<String>
     orthodb_excluded_species: Iterable<String>
@@ -40,6 +40,7 @@ record Samplesheet {
     tsebra_gtfs: Iterable<Path>
     tsebra_hintsfiles: Iterable<Path>
 }
+
 
 workflow GENOMEANNOTATOR {
 
@@ -92,6 +93,11 @@ workflow GENOMEANNOTATOR {
             params.skip_fastqc_cleaned,
             params.skip_umi_extract,
             params.skip_short_read_cleaning,
+            params.nb_short_read_sra_datasets,
+            params.nb_long_read_sra_datasets,
+            params.sra_max_size,
+            params.sra_allow_single_end,
+            params.sra_random_seed,
             params.short_read_mapper,
             params.ignore_existing_gff_for_mapping
         )
@@ -122,52 +128,22 @@ workflow GENOMEANNOTATOR {
         // when skipping the structural annotation, the provided gff becomes the structural annotation
         ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.gff)}
     }
-    
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // COMPLEMENTATION OF ANNOTATION (WHEN NECESSARY)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // complementation can only be done using the new structural annotation
-
-    if ( params.complement_annotation ) {
-        ch_complemented = COMPLEMENT_ANNOTATION( ch_main )
-        ch_main = ch_main.join( ch_complemented, by: 'id' )
-    }
-
-    // storing the provided gff (if any)
-    // filtering to keep only records that have at least a structural annotation or a gff
-    ch_main = ch_main
-                .filter { rec -> rec.structural_annotation != null }
-                .map { rec -> rec.gff ? rec + record(previous_annotation: rec.gff) : rec }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // CLEANING OF GFF
+    // POST-PROCESS STRUCTURAL ANNOTATION
+    // COMPLEMENT WITH PREVIOUS ANNOTATION, CLEAN, MAKE ALTERNATIVE ANNOTATIONS, ...
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if ( !params.skip_gff_cleaning ) {
-    
-        ch_cleaned = CLEAN_ANNOTATION (
-            ch_main,
-            params.gff_fix_feature_locations_duplicated,
-            params.gff_fix_overlapping_genes,
-            params.gff_filter_incomplete_gene_models
-        )
-        ch_main = ch_main.join( ch_cleaned, by: 'id' )
-    
-        // NOTE: now the annotation is under the 'gff' key
-
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // MAKE ALTERNATIVE ANNOTATIONS (LONGEST ISOFORMS ONLY, ...)
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    if ( !params.skip_alternative_annotations ) {
-
-        ch_alternative_annotations = ALTERNATIVE_ANNOTATIONS( ch_main )
-        ch_main = ch_main.join( ch_alternative_annotations, by: 'id' )
-
-    }
+    ch_post_processed_annotation = POST_PROCESS_ANNOTATION(
+        ch_main,
+        params.complement_annotation,
+        params.skip_gff_cleaning,
+        params.skip_alternative_annotations,
+        params.gff_fix_feature_locations_duplicated,
+        params.gff_fix_overlapping_genes,
+        params.gff_filter_incomplete_gene_models
+    )
+    ch_main = ch_main.join( ch_post_processed_annotation, by: 'id' )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAKE PROTEOME 
@@ -176,14 +152,12 @@ workflow GENOMEANNOTATOR {
 
     if ( !(params.skip_functional_annotation && params.skip_qc) ) {
     
-        ch_extracted_sequences = EXTRACT_SEQUENCES (
-            ch_main
-        )
-    
+        ch_extracted_sequences = EXTRACT_SEQUENCES( ch_main)
         ch_main = ch_main.join( ch_extracted_sequences, by: 'id' )
 
     }
 
+    
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FUNCTIONAL ANNOTATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

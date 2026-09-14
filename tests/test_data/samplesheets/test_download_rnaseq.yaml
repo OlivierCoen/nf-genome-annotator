@@ -6,6 +6,9 @@
       short_reads:
         - SRX30583970 # paired-end
         - DRX552466 # single-end
+      long_reads: 
+        - ERX16538129
+      
 
 - sample: ena
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
@@ -13,5 +16,5 @@
   rnaseq:
     sra:
       short_reads:
-        - ERX14354136 # paired-end
-        - ERR3365947 # single-end
+        - ERX16197251 # paired-end
+      

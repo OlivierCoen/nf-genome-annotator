@@ -75,6 +75,6 @@ workflow CLEAN_ANNOTATION {
     }
 
     emit:
-    cleaned = ch_input
+    ch_input
 
 }

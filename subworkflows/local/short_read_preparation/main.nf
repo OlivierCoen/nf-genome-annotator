@@ -12,6 +12,17 @@ include { AGAT_CONVERTSPGFF2GTF  as CONVERT_TO_GTF } from '../../../modules/loca
 include { FASTQ_ALIGN_HISAT2                       } from '../fastq_align_hisat2'
 include { FASTQ_ALIGN_STAR                         } from '../fastq_align_star'
 
+record Read {
+    id: String
+    reads: List<Path>
+}
+
+record Input {
+    id: String
+    short_reads: List<Read>
+    fasta: Path
+    gff: Path
+}
 
 
 workflow SHORT_READ_PREPARATION {
@@ -53,7 +64,7 @@ workflow SHORT_READ_PREPARATION {
     // make channel containing one pair of fastq files (or one single fastq file in case of single end)
     // per element
     ch_reads = ch_input
-                .flatMap{ rec -> rec.reads_to_map.collect{ subrec ->
+                .flatMap{ rec -> rec.short_reads.collect{ subrec ->
                     record(
                         sample_id: rec.id,
                         fasta: rec.fasta,

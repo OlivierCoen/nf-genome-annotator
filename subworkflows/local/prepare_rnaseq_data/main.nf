@@ -20,7 +20,10 @@ record Read {
 
 record Input {
     id: String
-    reads_to_map: List<Read>
+    supplied_short_reads: List<Read>
+    supplied_long_reads: List<Read>
+    supplied_short_read_sra_ids: List<String>
+    supplied_long_read_sra_ids: List<String>    
     fasta: Path
     gff: Path
 }
@@ -35,11 +38,17 @@ workflow PREPARE_RNASEQ_DATA {
     skip_fastqc_cleaned: Boolean
     skip_umi_extract: Boolean
     skip_short_read_cleaning: Boolean
+    nb_short_read_sra_datasets: Integer
+    nb_long_read_sra_datasets: Integer
+    sra_max_size: String
+    sra_allow_single_end: Boolean
+    sra_random_seed: Integer
     short_read_mapper: String
     ignore_existing_gff_for_mapping: Boolean
+    
 
     main:
-ch_input.view()
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // WHEN NEEDED, FETCH SRA IDS CORRESPONDING TO THE PROVIDED SPECIES
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,10 +57,11 @@ ch_input.view()
 
         ch_sra_ids = FETCH_SRA_IDS( 
             ch_input,
-            params.nb_short_read_sra_datasets,
-            params.nb_long_read_sra_datasets,
-            params.sra_allow_single_end,
-            params.sra_random_seed
+            nb_short_read_sra_datasets,
+            nb_long_read_sra_datasets,
+            sra_max_size,
+            sra_allow_single_end,
+            sra_random_seed
         )
         ch_input = ch_input.join( ch_sra_ids, by: 'id', remainder: true )
         
@@ -72,7 +82,7 @@ ch_input.view()
 
     ch_downloaded_reads = DOWNLOAD_READS( ch_input ) 
     ch_input = ch_input.join( ch_downloaded_reads, by: 'id', remainder: true )
-
+    
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // PREPARE RNASEQ DATA FOR STRUCTURAL ANNOTATION (CLEANING AND / OR MAPPING)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

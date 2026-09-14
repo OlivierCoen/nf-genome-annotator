@@ -26,12 +26,12 @@ workflow DOWNLOAD_SRA {
     // PREFETCH SEQUENCING READS IN SRA FORMAT.
     // ----------------------------------------
 
-    SRATOOLS_PREFETCH (
+    ch_prefetch_out = SRATOOLS_PREFETCH (
         ch_ids,
         ch_ncbi_settings
     )
 
-    ch_sra = SRATOOLS_PREFETCH.out
+    ch_sra = ch_prefetch_out
                 .flatMap { rec -> // transpose (typed version): when multiple SRRs are downloaded for a specific SRA ID, we split them
                     rec.sra.collect { value -> record(id: rec.id, sra: value) }
                 }
@@ -40,11 +40,11 @@ workflow DOWNLOAD_SRA {
     // CONVERT THE SRA FORMAT INTO ONE OR MORE COMPRESSED FASTQ FILES.
     // ---------------------------------------------------------------
 
-    SRATOOLS_FASTERQDUMP (
+    ch_downloaded_fastq = SRATOOLS_FASTERQDUMP (
         ch_sra,
         ch_ncbi_settings
     )
 
     emit:
-    reads = SRATOOLS_FASTERQDUMP.out
+    reads = ch_downloaded_fastq
 }

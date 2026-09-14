@@ -15,6 +15,7 @@ workflow FETCH_SRA_IDS {
     ch_input: Channel<Input>
     nb_short_read_sra_datasets: Integer
     nb_long_read_sra_datasets: Integer
+    sra_max_size: String
     sra_allow_single_end: Boolean
     sra_random_seed: Integer
     
@@ -24,6 +25,7 @@ workflow FETCH_SRA_IDS {
         ch_input.map { rec -> rec.taxid }.unique(),
         nb_short_read_sra_datasets,
         nb_long_read_sra_datasets,
+        sra_max_size,
         sra_allow_single_end
     )
 

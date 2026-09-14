@@ -28,6 +28,23 @@ workflow LONG_READ_PREPARATION {
 
     main:
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // EXTRACT READS 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // make channel containing one pair of fastq files (or one single fastq file in case of single end)
+    // per element
+    ch_reads = ch_input
+                .flatMap{ rec -> rec.long_reads.collect{ subrec ->
+                    record(
+                        sample_id: rec.id,
+                        fasta: rec.fasta,
+                        gtf: rec.gtf,
+                        id: subrec.id,
+                        reads: subrec.reads
+                    ) }
+                }
+
     // ---------------------------------------------------------------------
     // QUALITY CONTROL ON RAW READS
     // ---------------------------------------------------------------------

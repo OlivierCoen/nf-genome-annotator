@@ -138,6 +138,12 @@
                     "default": 5,
                     "help_text": "When more long read datasets are available than the specified value, a random subset will be selected. Set to 0 to disable download of long read datasets."
                 },
+                "sra_max_size": {
+                    "type": "string",
+                    "default": "string",
+                    "fa_icon": "fas fa-barcode",
+                    "description": "Maximum size (in Mb / Gb) allowed for an experiment. Must end with 'Mb' or 'Gb'. Example: `10.2Mb` / `2Gb`"
+                },
                 "sra_allow_single_end": {
                     "type": "boolean",
                     "description": "For short read RNAseq SRA datasets, allow fetching single end datasets when not enough paired-end data are found.",
