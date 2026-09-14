@@ -23,10 +23,22 @@ process SAMTOOLS_FAIDX {
 
     script:
     def args = task.ext.args ?: ''
+    def is_compressed = fasta.getExtension() == "gz" ? true : false
+    def fasta_name = is_compressed ? fasta.getBaseName() : fasta.name
     """
+    # uncompressing, because samtools does not like gzipped fasta (only bgzipped)
+    if [ "${is_compressed}" == "true" ]; then
+        gzip -c -d ${fasta} > ${fasta_name}
+    fi
+    
     samtools \\
         faidx \\
-        ${fasta} \\
+         ${fasta_name} \\
         ${args}
+
+    if [ "${is_compressed}" == "true" ]; then
+        echo "Removing ${fasta_name}"
+        rm ${fasta_name}
+    fi
     """
 }
