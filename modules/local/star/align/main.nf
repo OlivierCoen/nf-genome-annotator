@@ -23,6 +23,7 @@ process STAR_ALIGN {
     output:
         record(
             id: id,
+            read_id: read_id,
             bam: file('*.Aligned.out.bam')
         )
 

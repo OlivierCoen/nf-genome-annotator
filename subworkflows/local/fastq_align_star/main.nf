@@ -5,6 +5,7 @@ include { STAR_ALIGN                     } from '../../../modules/local/star/ali
 
 record MappingInput {
     id: String
+    read_id: String
     reads: List<Path>
     fasta: Path
     reference_gtf: Path
@@ -36,6 +37,6 @@ workflow FASTQ_ALIGN_STAR {
     )
 
     emit:
-    mapped = ch_input.join(ch_aligned, by: 'id')
+    mapped = ch_input.join(ch_aligned, by: 'read_id')
 
 }

@@ -100,7 +100,6 @@ workflow REPORTING {
                         .mix( channel.topic('agat_structural_annotation_stats_multiqc') )
                         .mix( channel.topic('agat_functional_annotation_stats_multiqc').flatMap{ id, files -> files.collect{ file -> [id, file] } } )
                         .mix( channel.topic('busco_multiqc') )
-                        .view{ v -> "multiqc files $v"}
 
     ch_multiqc_file_list = ch_multiqc_files
                             .groupTuple()

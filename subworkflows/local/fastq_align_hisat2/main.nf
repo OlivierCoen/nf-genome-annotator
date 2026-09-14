@@ -7,6 +7,7 @@ include { HISAT2_ALIGN                  } from '../../../modules/local/hisat2/al
 
 record MappingInput {
     id: String
+    read_id: String
     reads: List<Path>
     fasta: Path
     reference_gtf: Path
@@ -64,5 +65,5 @@ workflow FASTQ_ALIGN_HISAT2 {
     )
 
     emit:
-    mapped = ch_input.join(ch_aligned, by: 'id')
+    mapped = ch_input.join(ch_aligned, by: 'read_id')
 }

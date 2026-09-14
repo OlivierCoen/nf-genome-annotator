@@ -19,6 +19,7 @@ process FASTPLONG {
     output:
         record(
             id: id,
+            read_id: read_id,
             fastq: file("*.fq.gz")
         )
 

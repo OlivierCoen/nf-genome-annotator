@@ -50,7 +50,7 @@ workflow DOWNLOAD_READS {
     // SAMPLE READS
     // ------------------------------------------------------------------------------------
 
-    ch_downloaded_reads = ch_downloaded_sra.mix( ch_downloaded_ena ).view()
+    ch_downloaded_reads = ch_downloaded_sra.mix( ch_downloaded_ena )
 
     // if read_sampling_size equals 1, it means that we don't need to sample
     if ( read_sampling_size ) {
@@ -59,7 +59,7 @@ workflow DOWNLOAD_READS {
             ch_downloaded_reads,
             read_sampling_size
         )
-        ch_downloaded_reads = ch_downloaded_reads.join( ch_sampled_reads, by: 'read_id' )
+        ch_downloaded_reads = ch_downloaded_reads.join( ch_sampled_reads, by: 'id' )
     
     }
     

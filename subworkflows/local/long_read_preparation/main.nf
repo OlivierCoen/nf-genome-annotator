@@ -63,9 +63,9 @@ workflow LONG_READ_PREPARATION {
     if ( !skip_long_read_cleaning ) {
 
         ch_cleaned_reads = FASTPLONG(
-            ch_reads.map { rec -> record(id: rec.id, fastq: rec.reads[0]) }
+            ch_reads.map { rec -> record(id: rec.id, read_id: rec.read_id, fastq: rec.reads[0]) }
         )
-        ch_reads = ch_reads.join( ch_cleaned_reads, by: 'id' )
+        ch_reads = ch_reads.join( ch_cleaned_reads, by: 'read_id' )
     
             if ( !skip_fastqc && !skip_fastqc_cleaned ) {
                 FASTQC_CLEANED ( ch_reads )
@@ -81,7 +81,7 @@ workflow LONG_READ_PREPARATION {
     // ---------------------------------------------------------------------
 
     ch_reads = ch_reads
-                .map { rec -> tuple(rec.sample_id, rec.fastq) }
+                .map { rec -> tuple(rec.id, rec.fastq) }
                 .groupTuple()
                 .map { id, fastqs -> record(id: id, new_long_reads: fastqs) }
 

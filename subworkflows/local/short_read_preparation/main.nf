@@ -100,7 +100,7 @@ workflow SHORT_READ_PREPARATION {
     if ( !skip_short_read_cleaning ) {
 
         ch_cleaned_reads = FASTP( ch_reads )
-        ch_reads = ch_reads.join( ch_cleaned_reads, by: 'id' )
+        ch_reads = ch_reads.join( ch_cleaned_reads, by: 'read_id' )
 
         if ( !skip_fastqc && !skip_fastqc_cleaned ) {
             FASTQC_CLEANED( ch_reads )
@@ -137,7 +137,7 @@ workflow SHORT_READ_PREPARATION {
                 .map { id, reads_list -> record(id: id, new_short_reads: reads_list) }
 
     ch_mapped = ch_mapped
-                .map { rec -> tuple(rec.sample_id, rec.bam) }
+                .map { rec -> tuple(rec.id, rec.bam) }
                 .groupTuple()
                 .map { id, bams -> record(id: id, new_short_read_bams: bams) }
 

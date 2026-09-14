@@ -12,7 +12,6 @@ process SAMTOOLS_IDXSTATS {
     input:
         record(
             id: String,
-            bam_id: String,
             bam: Path,
             bai: Path
         )

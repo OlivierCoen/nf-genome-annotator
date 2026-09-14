@@ -20,6 +20,7 @@ process FASTP {
     output:
         record(
             id: id,
+            read_id: read_id,
             reads: files('*.fastp.fastq.gz')
         )
 
