@@ -28,7 +28,7 @@ record Samplesheet {
     fasta: Path
     species: String
     gff: Path?
-    supplied_rnaseq_bams: Iterable<Path>
+    supplied_short_read_bams: Iterable<Path>
     supplied_short_reads: Iterable<Record>
     supplied_long_reads: Iterable<Record>
     supplied_short_read_sra_ids: Iterable<String>

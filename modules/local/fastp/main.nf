@@ -1,7 +1,8 @@
 nextflow.enable.types = true
 
+
 process FASTP {
-    tag "$id"
+    tag "${id} :: ${read_id}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -10,7 +11,11 @@ process FASTP {
     :         'community.wave.seqera.io/library/fastp:1.3.6--4df8d6c11b471bde' }"
 
     input:
-        record(id: String, reads: Iterable<Path>)
+        record(
+            id: String, 
+            read_id: String,
+            reads: Iterable<Path>
+        )
 
     output:
         record(
@@ -19,14 +24,14 @@ process FASTP {
         )
 
     topic:
-        //tuple(id, file('*.json'))                                                              >> 'fastp_multiqc'
+        tuple(id, file('*.json'))                                                              >> 'fastp_multiqc'
         tuple('fastp', id, file('*.fastp.log'))                                                >> 'logs'
         tuple("${task.process}", 'fastp', eval('fastp --version 2>&1 | sed -e "s/fastp //g"')) >> 'versions'
 
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "$read_id"
     if ( reads.size() == 1 ) { // single-end
         """
         fastp \\

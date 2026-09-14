@@ -11,9 +11,14 @@ include { FASTQC as FASTQC_CLEANED              } from '../../../modules/local/f
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-record Reads {
+record Read {
     id: String
-    reads:  List<Path>
+    reads: List<Path>
+}
+
+record Input {
+    id: String
+    long_reads: List<Read>
 }
 
 
@@ -37,10 +42,8 @@ workflow LONG_READ_PREPARATION {
     ch_reads = ch_input
                 .flatMap{ rec -> rec.long_reads.collect{ subrec ->
                     record(
-                        sample_id: rec.id,
-                        fasta: rec.fasta,
-                        gtf: rec.gtf,
-                        id: subrec.id,
+                        id: rec.id,
+                        read_id: subrec.id,
                         reads: subrec.reads
                     ) }
                 }
@@ -50,7 +53,7 @@ workflow LONG_READ_PREPARATION {
     // ---------------------------------------------------------------------
 
     if ( !skip_fastqc && !skip_fastqc_raw ) {
-        FASTQC_RAW ( ch_input )
+        FASTQC_RAW ( ch_reads )
     }
 
     // ---------------------------------------------------------------------
@@ -59,11 +62,13 @@ workflow LONG_READ_PREPARATION {
 
     if ( !skip_long_read_cleaning ) {
 
-        ch_cleaned_reads = FASTPLONG( ch_input )
-        ch_input = ch_input.join( ch_cleaned_reads, by: 'id' )
+        ch_cleaned_reads = FASTPLONG(
+            ch_reads.map { rec -> record(id: rec.id, fastq: rec.reads[0]) }
+        )
+        ch_reads = ch_reads.join( ch_cleaned_reads, by: 'id' )
     
             if ( !skip_fastqc && !skip_fastqc_cleaned ) {
-                FASTQC_CLEANED ( ch_input )
+                FASTQC_CLEANED ( ch_reads )
             }
 
     }
@@ -71,6 +76,15 @@ workflow LONG_READ_PREPARATION {
     // NOTE: for now, no structural annotator integrated in the pipeline accepts Isoseq data in BAM format
     // if Braker4 gets integrated in the pipeline in the future, we'll need to add mapping steps here
 
+    // ---------------------------------------------------------------------
+    // FORMAT OUTPUT CHANNEL
+    // ---------------------------------------------------------------------
+
+    ch_reads = ch_reads
+                .map { rec -> tuple(rec.sample_id, rec.fastq) }
+                .groupTuple()
+                .map { id, fastqs -> record(id: id, new_long_reads: fastqs) }
+
     emit:
-    ch_input
+    ch_reads
 }

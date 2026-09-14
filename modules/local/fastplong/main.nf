@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process FASTPLONG {
-    tag "$id"
+    tag "${id} :: ${read_id}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -12,21 +12,24 @@ process FASTPLONG {
     input:
         record(
             id: String,
+            read_id: String,
             fastq: Path
         )
 
     output:
         record(
             id: id,
-            fastq: file("${prefix}.fq.gz")
+            fastq: file("*.fq.gz")
         )
 
     topic:
+        tuple('fastplong', id, file('fastplong.html', optional: true)) >> 'additional_results'
+        tuple('fastplong', id, file('fastplong.json', optional: true)) >> 'additional_results'
         tuple("${task.process}", 'fastplong', eval("fastplong --version | cut -d' ' -f2")) >> 'versions'
 
     script:
-    def args   = task.ext.args   ?: ''
-    prefix = task.ext.prefix ?: "${id}.preprocessed"
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "$read_id"
     """
     fastplong \\
         $args \\

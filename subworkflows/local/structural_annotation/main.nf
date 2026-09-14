@@ -19,7 +19,7 @@ record Input {
     excluded_species: Iterable<String>
     mmseqs_db: String
     training_proteins: Iterable<Path>
-    mappings: Iterable<Record>
+    short_read_sorted_bams_bais: Iterable<Record>
     tsebra_gtfs: Iterable<Path>
     tsebra_hintsfiles: Iterable<Path>
 }
@@ -64,6 +64,6 @@ workflow STRUCTURAL_ANNOTATION {
     }
 
     emit:
-    annotated = ch_annotated
+    ch_annotated
 
 }

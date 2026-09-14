@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process SAMTOOLS_FLAGSTAT {
-    tag "${bam.name}"
+    tag "${id} :: ${bam.baseName}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -12,6 +12,7 @@ process SAMTOOLS_FLAGSTAT {
     input:
         record(
             id: String,
+            bam_id: String,
             bam: Path,
             bai: Path
         )

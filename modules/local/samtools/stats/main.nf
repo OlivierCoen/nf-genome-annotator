@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process SAMTOOLS_STATS {
-    tag "$id"
+    tag "${id} :: ${bam.baseName}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -24,7 +24,7 @@ process SAMTOOLS_STATS {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "${bam.baseName}"
     """
     samtools \\
         stats \\

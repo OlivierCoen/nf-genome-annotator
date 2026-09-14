@@ -117,19 +117,19 @@ workflow PREPARE_RNASEQ_DATA {
         params.skip_long_read_cleaning
     )
 
-    ch_input = ch_input.join( ch_short_reads_mapped, by: 'id', remainder: true )
+    ch_input = ch_input.join( ch_long_reads_mapped, by: 'id', remainder: true )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_input = ch_input.map{ rec ->
-        def new_rnaseq_bams = rec.new_rnaseq_bams ?: []
-        rec + record(bams: rec.supplied_rnaseq_bams + new_rnaseq_bams)
+        def new_short_read_bams = rec.new_short_read_bams ?: []
+        rec + record(short_read_bams: rec.supplied_short_read_bams + new_short_read_bams)
     }
     
     ch_sorted_bam = BAM_SORT_INDEX_STATS(
-        ch_input.filter { rec -> rec.bams.size() > 0 }
+        ch_input.filter { rec -> rec.short_read_bams.size() > 0 }
     )
     ch_input = ch_input.join( ch_sorted_bam, by: 'id', remainder: true )
 

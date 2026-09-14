@@ -184,7 +184,7 @@ def parseSamplesheet() {
                     species: meta.species.toString(),
                     reference_gff: meta.gff ?: null,
 
-                    supplied_rnaseq_bams: meta.rnaseq_bams ?: [],
+                    supplied_short_read_bams: meta.short_read_bams ?: [],
                     
                     supplied_short_reads: meta.short_reads ? organiseShortReadFastqFiles(meta.rnaseq_fastqs) : [],
                     supplied_long_reads: meta.long_reads ?: [],

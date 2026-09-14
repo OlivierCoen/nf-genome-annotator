@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process FASTQC {
-    tag "$id"
+    tag "${id} :: ${read_id}"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
@@ -10,23 +10,23 @@ process FASTQC {
             : 'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0'}"
 
     input:
-        record(id: String, reads: Iterable<Path>)
+        record(
+            id: String, 
+            read_id: String,
+            reads: Iterable<Path>
+        )
 
     stage:
         stageAs reads, '?/*'
 
     //topic:
-        //tuple('fastqc', id, files("*.zip"))                                                         >> 'fastqc_multiqc'
-        //tuple('fastqc', id, files("*.html"))                                                        >> 'additional_results'
+        //tuple(id, files("*.zip"))                                                                  >> 'fastqc_multiqc'
+        //tuple('fastqc', id, files("*.html"))                                                       >> 'additional_results'
         //tuple("${task.process}", 'fastqc', eval('fastqc --version | sed "/FastQC v/!d; s/.*v//"')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "$id"
-    // Make list of old name and new name pairs to use for renaming in the bash while loop
-    def old_new_pairs = reads.size() == 1 ? [[reads[0], "${prefix}.${reads[0].extension}"]] : reads.withIndex().collect { entry, index -> [entry, "${prefix}_${index + 1}.${entry.extension}"] }
-    def rename_to = old_new_pairs*.join(' ').join(' ')
-    def renamed_files = old_new_pairs.collect { _old_name, new_name -> new_name }.join(' ')
+    def prefix = task.ext.prefix ?: "$read_id"
 
     // The total amount of allocated RAM by FastQC is equal to the number of threads defined (--threads) time the amount of RAM defined (--memory)
     // https://github.com/s-andrews/FastQC/blob/1faeea0412093224d7f6a07f777fad60a5650795/fastqc#L211-L222
@@ -39,19 +39,15 @@ process FASTQC {
     def fastqc_memory_arg = fastqc_memory ? "--memory ${fastqc_memory}" : ''
 
     """
-    printf "%s %s\\n" ${rename_to} | while read old_name new_name; do
-        [ -f "\${new_name}" ] || ln -s \$old_name \$new_name
-    done
-
     fastqc \\
         ${args} \\
         --threads ${task.cpus} \\
         ${fastqc_memory_arg} \\
-        ${renamed_files}
+        ${reads.join(' ')}
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "$read_id"
     """
     touch ${prefix}.html
     touch ${prefix}.zip

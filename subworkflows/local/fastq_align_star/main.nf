@@ -23,7 +23,7 @@ workflow FASTQ_ALIGN_STAR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_star_index = STAR_GENOMEGENERATE(
-        ch_input.map { rec -> record(id: rec.id, fasta: rec.fasta, gtf: rec.reference_gtf) },
+        ch_input.map { rec -> record(id: rec.id, fasta: rec.fasta, gtf: rec.reference_gtf) }.unique(),
         ignore_existing_gff_for_mapping
     )
 

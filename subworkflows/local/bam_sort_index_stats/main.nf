@@ -8,7 +8,7 @@ include { SAMTOOLS_FLAGSTAT                        } from '../../../modules/loca
 
 record Bams {
     id: String
-    bam: Iterable<Path>
+    short_read_bams: Iterable<Path>
 }
 
 workflow BAM_SORT_INDEX_STATS {
@@ -33,40 +33,42 @@ workflow BAM_SORT_INDEX_STATS {
     // ------------------------------------------------------------------------------------
 
     ch_bam = ch_input.flatMap { rec ->
-        rec.bams.collect{ bam ->
+        rec.short_read_bams.collect{ bam ->
             record(
-                sample_id: rec.id,
-                id: bam.baseName,
+                id: rec.id,
                 bam: bam,
                 fasta: rec.fasta,
                 fai: rec.fai
             ) }
     }
 
-    ch_sorted_bam = SAMTOOLS_SORT_INDEX( ch_bam )
+    ch_sorted_bam_bai = SAMTOOLS_SORT_INDEX( ch_bam )
 
-    ch_bam = ch_bam.join( ch_sorted_bam, by: 'id' )
+    ch_bam_bai = ch_bam.join( ch_sorted_bam_bai, by: 'id' )
 
     // ------------------------------------------------------------------------------------
     // MAPPING STATS
     // ------------------------------------------------------------------------------------
 
-    //SAMTOOLS_STATS( ch_bam )
+    SAMTOOLS_STATS( ch_bam_bai )
 
-    //SAMTOOLS_FLAGSTAT( ch_bam )
+    SAMTOOLS_FLAGSTAT( ch_bam_bai )
 
-    //SAMTOOLS_IDXSTATS( ch_bam )
+    SAMTOOLS_IDXSTATS( ch_bam_bai )
 
     // ------------------------------------------------------------------------------------
     // ASSOCIATE SORTED BAM TO ORIGINAL DATA
     // ------------------------------------------------------------------------------------
 
-    ch_bams = ch_bam
-                .map { rec -> tuple( rec.sample_id, record(bam: rec.bam, bai: rec.bai)) }
-                .groupTuple()
-                .map { id, mappings -> record(id: id, mappings: mappings) }
+    ch_mappings = ch_bam_bai
+                    .map { rec -> tuple( rec.id, record(bam: rec.bam, bai: rec.bai) ) }
+                    .groupTuple()
+                    .map { id, bam_bai_list -> record(
+                        id: id, 
+                        short_read_sorted_bams_bais: bam_bai_list
+                    ) }
 
     emit:
-    sorted_indexed = ch_input.join( ch_bams, by: 'id' )
+    ch_input.join( ch_mappings, by: 'id' )
 
 }

@@ -6,3 +6,4 @@ channels:
 
 dependencies:
   - bioconda::star=2.7.11b
+  - conda-forge::gzip=1.14 

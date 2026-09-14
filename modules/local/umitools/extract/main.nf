@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process UMITOOLS_EXTRACT {
-    tag "$id"
+    tag "${id} :: ${read_id}"
     label "process_single"
     label "process_long"
 
@@ -11,7 +11,11 @@ process UMITOOLS_EXTRACT {
             'community.wave.seqera.io/library/umi_tools_future_matplotlib_numpy_pruned:1ee668bafc8c9f81' }"
 
     input:
-        record(id: String, reads: List<Path>)
+        record(
+            id: String, 
+            read_id: String,
+            reads: List<Path>
+        )
 
     output:
         record(id: id, reads: file("*.fastq.gz"))
@@ -23,7 +27,7 @@ process UMITOOLS_EXTRACT {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "$read_id"
     def single_end = reads.size() == 1 ? true : false
     if (single_end) {
         """

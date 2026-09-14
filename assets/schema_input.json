@@ -41,6 +41,7 @@
                 "properties": {
                     "bam": {
                         "type": "array",
+                        "description": "BAM files obtained from mapping of short read RNA-seq data to the provided genome.",
                         "items": {
                             "type": "string",
                             "format": "file-path",
@@ -48,7 +49,7 @@
                             "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.bam$",
                             "errorMessage": "BAM file cannot contain spaces and must have extension '.bam'"
                         },
-                        "meta": ["rnaseq_bams"]
+                        "meta": ["short_read_bams"]
                     },
                     "reads": {
                         "type": "object",

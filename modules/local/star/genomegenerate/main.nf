@@ -6,8 +6,8 @@ process STAR_GENOMEGENERATE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/1b/1b03f5c57d28f4975bbbda74a56202f192c69744e3f4533463cc2dfc1bde2bba/data' :
-        'community.wave.seqera.io/library/star:2.7.11b--5300af0cf0d14492' }"
+            'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/26/268b4c9c6cbf8fa6606c9b7fd4fafce18bf2c931d1a809a0ce51b105ec06c89d/data' :
+            'community.wave.seqera.io/library/htslib_samtools_star_gawk:ae438e9a604351a4' }"
 
     input:
         record(
@@ -32,7 +32,8 @@ process STAR_GENOMEGENERATE {
     def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
     def gtf_arg     = ignore_existing_gtf ? "" : gtf ? "--sjdbGTFfile $gtf" : ''
     """
-    NUM_BASES=\$(grep -v '^>' $fasta | tr -d '\n' | wc -c)
+    samtools faidx $fasta
+    NUM_BASES=`gawk '{sum = sum + \$2}END{if ((log(sum)/log(2))/2 - 1 > 14) {printf "%.0f", 14} else {printf "%.0f", (log(sum)/log(2))/2 - 1}}' ${fasta}.fai`
 
     mkdir star
     STAR \\
@@ -44,6 +45,20 @@ process STAR_GENOMEGENERATE {
         --genomeSAindexNbases \$NUM_BASES \\
         $memory \\
         $args
+    """
+
+    stub:
+    """
+    mkdir star
+    touch star/Genome
+    touch star/Log.out
+    touch star/SA
+    touch star/SAindex
+    touch star/chrLength.txt
+    touch star/chrName.txt
+    touch star/chrNameLength.txt
+    touch star/chrStart.txt
+    touch star/genomeParameters.txt
     """
 
 }

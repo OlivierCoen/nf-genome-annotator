@@ -72,10 +72,10 @@ workflow SHORT_READ_PREPARATION {
     ch_reads = ch_input
                 .flatMap{ rec -> rec.short_reads.collect{ subrec ->
                     record(
-                        sample_id: rec.id,
+                        id: rec.id,
                         fasta: rec.fasta,
                         gtf: rec.gtf,
-                        id: subrec.id,
+                        read_id: subrec.id,
                         reads: subrec.reads
                     ) }
                 }
@@ -128,16 +128,19 @@ workflow SHORT_READ_PREPARATION {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // GROUP BAM FILES BY SAMPLE ID
+    // GROUP READS & BAM FILES BY SAMPLE ID
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ch_reads = ch_reads
+                .map { rec -> tuple(rec.id, rec.reads) }
+                .groupTuple()
+                .map { id, reads_list -> record(id: id, new_short_reads: reads_list) }
 
     ch_mapped = ch_mapped
                 .map { rec -> tuple(rec.sample_id, rec.bam) }
                 .groupTuple()
-                .map { id, bams -> record(id: id, new_rnaseq_bams: bams) }
-
-    
+                .map { id, bams -> record(id: id, new_short_read_bams: bams) }
 
     emit:
-    ch_mapped
+    ch_reads.join( ch_mapped, by: 'id' )
 }

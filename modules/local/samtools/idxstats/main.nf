@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process SAMTOOLS_IDXSTATS {
-    tag "$id"
+    tag "${id} :: ${bam.baseName}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -12,6 +12,7 @@ process SAMTOOLS_IDXSTATS {
     input:
         record(
             id: String,
+            bam_id: String,
             bam: Path,
             bai: Path
         )
@@ -21,7 +22,7 @@ process SAMTOOLS_IDXSTATS {
         tuple("${task.process}", 'samtools', eval("samtools version | sed '1!d;s/.* //'")) >> 'versions'
 
     script:
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "${bam.baseName}"
 
     """
     # Note: --threads value represents *additional* CPUs to allocate (total CPUs = 1 + --threads).

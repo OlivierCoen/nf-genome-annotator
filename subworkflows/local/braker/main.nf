@@ -20,7 +20,7 @@ record Input {
     excluded_clades: Iterable<String>
     excluded_species: Iterable<String>
     training_proteins: Iterable<Path>
-    mappings: Iterable<Record>?
+    short_read_sorted_bams_bais: Iterable<Record>?
     tsebra_gtfs: Iterable<Path>
     tsebra_hintsfiles: Iterable<Path>
 }
@@ -59,15 +59,15 @@ workflow BRAKER {
     // ----------------------------------------------------------
 
     ch_samtools_merge_input = ch_merge_me.map{ rec ->
-        def bams = rec.mappings.collect { r -> r.bam }
-        def bais = rec.mappings.collect { r -> r.bai }
+        def bams = rec.short_read_sorted_bams_bais.collect { r -> r.bam }
+        def bais = rec.short_read_sorted_bams_bais.collect { r -> r.bai }
         record(id: rec.id, bams: bams, bais: bais)
     }
 
     ch_merged = SAMTOOLS_MERGE( ch_samtools_merge_input )
 
     ch_merge_me       = ch_merge_me.join( ch_merged, by: 'id' )
-    ch_not_no_merge   = ch_not_no_merge.map { rec -> rec + record(bam: rec.mappings[0].bam) }
+    ch_not_no_merge   = ch_not_no_merge.map { rec -> rec + record(bam: rec.short_read_sorted_bams_bais[0].bam) }
 
     ch_input = ch_leave_me_alone.mix( ch_not_no_merge ).mix( ch_merge_me )
 
@@ -118,6 +118,6 @@ workflow BRAKER {
     ch_not_to_merge = ch_not_to_merge.map{ rec -> rec + record(structural_annotation: rec.braker_gtf) }
 
     emit:
-    annotated = ch_merged.mix( ch_not_to_merge )
+    ch_merged.mix( ch_not_to_merge )
 
 }

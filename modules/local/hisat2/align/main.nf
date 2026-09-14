@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process HISAT2_ALIGN {
-    tag "$id"
+    tag "${id} :: ${read_id}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -13,6 +13,7 @@ process HISAT2_ALIGN {
         record(
             id: String,
             reads: Iterable<Path>,
+            read_id: String,
             index: Path
         )
 
@@ -23,14 +24,14 @@ process HISAT2_ALIGN {
         )
 
     topic:
-        tuple(id, file('*.log'))           >> 'hisat2_multiqc'
-        tuple('hisat2', id, file('*.log')) >> 'logs'
+        tuple(id, file('*.hisat2.summary.log'))           >> 'hisat2_multiqc'
+        tuple('hisat2', id, file('*.hisat2.summary.log')) >> 'logs'
         tuple("${task.process}", 'hisat2', eval('hisat2 --version | grep -o "version [^ ]*" | cut -d " " -f 2')) >> 'versions'
         tuple("${task.process}", 'samtools', eval("samtools --version | sed -n '1s/samtools //p'"))              >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "$read_id"
 
     // TODO: implement computation of strandedness
     strandedness_arg = ''
@@ -45,6 +46,8 @@ process HISAT2_ALIGN {
     }
     */
 
+    // NOTE: --dta is required for braker
+
     def rg = args.contains("--rg-id") ? "" : "--rg-id ${prefix} --rg SM:${prefix}"
     if ( reads.size() == 1 ) {
         """
@@ -57,6 +60,7 @@ process HISAT2_ALIGN {
             $strandedness_arg \\
             --summary-file ${prefix}.hisat2.summary.log \\
             --threads $task.cpus \\
+            --dta \\
             $rg \\
             $args \\
             | samtools view -bS -F 4 -F 256 - > ${prefix}.bam
@@ -73,6 +77,7 @@ process HISAT2_ALIGN {
             $strandedness_arg \\
             --summary-file ${prefix}.hisat2.summary.log \\
             --threads $task.cpus \\
+            --dta \\
             $rg \\
             --no-mixed \\
             --no-discordant \\
