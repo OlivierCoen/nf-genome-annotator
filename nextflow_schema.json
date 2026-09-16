@@ -57,14 +57,15 @@
                 "genome_masker": {
                     "type": "string",
                     "description": "Tool to use for genome masking. Choose between the RepeatModeler / RepeatMasker suite, or EarlGrey.",
-                    "enum": ["red", "repeatmasker", "earlgrey"],
-                    "default": "red"
+                    "enum": ["repeatmasker", "red", "earlgrey"],
+                    "default": "repeatmasker",
+                    "help_text": "As a rule of thumb, in terms of accuracy, earlGrey is more accurate (but takes longer) than RepeatModeler / RepeatMasker. Use Red for very fast masking, but less acurate."
                 },
                 "dfam_db": {
                     "type": "string",
                     "description": "Path to DFAM database",
                     "fa_icon": "fas fa-hand-scissors",
-                    "help": "Folder containing the DFAM database files"
+                    "help_text": "Folder containing the DFAM database files"
                 }
             }
         },

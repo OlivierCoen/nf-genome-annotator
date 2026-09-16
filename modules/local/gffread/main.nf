@@ -7,8 +7,8 @@ process GFFREAD {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/12/12f086e3af543e5338bb43ddbe3e06539d58801d116b4e3dbe1a8397620d76ac/data':
-        'community.wave.seqera.io/library/gffread:0.12.9--31052b0daea9875b' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/0f/0f2e0989f34dd166393d87c5265fe5860224ab0cf92061e45a8b21602605b134/data':
+        'community.wave.seqera.io/library/gffread_gzip:3a40774e2f2a9631' }"
 
     input:
         record(

@@ -1,2 +1,6 @@
 gérer le strandedness
 détecter fastq interleaved
+ajouter le busco lineage à braker
+ajouter les isoseq à braker
+finir tiberius
+maj multiqc modules

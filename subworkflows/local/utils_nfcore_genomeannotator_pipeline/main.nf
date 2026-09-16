@@ -186,7 +186,7 @@ def parseSamplesheet() {
 
                     supplied_short_read_bams: meta.short_read_bams ?: [],
                     
-                    supplied_short_reads: meta.short_reads ? organiseShortReadFastqFiles(meta.rnaseq_fastqs) : [],
+                    supplied_short_reads: meta.short_reads ? organiseShortReadFastqFiles(meta.short_reads) : [],
                     supplied_long_reads: meta.long_reads ?: [],
                     
                     supplied_short_read_sra_ids: meta.sra?.short_reads ?: [],

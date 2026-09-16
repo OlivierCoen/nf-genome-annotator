@@ -1,7 +1,3 @@
-- sample: braker_proteins
-  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  species: "3702"
-  training_proteins:
-    - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
-  rnaseq:
-    reads:
+- sample: anasatum_scaff_25_500000_700000
+  genome: tests/test_data/data/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
+  species: 96803

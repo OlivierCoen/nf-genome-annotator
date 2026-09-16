@@ -39,27 +39,24 @@ workflow STRUCTURAL_ANNOTATION {
 
     if ( structural_annotator == "braker3" ) {
 
-        BRAKER(
+        ch_annotated = BRAKER(
             ch_input,
             skip_orthodb_download,
             min_prot_db_seq_length
         )
-        ch_annotated = BRAKER.out.annotated
 
     } else if ( structural_annotator == "helixer" ) {
 
-        HELIXER( ch_input )
-        ch_annotated = HELIXER.out.annotated
+        ch_annotated = HELIXER( ch_input )
         
     } else if ( structural_annotator == "metaeuk" ) {
 
-        METAEUK(
+        ch_annotated = METAEUK(
             ch_input,
             mmseqs_db,
             skip_mmseqs_db_download,
             min_prot_db_seq_length
         )
-        ch_annotated = METAEUK.out.annotated
         
     }
 

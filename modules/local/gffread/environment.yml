@@ -5,3 +5,4 @@ channels:
   - bioconda
 dependencies:
   - bioconda::gffread=0.12.9
+  - conda-forge::gzip=1.14 

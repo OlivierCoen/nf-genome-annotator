@@ -1,4 +1,4 @@
-- sample: braker_bam
+- sample: braker_example
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
   species: arabidopsis thaliana
   rnaseq:
@@ -8,11 +8,5 @@
       short:
         - R1: tests/test_data/data/RNAseq.1.fq.gz
           R2: tests/test_data/data/RNAseq.2.fq.gz
-
-
-- sample: braker_proteins
-  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
-  species: 3702
   training_proteins:
     - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa
-  rnaseq:
