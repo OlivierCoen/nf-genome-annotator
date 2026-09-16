@@ -37,7 +37,7 @@ process RED {
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > input/genome.fa
     else
-        ln -s ${fasta} input/genome.fa
+        cp -P ${fasta} input/genome.fa
     fi
 
     ################################################
