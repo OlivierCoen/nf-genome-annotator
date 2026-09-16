@@ -13,17 +13,92 @@
 
 ## Introduction
 
-**nf-genome-annotator** is a bioinformatics pipeline that performs genome annotation (structural + functional).
+**nf-core/genomeannotation** is a bioinformatics pipeline that performs end-to-end genome annotation (structural + functional) for **eukaryotic organisms**. After sequencing and assembling a genome, annotation is essential to identify gene locations and their functions. However, the annotation process can be complex, time-consuming, and challenging for less experienced users. The **nf-core/genomeannotation** pipeline aims to simplify this process, offering users a seamless and intuitive experience while ensuring high-quality annotations.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+It takes as input a samplesheet in `yaml` / `json` format, with the mandatory fields :
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+- the sequence of the genome in `fasta` format (compressed or not)
+- a NCBI Taxon ID (or a species name recognised by **NCBI Taxonomy**)
+- a genome ID is used for naming files, particularly the final annotation output
+
+<!-- TODO nf-core: send link to usage for the whole list of accepted parameters -->
+
+
+## Pipeline overview
+
+The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data in multiple distinct steps.
+
+>[!TIP]
+>Note: Except for data preparation and reporting, all steps are optional. For example, you can use a `gff` file from a previous run (or another tool) and proceed directly to sequence extraction (proteome + CDS), functional annotation, and quality control.
+
+#### 1. Data preparation (mandatory)
+
+- Check genome sequence and IDs
+- Compute general statistics from the genome sequence
+- Fetch taxonomy information corresponding to the provided species / taxon ID
+
+#### 2. Genome masking (optional)
+
+Some structural annotators, such as **BRAKER**, require genome softmasking. The pipeline offers multiple options for repeat masking:
+
+- **RepeatModeler / RepeatMasker (default)**: The standard tool suite for repeat masking, using a minimal Dfam database. Moderate speed.
+- **Red**: A fast but less accurate repeat masker, relying solely on genome sequence. Extremely fast.
+- **earlGrey**: A highly accurate repeat masker that uses a custom Dfam database tailored to the closest available clade of the provided species. Slow to very slow.
+
+>[!NOTE]
+>earlGrey requires users to download the relevant portion of the Dfam database. **nf-core/genomeannotation** automates this process using a custom multithreaded download script based on the **famdb** package.
+
+#### 3. Preparation of RNA-seq data (optional)
+
+Structural annotators like **BRAKER** or **Tiberius** can use short- or long-read RNA-seq data to enhance gene model accuracy. With **nf-core/genomeannotation**, users can provide their own RNA-seq data (in `fastq` or `bam` format) for these tools. Additionally, the pipeline offers an opt-out feature to automatically retrieve a random set of SRA/ENA IDs specific to the provided species and download the corresponding `fastq` files.
+
+If required by downstream tools, `fastq` files can be mapped to the genome prior to structural annotation.
+
+#### 4. Structural annotation (optional)
+
+Users can choose between multiple structural annotators:
+
+- **Braker3**
+- **Helixer**
+- **Metaeuk**
+- **Tiberius** [TODO]
+
+>[!NOTE]
+>For technical reasons, **BRAKER4** is not yet available in **nf-core/genomeannotation**. We are actively working to overcome these limitations.
+
+>[!NOTE]
+>**Metaeuk** should be chosen only for small eurakyotic organisms.
+
+>[!WARNING]
+>Both **Helixer** and **Tiberius** rely on deep learning models, so inference is significantly faster when run on GPUs rather than CPUs.
+
+#### 5. Annotation post-processing (optional)
+
+- The structural annotation (or the annotation provided by the user if structural annotation was skipped) is cleaned using **AGAT**.
+- Alternative annotations are produced (longest transcript isoforms only, etc.).
+- CDS and Protein sequences are extracted as `fasta` files using **gffread**.
+
+#### 6. Functional annotation (optional)
+
+Users can select one or more functional annotators from the following options:
+
+- **eggNOG-mapper**
+- **Interproscan5**
+
+If multiple annotators are chosen, their results are merged into a unified annotation.
+
+#### 7. Quality controls (optional)
+
+Quality controls are performed using:
+
+- **BUSCO**
+- **OMark**
+- **AGAT**
+
+#### 8. Reporting
+
+**nf-core/genomeannotation** uses **MultiQC** to generate a dedicated QC report for each annotated genome.
+
 
 ## Usage
 
@@ -33,14 +108,14 @@
 Now, you can run the pipeline using:
 
 ```bash
-nextflow run OlivierCoen/nf-genome-annotator \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
+nextflow run nf-core/genomeannotation \
+   -profile <docker/apptainer/singularity/.../institute> \
+   --input samplesheet.yaml \
    --outdir <OUTDIR>
 ```
 
 > [!WARNING]
->`conda` cannot be used as a profile for this pipeline.
+>For certain tools, such as **BRAKER3** and **Tiberius**, the `conda` profile is not supported in this pipeline. We recommend using `apptainer`, `singularity` or `docker` instead.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
