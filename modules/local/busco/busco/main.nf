@@ -3,14 +3,14 @@ nextflow.enable.types = true
 // Note: merge with other processes when bug is fixed:
 // https://github.com/nextflow-io/nextflow/issues/7573 
 
-process BUSCO_PROTEOME {
+process BUSCO_BUSCO {
     
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/6f/6f67e816ab2f7ccc9cb2d40874dea1e2e1a8e88ef6a44750b66c0ee55fe8de6c/data'
-            : 'community.wave.seqera.io/library/busco:6.1.0--0e40710a525d8d44'}"
+            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/54/541932735559672d1f3e588126b044b579d484f98cc70b4903234801b45af193/data'
+            : ''}"
     // Note: one test had to be disabled when switching to Busco 6.0.0, cf https://github.com/nf-core/modules/pull/8781/files
     // Try to restore it when upgrading Busco to a later version
 
@@ -26,11 +26,11 @@ process BUSCO_PROTEOME {
     stage:
         stageAs fasta, 'tmp_input/*'
 
-    topic:
-        tuple(id, files("short_summaries/*.txt"))                                      >> 'busco_multiqc'
-        tuple('busco', id, file("*-busco.batch_summary.txt"))                          >> 'additional_results'
-        tuple('busco', id, file('*-busco.log'))                                        >> 'logs'
-        tuple("${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"')) >> 'versions'
+    //topic:
+    //    tuple(id, files("short_summaries/*.txt"))                                      >> 'busco_multiqc'
+    //    tuple('busco', id, file("*-busco.batch_summary.txt"))                          >> 'additional_results'
+    //    tuple('busco', id, file('*-busco.log'))                                        >> 'logs'
+    //    tuple("${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
@@ -71,7 +71,7 @@ process BUSCO_PROTEOME {
         if [ "\${FASTA##*.}" == 'gz' ]; then
             gzip -cdf "\$FASTA" > \$( basename "\$FASTA" .gz )
         else
-            ln -s "\$FASTA" .
+            cp -P "\$FASTA" .
         fi
     done
     cd ..

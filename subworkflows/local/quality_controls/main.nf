@@ -1,8 +1,8 @@
 nextflow.enable.types = true
 
 include { BUSCO_DOWNLOAD                                              } from '../../../modules/local/busco/download'
-include { BUSCO_GENOME                                } from '../../../modules/local/busco/busco_genome'
-include { BUSCO_PROTEOME                               } from '../../../modules/local/busco/busco_proteome'
+include { BUSCO_BUSCO as BUSCO_GENOME                                 } from '../../../modules/local/busco/busco'
+include { BUSCO_BUSCO as BUSCO_PROTEOME                               } from '../../../modules/local/busco/busco'
 include { AGAT_SPSTATISTICS as AGAT_GTF_STATISTICS                    } from '../../../modules/local/agat/spstatistics'
 include { AGAT_SPFUNCTIONALSTATISTICS as AGAT_FUNCTIONAL_STATISTICS   } from '../../../modules/local/agat/spfunctionalstatistics'
 
