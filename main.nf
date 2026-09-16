@@ -42,7 +42,9 @@ workflow NFCORE_GENOMEANNOTATOR {
     GENOMEANNOTATOR( samplesheet )
 
     emit:
-    results = GENOMEANNOTATOR.out.results
+    results            = GENOMEANNOTATOR.out.results
+    additional_results = GENOMEANNOTATOR.out.additional_results
+    logs               = GENOMEANNOTATOR.out.logs
 }
 
 
@@ -89,7 +91,9 @@ workflow {
     )
 
     publish:
-    results            = NFCORE_GENOMEANNOTATOR.out.results
+    results               = NFCORE_GENOMEANNOTATOR.out.results
+    additional_results    = NFCORE_GENOMEANNOTATOR.out.additional_results
+    logs                  = NFCORE_GENOMEANNOTATOR.out.logs
 }
 
 /*
@@ -120,6 +124,18 @@ output {
             rec.structural_annotation_stats >> "${rec.id}/quality_controls/${rec.id}.structural_annotation_stats.yaml"
             rec.functional_annotation_stats >> "${rec.id}/quality_controls/${rec.id}.functional_annotation_stats.yaml"
             rec.omark                       >> "${rec.id}/quality_controls/"
+        }
+    }
+
+    additional_results {
+        path { tool_name, id, files -> 
+            files >> "${id}/${tool_name}/"
+        }
+    }
+
+    logs {
+        path { tool_name, id, files -> 
+            files >> "${id}/${tool_name}/"
         }
     }
 

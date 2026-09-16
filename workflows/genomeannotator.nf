@@ -216,7 +216,9 @@ workflow GENOMEANNOTATOR {
     ch_main = ch_main.join( ch_reporting, by: 'id' )
 
     emit:
-    results = ch_main
+    results            = ch_main
+    additional_results = channel.topic('additional_results')
+    logs               = channel.topic('logs')
 
 }
 
