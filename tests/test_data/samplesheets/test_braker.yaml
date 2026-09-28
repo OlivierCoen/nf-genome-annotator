@@ -1,5 +1,5 @@
 - sample: braker_pass_etp
-  genome: tests/test_data/data/genome.X1-4.fa.gz
+  genome: tests/test_data/data/genome.X1-4.pass_etp.fa.gz
   species: arabidopsis thaliana
   rnaseq:
     bam:
