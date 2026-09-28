@@ -19,7 +19,7 @@ record Input {
     excluded_species: List<String>
     mmseqs_db: String
     training_proteins: Set<Path>
-    short_read_sorted_bams_bais: Set<Record>
+    short_read_mappings: Set<Record>
     tsebra_gtfs: Set<Path>
     tsebra_hintsfiles: Set<Path>
 }

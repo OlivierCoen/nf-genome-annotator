@@ -12,8 +12,8 @@ process SAMTOOLS_MERGE {
     input:
         record(
             id: String,
-            bams: Set<Path>,
-            bais: Set<Path>
+            bams: List<Path>,
+            bais: List<Path>
         )
 
     stage:

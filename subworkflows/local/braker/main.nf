@@ -12,6 +12,11 @@ include { SAMTOOLS_MERGE                                        } from '../../..
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+record Mapping {
+    bam: Path
+    bai: Path
+}
+
 record Input {
     id: String
     fasta: Path
@@ -20,7 +25,7 @@ record Input {
     excluded_clades: List<String>
     excluded_species: List<String>
     training_proteins: Set<Path>
-    short_read_sorted_bams_bais: Set<Record>?
+    short_read_mappings: List<Mapping>?
     tsebra_gtfs: Set<Path>
     tsebra_hintsfiles: Set<Path>
 }
@@ -48,26 +53,26 @@ workflow BRAKER {
     // remainder true means a left outer join
     ch_input = ch_input.join( ch_proteins, by: 'id', remainder: true )
 
-    ch_has_mappings   = ch_input.filter{ rec -> rec.mappings != null }
-    ch_leave_me_alone = ch_input.filter{ rec -> rec.mappings == null }
+    ch_has_mappings   = ch_input.filter{ rec -> rec.short_read_mappings != null }
+    ch_leave_me_alone = ch_input.filter{ rec -> rec.short_read_mappings == null }
     
-    ch_merge_me       = ch_has_mappings.filter{ rec -> rec.mappings.size() > 1 }
-    ch_not_no_merge   = ch_has_mappings.filter{ rec -> rec.mappings.size() <= 1 }
+    ch_merge_me       = ch_has_mappings.filter{ rec -> rec.short_read_mappings.size() > 1 }
+    ch_not_no_merge   = ch_has_mappings.filter{ rec -> rec.short_read_mappings.size() <= 1 }
 
     // ----------------------------------------------------------
     // MERGE MULTIPLE BAM FILES INTO A SINGLE BAM WHEN NECESSARY
     // ----------------------------------------------------------
 
     ch_samtools_merge_input = ch_merge_me.map{ rec ->
-        def bams = rec.short_read_sorted_bams_bais.collect { r -> r.bam }
-        def bais = rec.short_read_sorted_bams_bais.collect { r -> r.bai }
+        def bams = rec.short_read_mappings.collect { r -> r.bam }
+        def bais = rec.short_read_mappings.collect { r -> r.bai }
         record(id: rec.id, bams: bams, bais: bais)
     }
 
     ch_merged = SAMTOOLS_MERGE( ch_samtools_merge_input )
 
     ch_merge_me       = ch_merge_me.join( ch_merged, by: 'id' )
-    ch_not_no_merge   = ch_not_no_merge.map { rec -> rec + record(bam: rec.short_read_sorted_bams_bais[0].bam) }
+    ch_not_no_merge   = ch_not_no_merge.map { rec -> rec + record(bam: rec.short_read_mappings[0].bam) }
 
     ch_input = ch_leave_me_alone.mix( ch_not_no_merge ).mix( ch_merge_me )
 
@@ -75,9 +80,7 @@ workflow BRAKER {
     // RUN BRAKER3
     // ----------------------------------------------------------
 
-    ch_braker_out = BRAKER3(
-        ch_input.map { rec -> rec.subMap(['id', 'species', 'fasta', 'proteins_fasta', 'bam']) }
-    )
+    ch_braker_out = BRAKER3( ch_input )
 
     ch_braker_out = ch_braker_out
             .filter { rec -> 

@@ -95,17 +95,17 @@ workflow TRAINING_PROTEIN_PREPARATION {
 
     ch_no_protein_db.map { rec -> warnNoProteinsFound(rec) }
 
-    ch_input = ch_single_protein_db.mix( ch_concatenated_proteins )
-
     // ----------------------------------------------------------
     // CHECK HEADERS OR WHOLE PROTEIN DB AND FIX THEM WHEN NECESSARY
     // ----------------------------------------------------------
 
     ch_proteins = CHECK_PROTEIN_FASTA(
-        ch_input,
+        ch_single_protein_db.mix( ch_concatenated_proteins ),
         min_prot_db_seq_length
-    ).map { rec -> record(id: rec.id, proteins_fasta: rec.fasta) }
+    )
 
+    ch_proteins = ch_proteins.map { rec -> record(id: rec.id, proteins_fasta: rec.fasta) }
+    
     emit:
-    proteins = ch_input.join(ch_proteins, by: 'id')
+    ch_input.join(ch_proteins, by: 'id')
 }

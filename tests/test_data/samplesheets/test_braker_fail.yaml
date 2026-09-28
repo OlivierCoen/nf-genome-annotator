@@ -1,0 +1,12 @@
+- sample: braker_example
+  genome: tests/test_data/data/genome.X1.fail.fa.gz
+  species: arabidopsis thaliana
+  rnaseq:
+    bam:
+      - http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
+    reads:
+      short:
+        - R1: tests/test_data/data/RNAseq.1.fq.gz
+          R2: tests/test_data/data/RNAseq.2.fq.gz
+  training_proteins:
+    - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa

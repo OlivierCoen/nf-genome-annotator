@@ -18,6 +18,10 @@ process BRAKER3 {
             bam: Path?
         )
 
+    stage:
+        stageAs fasta, fasta.getExtension() == "gz" ? 'genome.fa.gz' : 'genome.fa'
+        stageAs proteins_fasta,  proteins_fasta.getExtension() == "gz" ? 'proteins.fa.gz' : 'proteins.fa'
+
     output:
         record(
             id: id,
@@ -26,10 +30,10 @@ process BRAKER3 {
         )
 
     topic:
-        tuple('braker3', id, file('workdir/braker.log'))       >> 'logs'
-        tuple('braker3', id, file("workdir/braker.codingseq")) >> 'additional_results'
-        tuple('braker3', id, file("workdir/braker.aa"))        >> 'additional_results'
-        tuple('braker3', id, file("workdir/braker.gff3"))      >> 'additional_results'
+        tuple('braker3', id, file('workdir/braker.log'))                       >> 'logs'
+        tuple('braker3', id, file("workdir/braker.codingseq", optional: true)) >> 'additional_results'
+        tuple('braker3', id, file("workdir/braker.aa", optional: true))        >> 'additional_results'
+        tuple('braker3', id, file("workdir/braker.gff3", optional: true))      >> 'additional_results'
         tuple("${task.process}", 'braker3',   eval("braker.pl --version 2>/dev/null | sed 's/braker.pl version //'"))          >> 'versions'
         tuple("${task.process}", 'augustus',  eval("augustus --version |& sed -n 's/AUGUSTUS (\\(.*\\)) is a gene .*/\\1/p'")) >> 'versions'
         tuple("${task.process}", 'genemark',  eval("gmetp.pl | sed -n 's/ETP version \\(.*\\)/\\1/p'"))                        >> 'versions'

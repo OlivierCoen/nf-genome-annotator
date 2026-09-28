@@ -28,10 +28,11 @@ process CHECK_PROTEIN_FASTA {
         tuple( "${task.process}", 'Bio',    eval('python3 -c "import Bio; print(Bio.__version__)"') ) >> 'versions'
 
     script:
-    def prefix = task.ext.prefix ?: "${id}.cleaned"
     def is_compressed = fasta.getExtension() == "gz" ? true : false
     def fasta_name = is_compressed ? fasta.getBaseName() : fasta.name
     def fasta_ext = fasta_name.tokenize('.')[-1]
+    def fasta_stem = fasta_name.tokenize('.')[0..-2].join('.')
+    def prefix = task.ext.prefix ?: "${fasta_stem}.cleaned"
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}

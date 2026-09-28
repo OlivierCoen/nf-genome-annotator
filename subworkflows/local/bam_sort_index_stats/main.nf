@@ -65,7 +65,7 @@ workflow BAM_SORT_INDEX_STATS {
                     .groupTuple()
                     .map { id, bam_bai_list -> record(
                         id: id, 
-                        short_read_sorted_bams_bais: bam_bai_list
+                        short_read_mappings: bam_bai_list
                     ) }
 
     emit:
