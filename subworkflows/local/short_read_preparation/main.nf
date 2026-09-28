@@ -3,12 +3,14 @@ nextflow.enable.types = true
 //
 // Read QC, UMI extraction and trimming
 //
+
 include { FASTQC as FASTQC_RAW                     } from '../../../modules/local/fastqc'
 include { FASTQC as FASTQC_CLEANED                 } from '../../../modules/local/fastqc'
 include { UMITOOLS_EXTRACT                         } from '../../../modules/local/umitools/extract'
 include { FASTP                                    } from '../../../modules/local/fastp'
 include { AGAT_CONVERTSPGFF2GTF  as CONVERT_TO_GTF } from '../../../modules/local/agat/convertspgff2gtf'
 
+include { DEINTERLEAVE                             } from '../deinterleave'
 include { FASTQ_ALIGN_HISAT2                       } from '../fastq_align_hisat2'
 include { FASTQ_ALIGN_STAR                         } from '../fastq_align_star'
 
@@ -38,7 +40,7 @@ workflow SHORT_READ_PREPARATION {
     ignore_existing_gff_for_mapping: Boolean
 
     main:
-
+    
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CLEAN AND CONVERT GFF / GTF TO GTF
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,10 +77,21 @@ workflow SHORT_READ_PREPARATION {
                         id: rec.id,
                         fasta: rec.fasta,
                         gtf: rec.gtf,
-                        read_id: subrec.id,
+                        read_id: subrec.id,BBMAP_DEINTERLEAVE
                         reads: subrec.reads
                     ) }
                 }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // DETECT IF SINGLE FASTQ FILES AND INTERLEAVED, SEPARATE THEM IF IT IS THE CASE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ch_single_reads     = ch_input.filter{ rec -> rec.reads.size() == 1 }
+    ch_paired_end_reads = ch_input.filter{ rec -> rec.reads.size() == 2 }
+    
+    ch_deinterleaved = DEINTERLEAVE( ch_single_reads )
+
+    ch_reads = ch_paired_end_reads.mix( ch_deinterleaved )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // QC ON RAW READS
