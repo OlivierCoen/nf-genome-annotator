@@ -1,0 +1,3 @@
+remove '(long)' in original varus.nf and replace by .toLong()
+add environments in varus processes
+optional: add return in closures for better parsing of lsp servers
