@@ -53,7 +53,7 @@ workflow SHORT_READ_PREPARATION {
         ch_converted = CONVERT_TO_GTF(
             ch_input_with_gff.map { rec -> record(id: rec.id, gff: rec.reference_gff) }
         )
-
+        
         ch_input_with_gff = ch_input_with_gff.join(
             ch_converted.map{ rec -> record(id: rec.id, reference_gtf: rec.gtf) },
             by: 'id'
@@ -62,7 +62,7 @@ workflow SHORT_READ_PREPARATION {
         ch_input = ch_input_without_gff.mix( ch_input_with_gff )
 
     } else {
-        ch_input = ch_input.map{ rec -> rec + record(gtf: null) }
+        ch_input = ch_input.map{ rec -> rec + record(reference_gtf: null) }
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +76,7 @@ workflow SHORT_READ_PREPARATION {
                     record(
                         id: rec.id,
                         fasta: rec.fasta,
-                        gtf: rec.gtf,
+                        reference_gtf: rec.reference_gtf,
                         read_id: subrec.id,
                         reads: subrec.reads
                     ) }

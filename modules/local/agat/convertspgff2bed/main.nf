@@ -12,7 +12,7 @@ process AGAT_CONVERTSPGFF2BED {
     input:
         record(
             id: String,
-            gff: Path
+            gxf: Path
         )
 
     output:
@@ -26,11 +26,13 @@ process AGAT_CONVERTSPGFF2BED {
 
     script:
     def args   = task.ext.args   ?: ''
-    def prefix = task.ext.prefix ?: "$id"
+    def is_compressed = gxf.getExtension() == "gz" ? true : false
+    def gxf_name = is_compressed ? gxf.getBaseName() : gxf.name
+    def gxf_stem = gxf_name.tokenize('.')[0..-2].join('.')
     """
     agat_convert_sp_gff2bed.pl \\
-        --gff ${gff} \\
-        --output ${prefix}.bed \\
+        --gff ${gxf} \\
+        --output ${gxf_stem}.bed \\
         ${args}
     """
 }

@@ -26,11 +26,14 @@ process AGAT_CONVERTSPGFF2GTF {
 
     script:
     def args = task.ext.args   ?: ''
+    def is_compressed = gff.getExtension() == "gz" ? true : false
+    def gff_name = is_compressed ? gff.getBaseName() : gff.name
+    def gff_stem = gff_name.tokenize('.')[0..-2].join('.')
     """
     mkdir converted
     agat_convert_sp_gff2gtf.pl \\
         --gff ${gff} \\
-        --output converted/${gff.baseName}.gtf \\
+        --output converted/${gff_stem}.gtf \\
         ${args}
     """
 }

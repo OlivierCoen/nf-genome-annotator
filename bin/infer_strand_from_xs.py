@@ -28,6 +28,7 @@ class Stranded(Enum):
     FORWARD = "forward"
     REVERSE = "reverse"
     UNSTRANDED = "unstranded"
+    UNKNOWN = "unknown"
 
 
 #####################################################
@@ -115,25 +116,27 @@ def main():
     logger.info(f"# total kept for strandedness inference: {total}")
     
     if total == 0:
-        raise ValueError("No spliced reads with an XS tag found.")
+        logger.error("No spliced reads with an XS tag found. Unknown strandedness.")
+        strandedness = Stranded.UNKNOWN
 
-    logger.info(f"# of read1 same strand as transcript:     {nb_same_strand} ({100 * nb_same_strand / total:.1f}%)")
-    logger.info(f"# of read1 opposite strand to transcript: {nb_opposite_strand} ({100 * nb_opposite_strand / total:.1f}%)")
-
-    if nb_same_strand / total >= 0.9:
-        verdict = "forward-stranded (ISF/SF) -> hisat2 --rna-strandness FR (paired) / F (single-end)"
-        strandedness = Stranded.FORWARD
-    elif nb_opposite_strand / total >= 0.9:
-        verdict = "reverse-stranded (ISR/SR) -> hisat2 --rna-strandness RF (paired) / R (single-end)"
-        strandedness = Stranded.REVERSE
     else:
-        verdict = "unstranded (IU/U) -> omit --rna-strandness"
-        strandedness = Stranded.UNSTRANDED
-        
-    logger.info(f"Verdict: {verdict}")
+        logger.info(f"# of read1 same strand as transcript:     {nb_same_strand} ({100 * nb_same_strand / total:.1f}%)")
+        logger.info(f"# of read1 opposite strand to transcript: {nb_opposite_strand} ({100 * nb_opposite_strand / total:.1f}%)")
+    
+        if nb_same_strand / total >= 0.9:
+            verdict = "forward-stranded (ISF/SF) -> hisat2 --rna-strandness FR (paired) / F (single-end)"
+            strandedness = Stranded.FORWARD
+        elif nb_opposite_strand / total >= 0.9:
+            verdict = "reverse-stranded (ISR/SR) -> hisat2 --rna-strandness RF (paired) / R (single-end)"
+            strandedness = Stranded.REVERSE
+        else:
+            verdict = "unstranded (IU/U) -> omit --rna-strandness"
+            strandedness = Stranded.UNSTRANDED
+            
+        logger.info(f"Verdict: {verdict}")
 
     with open(OUTFILE, 'w') as fout:
-        fout.write(str(strandedness))
+        fout.write(strandedness.value)
         
 
 if __name__ == "__main__":

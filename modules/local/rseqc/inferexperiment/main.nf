@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process RSEQC_INFEREXPERIMENT {
-    tag "$id"
+    tag "$read_id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
@@ -11,15 +11,15 @@ process RSEQC_INFEREXPERIMENT {
 
     input:
         record(
-            id: String,
+            read_id: String,
             bed: Path,
             bam: Path
         )
 
     output:
         record(
-            id: id,
-            txt: file("*.infer_experiment.txt")
+            read_id: read_id,
+            report: file("*.infer_experiment.txt")
         )
 
     topic:
@@ -27,7 +27,7 @@ process RSEQC_INFEREXPERIMENT {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "$read_id"
     """
     infer_experiment.py \\
         -i $bam \\
@@ -37,7 +37,7 @@ process RSEQC_INFEREXPERIMENT {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "$read_id"
     """
     touch ${prefix}.infer_experiment.txt
     """

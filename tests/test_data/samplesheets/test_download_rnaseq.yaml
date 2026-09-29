@@ -14,7 +14,7 @@
 - sample: ena
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
   species: Arabidopsis thaliana
-  gff: tests/test_data/data/braker.sample.gtf
+  gff: tests/test_data/data/braker.sample.gtf.gz
   rnaseq:
     reads:
       short:

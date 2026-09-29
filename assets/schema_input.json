@@ -29,10 +29,10 @@
             },
             "gff": {
                 "type": "string",
-                "description": "Current annotation of the genome. Can be a `GFF` or `GTF` file.",
+                "description": "Current annotation of the genome. Can be a `GFF` or `GTF` file (possibly gzipped).",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gtf|gff|gff3)$",
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(gtf|gff|gff3)(\\.gz)?$",
                 "errorMessage": "Existing annotation GTF file cannot contain spaces and must have extension '.gtf', '.gff' or '.gff3'",
                 "meta": ["gff"]
             },
