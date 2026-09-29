@@ -2,6 +2,7 @@ nextflow.enable.types = true
 
 include { FETCH_SRA_IDS                                 } from '../fetch_sra_ids'
 include { DOWNLOAD_READS                                } from '../download_reads'
+//include { PYVARUS                                       } from '../pyvarus'
 include { SHORT_READ_PREPARATION                        } from '../short_read_preparation'
 include { LONG_READ_PREPARATION                         } from '../long_read_preparation'
 include { BAM_SORT_INDEX_STATS                          } from '../bam_sort_index_stats'
@@ -67,6 +68,18 @@ workflow PREPARE_RNASEQ_DATA {
         ch_input = ch_input.join( ch_sra_ids, by: 'id', remainder: true )
         
     }
+    
+    /*
+    if ( params.fetch_sra_rnaseq ) {
+
+        ch_sra_ids = PYVARUS( 
+            ch_input
+        )
+        ch_input = ch_input.join( ch_sra_ids, by: 'id', remainder: true )
+        
+    }
+    */
+    
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // DOWNLOAD READS FROM SRA / ENA

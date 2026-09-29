@@ -83,7 +83,7 @@ workflow GENOMEANNOTATOR {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // only a subset of structural annotator can use RNAseq data 
-    def structural_annotator_needing_rnaseq = ['braker3', 'tiberius']
+    def structural_annotator_needing_rnaseq = ['braker3']
     if ( params.structural_annotator in structural_annotator_needing_rnaseq || params.force_prepare_rnaseq ){
 
         ch_prepared_rnaseq_data = PREPARE_RNASEQ_DATA( 

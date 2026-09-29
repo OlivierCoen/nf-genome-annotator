@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process BBMAP_DEINTERLEAVE {
-    tag "$id"
+    tag "$read_id"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"

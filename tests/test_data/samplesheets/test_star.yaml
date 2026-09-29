@@ -1,0 +1,9 @@
+- sample: sra
+  genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
+  species: Arabidopsis thaliana
+  rnaseq:
+    sra:
+      short_reads:
+        - SRX10300987 # paired-end
+        - DRX645493 # single-end
+    

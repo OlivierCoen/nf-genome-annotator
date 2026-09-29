@@ -5,6 +5,14 @@ include { HISAT2_EXTRACTEXONS           } from '../../../modules/local/hisat2/ex
 include { HISAT2_BUILD                  } from '../../../modules/local/hisat2/build'
 include { HISAT2_ALIGN                  } from '../../../modules/local/hisat2/align'
 
+include { INFER_STRANDEDNESS            } from '../infer_strandedness'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
 record MappingInput {
     id: String
     read_id: String
@@ -56,14 +64,20 @@ workflow FASTQ_ALIGN_HISAT2 {
 
     ch_hisat2_index = HISAT2_BUILD( ch_input )
 
+    ch_input_with_index = ch_input.join(ch_hisat2_index, by: 'id')
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // MAP A SMALL SAMPLE OF READS TO THE GENOME AND INFER STRANDEDNESS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    INFER_STRANDEDNESS( ch_input_with_index )
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MAP READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_aligned = HISAT2_ALIGN(
-        ch_input.join(ch_hisat2_index, by: 'id')
-    )
-
+    ch_aligned = HISAT2_ALIGN( ch_input_with_index )
+        
     emit:
     mapped = ch_input.join(ch_aligned, by: 'read_id')
 }

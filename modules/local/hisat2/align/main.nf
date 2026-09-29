@@ -14,7 +14,8 @@ process HISAT2_ALIGN {
             id: String,
             reads: Set<Path>,
             read_id: String,
-            index: Path
+            index: Path,
+            strandedness: String?
         )
 
     output:
@@ -33,24 +34,21 @@ process HISAT2_ALIGN {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "$read_id"
+    def single_end = reads.size() == 1
 
-    // TODO: implement computation of strandedness
-    strandedness_arg = ''
-    /*
-    def strandedness = ''
-    if (meta.strandedness == 'forward') {
-        strandedness_arg = meta.single_end ? '--rna-strandness F' : '--rna-strandness FR'
-    } else if (meta.strandedness == 'reverse') {
-        strandedness_arg = meta.single_end ? '--rna-strandness R' : '--rna-strandness RF'
+    def strandedness_arg = ''
+    if (strandedness == 'forward') {
+        strandedness_arg = single_end ? '--rna-strandness F' : '--rna-strandness FR'
+    } else if (strandedness == 'reverse') {
+        strandedness_arg = single_end ? '--rna-strandness R' : '--rna-strandness RF'
     } else {
         strandedness_arg = ''
     }
-    */
 
-    // NOTE: --dta is required for braker
+    // NOTE: --dta is required for braker (makes HISAT2 write the XS:A:+/- tag)
 
     def rg = args.contains("--rg-id") ? "" : "--rg-id ${prefix} --rg SM:${prefix}"
-    if ( reads.size() == 1 ) {
+    if ( single_end ) {
         """
         # find is not included in the Docker image, so use ls instead
         INDEX=\$(ls -1 hisat2/*.1.ht2 | sed 's/\\.1.ht2.*\$//')

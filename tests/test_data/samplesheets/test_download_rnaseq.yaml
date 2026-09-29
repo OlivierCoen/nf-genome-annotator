@@ -5,6 +5,7 @@
     sra:
       short_reads:
         - SRX10300987 # paired-end
+        - SRX26701554 # paired-end, stranded
         - DRX645493 # single-end
       long_reads: 
         - ERX16538129
@@ -13,7 +14,11 @@
 - sample: ena
   genome: https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/genome.fa
   species: Arabidopsis thaliana
+  gff: tests/test_data/data/braker.sample.gtf
   rnaseq:
+    reads:
+      short:
+        - R1: tests/test_data/data/ERR16804971.interleaved.fastq
     sra:
       short_reads:
         - ERX16197251 # paired-end

@@ -17,7 +17,7 @@ process DETECT_INTERLEAVING {
         )
 
     output:
-        record( read_id: read_id, interleaved: env("STATUS") )
+        record( read_id: read_id, interleaved: env("STATUS").toBoolean() )
 
     topic:
         tuple( "${task.process}", 'python', eval("python3 --version | sed 's/Python //'") ) >> 'versions'
@@ -25,7 +25,7 @@ process DETECT_INTERLEAVING {
     script:
     """
     detect_interleaving.py --file $fastq
-    STATUS=\$cat(status.txt)
+    STATUS=\$(cat status.txt)
     """
 
 }

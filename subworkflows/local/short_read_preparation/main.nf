@@ -77,7 +77,7 @@ workflow SHORT_READ_PREPARATION {
                         id: rec.id,
                         fasta: rec.fasta,
                         gtf: rec.gtf,
-                        read_id: subrec.id,BBMAP_DEINTERLEAVE
+                        read_id: subrec.id,
                         reads: subrec.reads
                     ) }
                 }
@@ -85,14 +85,9 @@ workflow SHORT_READ_PREPARATION {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // DETECT IF SINGLE FASTQ FILES AND INTERLEAVED, SEPARATE THEM IF IT IS THE CASE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    ch_single_reads     = ch_input.filter{ rec -> rec.reads.size() == 1 }
-    ch_paired_end_reads = ch_input.filter{ rec -> rec.reads.size() == 2 }
     
-    ch_deinterleaved = DEINTERLEAVE( ch_single_reads )
-
-    ch_reads = ch_paired_end_reads.mix( ch_deinterleaved )
-
+    ch_reads = DEINTERLEAVE( ch_reads )
+    
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // QC ON RAW READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
