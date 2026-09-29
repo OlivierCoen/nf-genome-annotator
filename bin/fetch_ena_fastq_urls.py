@@ -8,6 +8,7 @@ import csv
 import logging
 import re
 import sys
+from typing import ClassVar
 
 import requests
 from tenacity import (
@@ -137,17 +138,10 @@ class DatabaseIdentifierChecker:
 class DatabaseResolver:
     """Define a service class for resolving various identifiers to experiments."""
 
-    _GEO_GSM_PREFIXES = {"GSM"}
-    _GEO_GSE_PREFIXES = {"GDS", "GSE"}
-    _SRA_PREFIXES = {
-        "DRA",
-        "DRP",
-        "DRS",
-        "DRX",
-        "PRJDB",
-        "SAMD",
-    }
-    _ENA_PREFIXES = {"ERR", "SRR", "SAMN", "DRR"}
+    _GEO_GSM_PREFIXES: ClassVar[list[str]] = ["GSM"]
+    _GEO_GSE_PREFIXES: ClassVar[list[str]] = ["GDS", "GSE"]
+    _SRA_PREFIXES: ClassVar[list[str]] = ["DRA", "DRP", "DRS", "DRX", "PRJDB", "SAMD"]
+    _ENA_PREFIXES: ClassVar[list[str]] = ["ERR", "SRR", "SAMN", "DRR"]
 
     @classmethod
     def expand_identifier(cls, identifier):
@@ -339,21 +333,28 @@ def check_accession(accession: str):
 def main():
     args = parse_args()
 
-    logger.info("Checking accessions")
-    check_accession(args.accession)
+    try:
 
-    logger.info("Fetching ENA FTP URLs")
-    ena_metadata_fields = ["run_accession", "fastq_ftp"]
-    ena_fetcher = ENAMetadataFetcher(ena_metadata_fields)
+        logger.info("Checking accessions")
+        check_accession(args.accession)
+    
+        logger.info("Fetching ENA FTP URLs")
+        ena_metadata_fields = ["run_accession", "fastq_ftp"]
+        ena_fetcher = ENAMetadataFetcher(ena_metadata_fields)
+    
+        ena_table = ena_fetcher.open_experiment_table(args.accession)
+        logger.info(f"Found {len(ena_table)} ENA entries")
+        logger.info(ena_table)
+    
+        logger.info("Writing FTP URLs to file")
+        ftp_urls = [url for row in ena_table for url in row["fastq_ftp"].split(";")]
+        with open(OUTFILE, "w") as fout:
+            fout.writelines([f"ftp://{url}\n" for url in ftp_urls])
 
-    ena_table = ena_fetcher.open_experiment_table(args.accession)
-    logger.info(f"Found {len(ena_table)} ENA entries")
-    logger.info(ena_table)
-
-    logger.info("Writing FTP URLs to file")
-    ftp_urls = [url for row in ena_table for url in row["fastq_ftp"].split(";")]
-    with open(OUTFILE, "w") as fout:
-        fout.writelines([f"ftp://{url}\n" for url in ftp_urls])
+    except AttributeError:
+        logger.error("Not Fastq file could be downloaded")
+        sys.exit(101)
+        
 
     logger.info("Done")
 
