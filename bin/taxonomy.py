@@ -66,7 +66,7 @@ class Taxonomy:
 
     @classmethod
     def get_taxonomy(cls, species: str) -> 'Taxonomy':
-        logger.info(f"Querying taxid for species: {args.species}")
+        logger.info(f"Querying taxid for species: {species}")
         formated_species = cls.format_species_name(species)
         metadata = cls.get_taxon_metadata(formated_species)
         if "lineage" not in metadata:

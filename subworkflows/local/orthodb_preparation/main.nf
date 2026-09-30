@@ -41,7 +41,7 @@ workflow ORTHODB_PREPARATION {
     
     ch_orthodb_clade = ORTHODB_GET_CLADE( 
         ch_input.map { rec -> rec.species }.unique(),
-        ch_available_orthodb_clades.collect()
+        ch_available_orthodb_clades
     )
 
     ch_input = ch_input.join(ch_orthodb_clade, by: 'species')

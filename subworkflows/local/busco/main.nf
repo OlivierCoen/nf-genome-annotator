@@ -39,7 +39,7 @@ workflow BUSCO {
     
     ch_busco_lineage = GET_LINEAGE( 
         ch_input.map { rec -> rec.species }.unique(),
-        ch_available_busco_datasets.collect()
+        ch_available_busco_datasets
     )
 
     ch_input = ch_input.join(ch_busco_lineage, by: 'species')

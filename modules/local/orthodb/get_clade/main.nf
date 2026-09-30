@@ -1,6 +1,6 @@
 nextflow.enable.types = true
 
-process GET_ORTHODB_CLADE {
+process ORTHODB_GET_CLADE {
 
     tag "$species"
     label 'process_single'
@@ -12,7 +12,7 @@ process GET_ORTHODB_CLADE {
 
     input:
         species: String
-        orthodb_clades_list: List<Path> // because we used collect()
+        orthodb_clades: Path
 
     output:
         record(
@@ -26,7 +26,6 @@ process GET_ORTHODB_CLADE {
         tuple( "${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'") )              >> 'versions'
 
     script:
-    def orthodb_clades = orthodb_clades_list[0]
     def orthodb_clades_is_compressed = orthodb_clades.getExtension() == "gz" ? true : false
     def orthodb_clades_file = orthodb_clades_is_compressed ? orthodb_clades.baseName : orthodb_clades
     """

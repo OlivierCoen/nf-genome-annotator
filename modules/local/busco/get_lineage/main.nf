@@ -12,7 +12,7 @@ process BUSCO_GET_LINEAGE {
 
     input:
         species: String
-        busco_datasets_list: List<Path> // because we used collect()
+        busco_datasets: Path
 
     output:
         record(
@@ -26,7 +26,6 @@ process BUSCO_GET_LINEAGE {
         tuple( "${task.process}", 'pigz',   eval("pigz --version 2>&1 | sed 's/pigz //g'") )              >> 'versions'
 
     script:
-    def busco_datasets = busco_datasets_list[0]
     """
     # removing header from busco dataset files
     grep -vP '^(\\d|#|D|\$)' ${busco_datasets} > busco_datasets.cleaned.txt
