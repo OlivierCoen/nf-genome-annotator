@@ -15,8 +15,8 @@ record Input {
     species: String
     fasta: Path
     orthodb_clade: String
-    excluded_clades: List<String>
-    excluded_species: List<String>
+    orthodb_excluded_clades: List<String>
+    orthodb_excluded_species: List<String>
     mmseqs_db: String
     training_proteins: Set<Path>
     short_read_mappings: Set<Record>

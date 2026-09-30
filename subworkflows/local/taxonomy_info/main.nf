@@ -1,8 +1,8 @@
 nextflow.enable.types = true
 
-include { BUSCO_LISTDATASETS                                 } from '../../../modules/local/busco/list_datasets'
+
 include { GET_TAXONOMY_INFO                                  } from '../../../modules/local/get_taxonomy_info'
-include { ORTHODB_GETCLADES                                  } from '../../../modules/local/orthodb/get_clades'
+include { ORTHODB_GET_AVAILABLE_CLADES                       } from '../../../modules/local/orthodb/get_available_clades'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,17 +18,9 @@ workflow TAXONOMY_INFO {
 
     main:
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // FETCHING LIST OF BUSCO DATASETS
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
 
-    BUSCO_LISTDATASETS([])
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // FETCHING LIST OF ORTHODB CLADES
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    ORTHODB_GETCLADES([])
+    
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // FETCHING TAXONOMY INFO AND AGGREGATING WITH PREVIOUS DATA FETCHED

@@ -7,7 +7,6 @@ nextflow.enable.types = true
 */
 
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
-include { TAXONOMY_INFO                                                 } from '../subworkflows/local/taxonomy_info'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { PREPARE_RNASEQ_DATA                                           } from '../subworkflows/local/prepare_rnaseq_data'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
@@ -55,15 +54,6 @@ workflow GENOMEANNOTATOR {
 
     ch_prepared = GENOME_PREPARATION( ch_main )
     ch_main = ch_main.join( ch_prepared, by: 'id' )
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // FETCH NCBI TAXON ID, BUSCO DATASET AND ORTHODB CLADE
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    ch_taxonomy = TAXONOMY_INFO(
-        ch_main.map{ rec -> rec.species }.unique()
-    )
-    ch_main = ch_main.join( ch_taxonomy, by: 'species' )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME MASKING

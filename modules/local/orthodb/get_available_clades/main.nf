@@ -1,6 +1,6 @@
 nextflow.enable.types = true
 
-process ORTHODB_GETCLADES {
+process ORTHODB_GET_AVAILABLE_CLADES {
 
     label 'process_single'
 

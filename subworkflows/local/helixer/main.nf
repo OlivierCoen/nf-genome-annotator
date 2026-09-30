@@ -1,7 +1,8 @@
 nextflow.enable.types = true
 
-include { HELIXER_HELIXER as RUN                  } from '../../../modules/local/helixer/helixer'
-include { HELIXER_FETCHMODEL as FETCH_MODEL       } from '../../../modules/local/helixer/fetch_model'
+include { HELIXER_GET_LINEAGE as GET_LINEAGE       } from '../../../modules/local/helixer/get_lineage'
+include { HELIXER_HELIXER     as RUN               } from '../../../modules/local/helixer/helixer'
+include { HELIXER_FETCHMODEL  as FETCH_MODEL       } from '../../../modules/local/helixer/fetch_model'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -11,7 +12,7 @@ include { HELIXER_FETCHMODEL as FETCH_MODEL       } from '../../../modules/local
 
 record Input {
     id: String
-    helixer_lineage: String
+    species: String
     fasta: Path
 }
 
@@ -23,11 +24,20 @@ workflow HELIXER {
 
     main:
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // SEARCH A MATCHING LINEAGE BETWEEN THE LIST OF AVAILABLE HELIXER LINEAGES AND THE LINEAGE OF PARENT ORGANISMS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ch_helixer_lineage = GET_LINEAGE( 
+        ch_input.map { rec -> rec.species }.unique()
+    )
+    ch_input = ch_input.join(ch_helixer_lineage, by: 'species')
+
     // Printing message for each sample where no helixer lineage could be found
     ch_input
         .filter { rec -> rec.helixer_lineage == null }
         .map { rec -> 
-            println "No Helixer lineage could be found for sample ${rec.id}. Skipping structural annotation for this sample."
+            println "No Helixer lineage could be found for species ${rec.species}. Skipping structural annotation for this species."
         }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

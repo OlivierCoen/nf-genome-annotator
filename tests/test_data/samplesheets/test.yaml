@@ -1,3 +1,15 @@
-- sample: anasatum_scaff_25_500000_700000
-  genome: tests/test_data/data/a_nasatum.final_asm.scaffold_25_1.500000_700000.fa.gz
-  species: 96803
+- sample: braker_pass_etp
+  genome: tests/test_data/data/genome.X1-4.pass_etp.fa.gz
+  species: arabidopsis thaliana
+  rnaseq:
+    bam:
+      - http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
+    reads:
+      short:
+        - R1: tests/test_data/data/RNAseq.1.fq.gz
+          R2: tests/test_data/data/RNAseq.2.fq.gz
+    sra:
+      short_reads:
+        - SRX10300987 # paired-end
+  training_proteins:
+    - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa

@@ -2,113 +2,22 @@
 
 # Written by Olivier Coen. Released under the MIT license.
 
+"""
+get_taxonomy_info.py - Get taxonomy ID and lineage for a given species name or Taxon ID
+"""
+
 import argparse
 import logging
-from multiprocessing import Value
-from pathlib import Path
-import re
 
-
-import httpx
-from tenacity import (
-    before_sleep_log,
-    retry,
-    stop_after_delay,
-    wait_exponential,
-)
-from dataclasses import dataclass
+from taxonomy import Taxonomy
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Modern NCBI API
-NCBI_TAXONOMY_API_URL = "https://api.ncbi.nlm.nih.gov/datasets/v2/taxonomy"
-NCBI_API_HEADERS = {"accept": "application/json", "content-type": "application/json"}
-STOP_RETRY_AFTER_DELAY = 120
-
 TAXID_OUTFILE = "taxid.txt"
 TAXID_LINEAGE_OUTFILE = "taxid_lineage.txt"
-BUSCO_LINEAGE_OUTFILE = "busco_lineage.txt"
-ORTHODB_CLADES_OUTFILE = "orthodb_clade.txt"
-HELIXER_LINEAGE_OUTFILE = "helixer_lineage.txt"
-TIBERIUS_LINEAGE_OUTFILE = "tiberius_lineage.txt"
-
-HELIXER_LINEAGES = {
-    "land_plant": {
-        "included": 3193, #Embryophyta
-        "excluded": None
-    },
-    "vertebrate": {
-        "included": 7742,
-        "excluded": None
-    },
-    "invertebrate": { # everything in metazoans except for vertebrates
-        "included": 33208,
-        "excluded": 7742
-    },
-    "fungi":  {
-        "included": 4751,
-        "excluded": None
-    }
-}
-
-# models available for version 2.0.7
-# see https://github.com/Gaius-Augustus/Tiberius/tree/v2.0.7/model_cfg
-
-TIBERIUS_LINEAGES = {
-    "angiosperms": {
-        "included": 1437183, #Mesangiospermae
-        "excluded": None
-    },
-    "chlorophyta": {
-        "included": 3041, #Chlorophyta
-        "excluded": None
-    },
-    "diatoms": {
-        "included": 2836, # Bacillariophyta
-        "excluded": None
-    },
-    "fungi":  {
-        "included": 4751, #Fungi
-        "excluded": None
-    },
-    "insecta":  {
-        "included": 50557, #Insecta
-        "excluded": None
-    },
-    "mammalia_nosofttmasking_v2":  {
-        "included": 40674, #Mammalia
-        "excluded": None
-    },
-    "vertebrates":  {
-        "included": 7742, #Vertebrata
-        "excluded": None
-    }
-}
-
-
-#####################################################
-#####################################################
-# CLASSES
-#####################################################
-#####################################################
-
-@dataclass
-class Taxonomy:
-    species: str
-    taxid: int
-    taxid_lineage: list[int]
-    common_name: str
-    lineage: list[int]
-    busco_lineage: str | None
-    orthodb_clade: str | None
-    helixer_lineage: str | None
-    tiberius_lineage: str | None
-
-    def __str__(self) -> str:
-        return f"{self.species} [{self.common_name}] (taxid: {self.taxid})"
 
 
 #####################################################
@@ -119,215 +28,15 @@ class Taxonomy:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Get taxonomy ID for a given species name or Taxon ID"
-    )
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--species", 
         type=str, 
         required=True,
         help="Species name (or Taxon ID)"
     )
-    parser.add_argument(
-        "--busco-datasets",
-        dest="busco_datasets",
-        type=Path,
-        required=True,
-        help="Path to file containing BUSCO datasets"
-    )
-    parser.add_argument(
-        "--orthodb-clades",
-        dest="orthodb_clades",
-        type=Path,
-        required=True,
-        help="Path to file containing OrthoDB clades"
-    )
     return parser.parse_args()
 
-
-@retry(
-    stop=stop_after_delay(STOP_RETRY_AFTER_DELAY),
-    wait=wait_exponential(multiplier=1, min=1, max=30),
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def send_request_to_ncbi_taxonomy(taxid: str | int):
-    logger.info(f"Sending POST request to {NCBI_TAXONOMY_API_URL}")
-    taxons = [str(taxid)]
-    data = {"taxons": taxons}
-    response = httpx.post(NCBI_TAXONOMY_API_URL, headers=NCBI_API_HEADERS, json=data)
-    response.raise_for_status()
-    return response.json()
-
-
-@retry(
-    stop=stop_after_delay(600),
-    wait=wait_exponential(multiplier=1, min=1, max=30),
-    before_sleep=before_sleep_log(logger, logging.WARNING),
-)
-def send_esearch_query(query: str, database: str, ncbi_api_key: str | None):
-    """
-    Query NCBI's db with Esearch API
-    """
-    params = dict(db=database, term=query, retmax=ESEARCH_RETMAX)
-    if ncbi_api_key is not None:
-        params["api_key"] = ncbi_api_key
-    response = httpx.get(ESEARCH_BASE_URL, params=params)
-    response.raise_for_status()
-    return response.text
-
-
-def get_taxon_metadata(taxid: str | int) -> dict:
-    result = send_request_to_ncbi_taxonomy(taxid)
-    
-    if len(result["taxonomy_nodes"]) > 1:
-        raise ValueError(f"Multiple taxids for {taxid}")
-        
-    try:
-        taxonomy_node = result["taxonomy_nodes"][0]
-    except (IndexError, KeyError):
-        msg = f"Could not find taxonomy results for taxid {taxid}"
-        if "errors" in result:
-            for error in result["errors"]:
-                msg += f"\n{error['reason']}"
-        raise RuntimeError(msg)
-        
-    if "taxonomy" not in taxonomy_node:
-        msg = f"Could not find taxonomy results for species {species}"
-        if "errors" in taxonomy_node:
-            for error in taxonomy_node["errors"]:
-                msg += f"\n{error['reason']}"
-        raise RuntimeError(msg)
-        
-    return taxonomy_node["taxonomy"]
-
-
-def get_taxonomy(
-    species: str,
-    lineages_to_busco_datasets: dict[str, str],
-    lineages_to_orthodb_clades: dict[str, str],
-) -> Taxonomy:
-    
-    metadata = get_taxon_metadata(species)
-
-    # trying to find a lineage match in the busco datasets and orthodb clades
-    busco_lineage = None
-    orthodb_clade = None
-
-    if "lineage" not in metadata:
-        raise KeyError(f"No lineage found for taxid {species}!")
-    
-    lineage = metadata["lineage"]
-    # looping from the most specific (species level or below) to the most general
-    for parent_taxid in lineage[::-1]:
-        parent_metadata = get_taxon_metadata(parent_taxid)
-        parent_organism_name = parent_metadata["organism_name"].lower()
-        
-        if parent_organism_name in lineages_to_busco_datasets:
-            logger.info(f"Found lineage match for BUSCO: {parent_organism_name} -> {lineages_to_busco_datasets[parent_organism_name]}")
-            busco_lineage = lineages_to_busco_datasets[parent_organism_name]
-
-        if parent_organism_name in lineages_to_orthodb_clades:
-            logger.info(f"Found lineage match for OrthoDB: {parent_organism_name} -> {lineages_to_orthodb_clades[parent_organism_name]}")
-            orthodb_clade = lineages_to_orthodb_clades[parent_organism_name]
-
-        # if both were found, break out of the loop
-        if busco_lineage and orthodb_clade:
-            break
-
-    if busco_lineage is None:
-        logger.warning(f"No lineage match found for species {species} and lineage {' '.join([str(l) for l in lineage[::-1]])}.")
-
-    if orthodb_clade is None:
-        logger.warning(f"No orthodb clade match found for species {species} and lineage {' '.join([str(l) for l in lineage[::-1]])}.")
-
-    helixer_lineage = get_helixer_lineage(lineage)
-    tiberius_lineage = get_tiberius_lineage(lineage)
-
-    common_name = metadata.get("common_name", metadata["organism_name"])
-
-    taxid = int(metadata["tax_id"])
-     # from the leaf to the root
-    taxid_lineage = [taxid] + [int(taxid) for taxid in lineage[::-1]]
-
-    return Taxonomy(
-        species=metadata["organism_name"],
-        taxid=taxid,
-        taxid_lineage=taxid_lineage,
-        common_name=common_name,
-        lineage=lineage,
-        busco_lineage=busco_lineage,
-        orthodb_clade=orthodb_clade,
-        helixer_lineage=helixer_lineage,
-        tiberius_lineage=tiberius_lineage
-    )
-
-
-def format_species_name(species: str) -> str:
-    return species.replace("_", " ").capitalize().strip()
-
-
-def parse_busco_datasets(file_path: Path) -> dict[str, str]:
-    with open(file_path, "r") as fin:
-        lines = [line.strip() for line in fin.readlines()]
-    busco_datasets = {}
-    for line in lines:
-        if match := re.findall(r"\w+_odb\d+\.?\d+?", line):
-            dataset = match[0]
-            lineage = dataset.split("_")[0]
-            busco_datasets[lineage] = dataset
-        else:
-            logger.warning(f"Could not parse line: {line}")
-    return busco_datasets
-
-
-def parse_orthodb_clades(file_path: Path) -> dict[str, str]:
-    with open(file_path, "r") as fin:
-        lines = [line.strip() for line in fin.readlines()]
-    clades = [line.split("\t")[1] for line in lines]
-    return {clade.lower(): clade for clade in clades}
-
-
-def get_helixer_lineage(taxid_lineage: list[int]) -> str | None:
-    return get_tool_lineage(taxid_lineage, 'Helixer', HELIXER_LINEAGES)
-
-
-def get_tiberius_lineage(taxid_lineage: list[int]) -> str | None:
-    return get_tool_lineage(taxid_lineage, 'Tiberius', TIBERIUS_LINEAGES)
-
-
-def get_tool_lineage(taxid_lineage: list[int], tool: str, model_lineages: dict) -> str | None:
-    """
-    Wrapper function that finds the best model given a lineage
-    """
-    # searching for a candidate lineage
-    # looping from the most general to the most specific (species level or below)
-    candidate_lineages = []
-    for taxid in taxid_lineage:
-        for lineage, lineage_dict in model_lineages.items():
-            if taxid == lineage_dict["included"]:
-                candidate_lineages.append(lineage)
-                
-    if candidate_lineages:
-        logger.info(f"{tool} candidate lineages: {candidate_lineages}")
-    else:
-        logger.info(f"No candidate lineage found for {tool}")
-        return None
-        
-    # among the candidate lineages, searching for the ones that are excluded
-    for taxid in taxid_lineage:
-        for lineage in candidate_lineages:
-            if taxid == model_lineages[lineage]["excluded"]:
-                del candidate_lineages[lineage]
-
-    if candidate_lineages:
-        if len(candidate_lineages) > 1:
-            raise ValueError(f"Multiple {tool} lineages found for taxid lineage: {taxid_lineage}")
-        found_lineage = candidate_lineages[0]
-        logger.info(f"Found {tool} lineage: {found_lineage}")
-        return found_lineage
-    else:
-        logger.info(f"All candidate lineages were excluded for {tool}")
-        return None
 
 #####################################################
 #####################################################
@@ -337,38 +46,13 @@ def get_tool_lineage(taxid_lineage: list[int], tool: str, model_lineages: dict) 
 
 if __name__ == "__main__":
     args = parse_args()
-    species = format_species_name(args.species)
 
-    lineages_to_busco_datasets = parse_busco_datasets(args.busco_datasets)
-    logger.info(f"Parsed {len(lineages_to_busco_datasets)} busco lineages")
+    species_taxonomy = Taxonomy.get_taxonomy(args.species)
     
-    lineages_to_orthodb_clades = parse_orthodb_clades(args.orthodb_clades)
-    logger.info(f"Parsed {len(lineages_to_orthodb_clades)} orthodb clades")
-
-    logger.info(f"Querying taxid for species: {species}")
-    taxonomy = get_taxonomy(
-        species,
-        lineages_to_busco_datasets,
-        lineages_to_orthodb_clades
-    )
-    logger.info(f"Obtained taxonomy for: {taxonomy}")
-
     with open(TAXID_OUTFILE, "w") as fout:
-        fout.write(str(taxonomy.taxid))
+        fout.write(str(species_taxonomy.taxid))
 
     with open(TAXID_LINEAGE_OUTFILE, "w") as fout:
-        fout.write(','.join([str(taxid) for taxid in taxonomy.taxid_lineage]))
-
-    with open(BUSCO_LINEAGE_OUTFILE, "w") as fout:
-        fout.write(str(taxonomy.busco_lineage))
-
-    with open(ORTHODB_CLADES_OUTFILE, "w") as fout:
-        fout.write(str(taxonomy.orthodb_clade))
-
-    with open(HELIXER_LINEAGE_OUTFILE, "w") as fout:
-        fout.write(str(taxonomy.helixer_lineage))
-
-    with open(TIBERIUS_LINEAGE_OUTFILE, "w") as fout:
-        fout.write(str(taxonomy.tiberius_lineage))
+        fout.write(','.join([str(taxid) for taxid in species_taxonomy.taxid_lineage]))
 
     logger.info("Done")
