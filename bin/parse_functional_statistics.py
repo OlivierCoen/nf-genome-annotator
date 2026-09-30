@@ -2,6 +2,10 @@
 
 # Written by Olivier Coen. Released under the MIT license.
 
+"""
+Parse functional annotation statistics from AGAT's sp_functional_statistics.pl output.
+"""
+
 import argparse
 import logging
 from pathlib import Path
@@ -12,19 +16,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+AGAT_STAT_OUTFILENAME = "table_per_feature_type.txt"
+
 NB_HOLDED_BY_FEATURE_OUTFILE_SUFFIX = "nb_holded_by_features.csv"
 ATTRIBUTE_STAT_OUTFILE_SUFFIX = "stats.csv"
 
-#####################################################
-#####################################################
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FUNCTIONS
-#####################################################
-#####################################################
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Parse functional annotation statistics")
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--stat", dest="stat_file", type=Path, required=True, help="Statistics file"
+        "--results", dest="result_folder", type=Path, required=True, help="Output folder from agat_sp_functional_statistics.pl"
     )
     parser.add_argument("--prefix", type=str, required=True, help="Outfile name prefix")
     return parser.parse_args()
@@ -41,6 +45,7 @@ def parse_line_with_numbers(line: str, key: str):
         'attribute': components[3].lstrip('<').rstrip('>'), 
         key: components[6]
     }
+
 
 def parse_table(fin: TextIOWrapper) -> dict:
     # going to the first real line of the table
@@ -71,19 +76,11 @@ def parse_table(fin: TextIOWrapper) -> dict:
     return parsed_dict
 
 
-def main():
-    args = parse_args()
-    logger.info(f"Parsing stat file: {args.stat_file}")
-
-    #####################################################
-    # PARSING
-    #####################################################
-
-    with open(args.stat_file, "r") as fin:
-
-        attribute_dicts = []
-        nb_holded_by_feature_dicts = []
-        
+def parse_stat_file(stat_file: Path):
+    attribute_dicts = []
+    nb_holded_by_feature_dicts = []
+    
+    with open(stat_file, "r") as fin:
         while True:
             
             try:
@@ -125,6 +122,65 @@ def main():
             else:
                 logger.warning(f"Unrecognised line: {line}")
 
+    return attribute_dicts, nb_holded_by_feature_dicts
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# CLASS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class StatParser:
+
+    folder: Path
+    stat_files: dict
+
+    def __init__(self, folder: Path):
+        self.folder = folder
+        self.stat_files = self.get_stat_files()
+
+    def parse(self):
+        results = {}
+        for level1, folder_dict in self.stat_files.items():
+            results[level1] = {}
+            for level2, file in folder_dict.items():
+                results[level1][level2] = {}
+                attribute_dicts, nb_holded_by_feature_dicts = parse_stat_file(file)
+                results[level1][level2]['attributes'] = attribute_dicts
+                results[level1][level2]['nb_holded_by_feature'] = nb_holded_by_feature_dicts
+        return results
+
+    def get_stat_files(self) -> dict:
+        # getting all subfolders like 'gene@mrna' or 'gene@transcript'
+        stat_subfolders = {}
+        for item in self.folder.iterdir():
+            if item.is_dir() and '@' in item.name:
+                level1, level2 = item.name.split('@', 2)
+                if level1 not in stat_subfolders:
+                    stat_subfolders[level1] = {}
+                for file in item.iterdir():
+                    if file.is_file() and file.name == AGAT_STAT_OUTFILENAME:
+                        stat_subfolders[level1][level2] = file
+        return stat_subfolders
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# MAIN
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def main():
+    args = parse_args()
+    logger.info(f"Parsing stat file: {args.result_folder}")
+
+    #####################################################
+    # PARSING
+    #####################################################
+
+    stat_parser = StatParser(args.result_folder)
+    results = stat_parser.parse()
+    print(results)
+
+
+    """
     #####################################################
     # WRITING PARSED STATS
     #####################################################
@@ -153,6 +209,7 @@ def main():
                 fout.write(header + "\n")
             line = ','.join(list(d.values()))
             fout.write(line + "\n")
+    """
 
     logger.info("Done")
 

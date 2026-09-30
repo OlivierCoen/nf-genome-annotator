@@ -17,7 +17,7 @@ process AGAT_SPFUNCTIONALSTATISTICS {
         )
     
     topic:
-        tuple(id, files("*.csv")) >> 'agat_functional_annotation_stats_multiqc'
+        //tuple(id, files("*.csv")) >> 'agat_functional_annotation_stats_multiqc'
         tuple("${task.process}", 'agat', eval("agat_sp_functional_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
@@ -31,11 +31,9 @@ process AGAT_SPFUNCTIONALSTATISTICS {
         --output ${prefix}.gtf_func_stats \\
         ${args}
 
-    mv ${prefix}.gtf_func_stats/*/table_per_feature_type.txt . 
-
     # parse stat file
     parse_functional_statistics.py \\
-        --stat table_per_feature_type.txt \\
+        --results ${prefix}.gtf_func_stats \\
         --prefix ${prefix}
     """
 }
