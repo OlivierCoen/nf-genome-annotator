@@ -166,10 +166,22 @@ workflow PIPELINE_COMPLETION {
 */
 
 // turning the map of fastq files into a list (all modules work with lists)
-def organiseShortReadFastqFiles( rnaseq_fastqs_list: List<Map<String, Path>> ) {
-    return rnaseq_fastqs_list.withIndex().collect { fastq_map, index -> 
+def organiseShortReadFastqFiles( fastqs_list: List<Map<String, Path>>) {
+    return fastqs_list.withIndex().collect { fastq_map, index -> 
         def reads = fastq_map.R2 ? [ fastq_map.R1, fastq_map.R2 ] : [ fastq_map.R1 ] 
-        record(id: "user_reads_${index}", reads: reads)
+        record(id: "user_short_reads_${index + 1}", reads: reads)
+    }
+}
+
+def organiseLongReadFastqFiles( fastqs: List<Path> ) {
+    return fastqs.withIndex().collect { fastq, index -> 
+        record(id: "user_long_reads_${index + 1}", fastq: fastq)
+    }
+}
+
+def organiseBamFiles( bams: List<Path>, id_pattern: String ) {
+    return bams.withIndex().collect { bam, index -> 
+        record(id: "${id_pattern}_${index + 1}", bam: bam)
     }
 }
 
@@ -184,13 +196,14 @@ def parseSamplesheet() {
                     species: meta.species.toString(),
                     reference_gff: meta.gff ?: null,
 
-                    supplied_short_read_bams: meta.short_read_bams ?: [],
+                    supplied_short_read_bams: meta.short_read_bams ? organiseBamFiles(meta.short_read_bams, 'user_short_read_bams') : [],
+                    supplied_long_read_bams: meta.long_read_bams ? organiseBamFiles(meta.long_read_bams, 'user_long_read_bams') : [],
                     
                     supplied_short_reads: meta.short_reads ? organiseShortReadFastqFiles(meta.short_reads) : [],
-                    supplied_long_reads: meta.long_reads ?: [],
+                    supplied_long_reads: meta.long_reads ? organiseLongReadFastqFiles(meta.long_reads) : [],
                     
-                    supplied_short_read_sra_ids: meta.sra?.short_reads ?: [],
-                    supplied_long_read_sra_ids: meta.sra?.long_reads ?: [],
+                    supplied_short_read_sra_ids: meta.sra?.short ?: [],
+                    supplied_long_read_sra_ids: meta.sra?.long ?: [],
 
                     training_proteins: meta.training_proteins ?: [],
 

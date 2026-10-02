@@ -23,11 +23,8 @@ logger = logging.getLogger(__name__)
 ORTHODB_CLADES_OUTFILE = "orthodb_clade.txt"
 
 #####################################################
-#####################################################
 # FUNCTIONS
 #####################################################
-#####################################################
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -71,6 +68,6 @@ if __name__ == "__main__":
     orthodb_clade = species_taxonomy.find_matching_lineage(lineages_to_orthodb_clades)
 
     with open(ORTHODB_CLADES_OUTFILE, "w") as fout:
-        fout.write(orthodb_clade)
+        fout.write(str(orthodb_clade))
 
     logger.info("Done")

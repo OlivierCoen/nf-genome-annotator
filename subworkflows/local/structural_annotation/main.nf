@@ -14,12 +14,11 @@ record Input {
     id: String
     species: String
     fasta: Path
-    orthodb_clade: String
     orthodb_excluded_clades: List<String>
     orthodb_excluded_species: List<String>
     mmseqs_db: String
     training_proteins: Set<Path>
-    short_read_mappings: Set<Record>
+
     tsebra_gtfs: Set<Path>
     tsebra_hintsfiles: Set<Path>
 }
@@ -32,6 +31,7 @@ workflow STRUCTURAL_ANNOTATION {
     structural_annotator: String
     mmseqs_db: String
     skip_orthodb_download: Boolean
+    orthodb_local: Path?
     skip_mmseqs_db_download: Boolean
     min_prot_db_seq_length: Integer
 
@@ -42,6 +42,7 @@ workflow STRUCTURAL_ANNOTATION {
         ch_annotated = BRAKER(
             ch_input,
             skip_orthodb_download,
+            orthodb_local,
             min_prot_db_seq_length
         )
 

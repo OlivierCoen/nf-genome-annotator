@@ -107,6 +107,7 @@ workflow GENOMEANNOTATOR {
             params.structural_annotator,
             params.mmseqs_db,
             params.skip_orthodb_download,
+            params.orthodb_local,
             params.skip_mmseqs_db_download,
             params.min_prot_db_seq_length
         )

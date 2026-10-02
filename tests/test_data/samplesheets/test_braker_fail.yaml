@@ -3,7 +3,8 @@
   species: arabidopsis thaliana
   rnaseq:
     bam:
-      - http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
+      short:
+        - http://topaz.gatech.edu/GeneMark/Braker/RNAseq.bam
     reads:
       short:
         - R1: tests/test_data/data/RNAseq.1.fq.gz

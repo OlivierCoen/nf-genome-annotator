@@ -24,7 +24,7 @@ process STAR_ALIGN {
         record(
             id: id,
             read_id: read_id,
-            bam: file('*.Aligned.out.bam')
+            bam: file('*.Aligned.sortedByCoord.out.bam')
         )
 
     topic:
@@ -45,7 +45,7 @@ process STAR_ALIGN {
         --runThreadN $task.cpus \\
         --outFileNamePrefix $prefix. \\
         --outSAMstrandField intronMotif \\
-        --outSAMtype BAM Unsorted \\
+        --outSAMtype BAM SortedByCoordinate \\
         --outSAMattributes All \\
         $args
     """

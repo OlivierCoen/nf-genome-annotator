@@ -140,14 +140,24 @@ workflow SHORT_READ_PREPARATION {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_reads = ch_reads
-                .map { rec -> tuple(rec.id, rec.reads) }
+                .map { rec -> tuple(rec.id, rec.read_id, rec.fastq) }
                 .groupTuple()
-                .map { id, reads_list -> record(id: id, new_short_reads: reads_list) }
+                .map { id, read_ids, fastqs -> 
+                    def new_short_reads = [read_ids, fastqs].collect { read_id, fastq -> 
+                        record(read_id: read_id, fastq: fastqs) 
+                    }
+                    record(id: id, new_short_reads: new_short_reads)
+                }
 
     ch_mapped = ch_mapped
-                .map { rec -> tuple(rec.id, rec.bam) }
+                .map { rec -> tuple(rec.id, rec.read_id, rec.bam) }
                 .groupTuple()
-                .map { id, bams -> record(id: id, new_short_read_bams: bams) }
+                .map { id, read_ids, bams -> 
+                    def new_short_read_bams = [read_ids, bams].collect { read_id, bam -> 
+                        record(id: read_id, bam: bam) 
+                    }
+                    record(id: id, new_short_read_bams: new_short_read_bams) 
+                }
 
     emit:
     ch_reads.join( ch_mapped, by: 'id' )

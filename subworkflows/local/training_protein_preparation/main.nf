@@ -33,6 +33,7 @@ workflow TRAINING_PROTEIN_PREPARATION {
     take:
     ch_input: Channel<Input>
     skip_orthodb_download: Boolean
+    orthodb_local: Path?
     min_prot_db_seq_length: Integer
 
     main:
@@ -41,16 +42,26 @@ workflow TRAINING_PROTEIN_PREPARATION {
     // PREPARE ORTHODB PROTEIN DB FROM CLADE-SPECIFIC ORTHODB AND CUSTOM PROTEIN FASTA FILES
     // ----------------------------------------------------------
 
-    if ( !skip_orthodb_download ) {
-
-        ch_prepared_orthodb = ORTHODB_PREPARATION( 
-            ch_input.map { rec -> rec.subMap(['species', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }.unique()
-        )
-        ch_input = ch_input.join(ch_prepared_orthodb, by: 'species')
-
-
+    if ( orthodb_local ) {
+    
+        ch_orthodb_local = channel.fromPath( orthodb_local, checkExists: true )
+                            .map { file -> record(orthodb_proteins: file) }
+                            
+        ch_input = ch_input.combine( ch_orthodb_local )
+                        
     } else {
-        ch_input = ch_input.map { rec -> rec + record(orthodb_proteins: null) }
+            
+        if ( !skip_orthodb_download ) {
+    
+            ch_prepared_orthodb = ORTHODB_PREPARATION( 
+                ch_input.map { rec -> rec.subMap(['species', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }.unique()
+            )
+            ch_input = ch_input.join(ch_prepared_orthodb, by: 'species')
+    
+    
+        } else {
+            ch_input = ch_input.map { rec -> rec + record(orthodb_proteins: null) }
+        }
     }
 
     ch_input = ch_input.map { rec ->

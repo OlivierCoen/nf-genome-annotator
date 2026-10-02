@@ -79,6 +79,6 @@ if __name__ == "__main__":
     busco_lineage = species_taxonomy.find_matching_lineage(lineages_to_busco_datasets)
 
     with open(BUSCO_LINEAGE_OUTFILE, "w") as fout:
-        fout.write(busco_lineage)
+        fout.write(str(busco_lineage))
 
     logger.info("Done")

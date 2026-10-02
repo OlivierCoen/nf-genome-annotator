@@ -231,6 +231,13 @@
                     "description": "Skip download of OrthoDB protein database.",
                     "fa_icon": "fas fa-hand-scissors"
                 },
+                "orthodb_local": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to OrthoDB protein fasta database.",
+                    "help_text": "Use this to supply an URL / a path to a pre-downloaded OrthoDB protein fasta file. Essentially for dev purposes.",
+                    "fa_icon": "fas fa-database"
+                },
                 "skip_mmseqs_db_download": {
                     "type": "boolean",
                     "description": "Skip download of MMseqs2 protein database.",

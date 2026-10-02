@@ -1,11 +1,10 @@
 nextflow.enable.types = true
 
-include { FETCH_SRA_IDS                                 } from '../fetch_sra_ids'
-include { DOWNLOAD_READS                                } from '../download_reads'
-//include { PYVARUS                                       } from '../pyvarus'
-include { SHORT_READ_PREPARATION                        } from '../short_read_preparation'
-include { LONG_READ_PREPARATION                         } from '../long_read_preparation'
-include { BAM_SORT_INDEX_STATS                          } from '../bam_sort_index_stats'
+include { FETCH_SRA_IDS                                               } from '../fetch_sra_ids'
+include { DOWNLOAD_READS                                              } from '../download_reads'
+include { SHORT_READ_PREPARATION                                      } from '../short_read_preparation'
+include { LONG_READ_PREPARATION                                       } from '../long_read_preparation'
+include { BAM_SORT_INDEX_STATS                                        } from '../bam_sort_index_stats'
 
 
 /*
@@ -23,6 +22,8 @@ record Input {
     id: String
     supplied_short_reads: List<Read>
     supplied_long_reads: List<Read>
+    supplied_short_read_bams: List<Path>
+    supplied_long_read_bams: List<Path>
     supplied_short_read_sra_ids: List<String>
     supplied_long_read_sra_ids: List<String>    
     fasta: Path
@@ -69,18 +70,6 @@ workflow PREPARE_RNASEQ_DATA {
         
     }
     
-    /*
-    if ( params.fetch_sra_rnaseq ) {
-
-        ch_sra_ids = PYVARUS( 
-            ch_input
-        )
-        ch_input = ch_input.join( ch_sra_ids, by: 'id', remainder: true )
-        
-    }
-    */
-    
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // DOWNLOAD READS FROM SRA / ENA
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -134,21 +123,32 @@ workflow PREPARE_RNASEQ_DATA {
         params.skip_long_read_cleaning
     )
 
-    ch_input = ch_input.join( ch_long_reads_mapped, by: 'id', remainder: true )
+    ch_input_with_bams = ch_input.join( ch_long_reads_mapped, by: 'id', remainder: true )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // SORT ALL BAMS (SUPPLIED + NEWLY PRODUCED) AND GET MAPPING STATS
+    // BAM QC
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_input = ch_input.map{ rec ->
+    ch_input_with_bams = ch_input_with_bams.map { rec ->
         def new_short_read_bams = rec.new_short_read_bams ?: []
-        rec + record(short_read_bams: rec.supplied_short_read_bams + new_short_read_bams)
+        def new_long_read_bams  = rec.new_long_read_bams ?: []
+        def short_read_bams = rec.supplied_short_read_bams + new_short_read_bams
+        def long_read_bams = rec.supplied_long_read_bams + new_long_read_bams
+        rec + record(
+            short_read_bams: short_read_bams.collect { bam -> record(type: 'short_reads', bam: bam) },
+            long_read_bams: long_read_bams.collect { bam -> record(type: 'long_reads', bam: bam) }
+        )
     }
+
+    ch_input_has_bams = ch_input_with_bams.filter { rec -> rec.short_read_bams.size() > 0 || rec.long_read_bams.size() > 0 }
     
-    ch_sorted_bam = BAM_SORT_INDEX_STATS(
-        ch_input.filter { rec -> rec.short_read_bams.size() > 0 }
+    BAM_SORT_INDEX_STATS(
+        ch_input_has_bams.map{ rec -> record(
+            id: rec.id, 
+            fasta: rec.fasta,
+            bams: rec.short_read_bams + rec.long_read_bams
+        ) }
     )
-    ch_input = ch_input.join( ch_sorted_bam, by: 'id', remainder: true )
 
     emit:
     ch_input

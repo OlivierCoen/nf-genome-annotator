@@ -3,11 +3,11 @@
   species: Arabidopsis thaliana
   rnaseq:
     sra:
-      short_reads:
+      short:
         - SRX10300987 # paired-end
         - SRX26701554 # paired-end, stranded
         - DRX645493 # single-end
-      long_reads: 
+      long: 
         - ERX16538129
       
 
@@ -20,6 +20,6 @@
       short:
         - R1: tests/test_data/data/ERR16804971.interleaved.fastq
     sra:
-      short_reads:
+      short:
         - ERX16197251 # paired-end
     

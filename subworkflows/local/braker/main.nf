@@ -2,6 +2,7 @@ nextflow.enable.types = true
 
 include { TRAINING_PROTEIN_PREPARATION                          } from '../training_protein_preparation'
 include { BRAKER3                                               } from '../../../modules/local/braker3'
+include { BRAKER3 as BRAKER3_ISOSEQ                             } from '../../../modules/local/braker3'
 include { TSEBRA_TSEBRA as TSEBRA                               } from '../../../modules/local/tsebra/tsebra'
 include { SAMTOOLS_MERGE                                        } from '../../../modules/local/samtools/merge'
 
@@ -12,20 +13,15 @@ include { SAMTOOLS_MERGE                                        } from '../../..
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-record Mapping {
-    bam: Path
-    bai: Path
-}
-
 record Input {
     id: String
     fasta: Path
     species: String
-    orthodb_clade: String
     excluded_clades: List<String>
     excluded_species: List<String>
     training_proteins: Set<Path>
-    short_read_mappings: List<Mapping>?
+    short_read_bams: Set<Path>
+    long_read_bams: Set<Path>
     tsebra_gtfs: Set<Path>
     tsebra_hintsfiles: Set<Path>
 }
@@ -36,6 +32,7 @@ workflow BRAKER {
     take:
     ch_input: Channel<Input>
     skip_orthodb_download: Boolean
+    orthodb_local: Path?
     min_prot_db_seq_length: Integer
 
     main:
@@ -47,6 +44,7 @@ workflow BRAKER {
     ch_proteins = TRAINING_PROTEIN_PREPARATION(
         ch_input,
         skip_orthodb_download,
+        orthodb_local,
         min_prot_db_seq_length
     )
 

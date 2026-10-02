@@ -72,6 +72,6 @@ if __name__ == "__main__":
     helixer_lineage = species_taxonomy.get_tool_lineage('Helixer', HELIXER_LINEAGES)
 
     with open(HELIXER_LINEAGE_OUTFILE, "w") as fout:
-        fout.write(helixer_lineage)
+        fout.write(str(helixer_lineage))
 
     logger.info("Done")

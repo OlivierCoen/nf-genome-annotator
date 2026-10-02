@@ -4,6 +4,8 @@ include { FASTPLONG                             } from '../../../modules/local/f
 include { FASTQC as FASTQC_RAW                  } from '../../../modules/local/fastqc'
 include { FASTQC as FASTQC_CLEANED              } from '../../../modules/local/fastqc'
 
+include { FASTQ_ALIGN_MINIMAP2                  } from '../fastq_align_minimap2'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,18 +75,37 @@ workflow LONG_READ_PREPARATION {
 
     }
 
-    // NOTE: for now, no structural annotator integrated in the pipeline accepts Isoseq data in BAM format
-    // if Braker4 gets integrated in the pipeline in the future, we'll need to add mapping steps here
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // MAP READS TO GENOME
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // ---------------------------------------------------------------------
-    // FORMAT OUTPUT CHANNEL
-    // ---------------------------------------------------------------------
+    ch_mapped = FASTQ_ALIGN_MINIMAP2( ch_reads )
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // GROUP READS & BAM FILES BY SAMPLE ID
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_reads = ch_reads
-                .map { rec -> tuple(rec.id, rec.fastq) }
+                .map { rec -> tuple(rec.id, rec.read_id, rec.fastq) }
                 .groupTuple()
-                .map { id, fastqs -> record(id: id, new_long_reads: fastqs) }
+                .map { id, read_ids, fastqs -> 
+                    def new_long_reads = [read_ids, fastqs].collect { read_id, fastq -> 
+                        record(read_id: read_id, fastq: fastqs) 
+                    }
+                    record(id: id, new_long_reads: new_long_reads)
+                }
+
+    ch_mapped = ch_mapped
+                .map { rec -> tuple(rec.id, rec.read_id, rec.bam) }
+                .groupTuple()
+                .map { id, read_ids, bams -> 
+                    def new_long_read_bams = [read_ids, bams].collect { read_id, bam -> 
+                        record(id: read_id, bam: bam) 
+                    }
+                    record(id: id, new_long_read_bams: new_long_read_bams) 
+                }
 
     emit:
-    ch_reads
+    ch_reads.join( ch_mapped, by: 'id' )
+
 }

@@ -46,7 +46,10 @@ process HISAT2_ALIGN {
     }
 
     // NOTE: --dta is required for braker (makes HISAT2 write the XS:A:+/- tag)
-
+    // samtools flags: 
+    // -F 4 : exclude read unmapped
+    // -F 8 : exclude mate unmapped
+    // -F 256: exclude if not primary alignment
     def rg = args.contains("--rg-id") ? "" : "--rg-id ${prefix} --rg SM:${prefix}"
     if ( single_end ) {
         """
@@ -62,7 +65,12 @@ process HISAT2_ALIGN {
             --dta \\
             $rg \\
             $args \\
-            | samtools view -bS -F 4 -F 256 - > ${prefix}.bam
+            | samtools view \\
+                -bS \\
+                -F 4 -F 256 - \\
+                | samtools sort \\
+                    -@ ${task.cpus-1} \\
+                    -o ${prefix}.bam
         """
     } else {
         """
@@ -81,7 +89,12 @@ process HISAT2_ALIGN {
             --no-mixed \\
             --no-discordant \\
             $args \\
-            | samtools view -bS -F 4 -F 8 -F 256 - > ${prefix}.bam
+            | samtools view \\
+                -bS \\
+                -F 4 -F 8 -F 256 - \\
+               | samtools sort \\
+                   -@ ${task.cpus-1} \\
+                   -o ${prefix}.bam
         """
     }
 
