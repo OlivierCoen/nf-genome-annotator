@@ -1,7 +1,9 @@
 nextflow.enable.types = true
 
 process MINIMAP2_INDEX {
+
     label 'process_low'
+    tag "$id"
 
     // Note: the versions here need to match the versions used in minimap2/align
     conda "${moduleDir}/environment.yml"

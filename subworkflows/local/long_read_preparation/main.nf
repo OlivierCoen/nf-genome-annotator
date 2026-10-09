@@ -15,7 +15,8 @@ include { FASTQ_ALIGN_MINIMAP2                  } from '../fastq_align_minimap2'
 
 record Read {
     id: String
-    reads: List<Path>
+    read_id: String
+    fastq: List<Path>
 }
 
 record Input {
@@ -45,8 +46,9 @@ workflow LONG_READ_PREPARATION {
                 .flatMap{ rec -> rec.long_reads.collect{ subrec ->
                     record(
                         id: rec.id,
+                        fasta: rec.fasta,
                         read_id: subrec.id,
-                        reads: subrec.reads
+                        fastq: subrec.fastq
                     ) }
                 }
 
@@ -55,7 +57,9 @@ workflow LONG_READ_PREPARATION {
     // ---------------------------------------------------------------------
 
     if ( !skip_fastqc && !skip_fastqc_raw ) {
-        FASTQC_RAW ( ch_reads )
+        FASTQC_RAW ( 
+            ch_reads.map { rec -> record(id: rec.id, read_id: rec.read_id, reads: [rec.fastq]) }
+        )
     }
 
     // ---------------------------------------------------------------------
@@ -64,13 +68,13 @@ workflow LONG_READ_PREPARATION {
 
     if ( !skip_long_read_cleaning ) {
 
-        ch_cleaned_reads = FASTPLONG(
-            ch_reads.map { rec -> record(id: rec.id, read_id: rec.read_id, fastq: rec.reads[0]) }
-        )
+        ch_cleaned_reads = FASTPLONG( ch_reads )
         ch_reads = ch_reads.join( ch_cleaned_reads, by: 'read_id' )
     
             if ( !skip_fastqc && !skip_fastqc_cleaned ) {
-                FASTQC_CLEANED ( ch_reads )
+                FASTQC_CLEANED ( 
+                    ch_reads.map { rec -> record(id: rec.id, read_id: rec.read_id, reads: [rec.fastq]) }
+                )
             }
 
     }
@@ -86,24 +90,14 @@ workflow LONG_READ_PREPARATION {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_reads = ch_reads
-                .map { rec -> tuple(rec.id, rec.read_id, rec.fastq) }
-                .groupTuple()
-                .map { id, read_ids, fastqs -> 
-                    def new_long_reads = [read_ids, fastqs].collect { read_id, fastq -> 
-                        record(read_id: read_id, fastq: fastqs) 
-                    }
-                    record(id: id, new_long_reads: new_long_reads)
-                }
+                .map { rec -> tuple(rec.id, rec.subMap(['read_id', 'fastq'])) }
+                .groupBy()
+                .map { id, records -> record(id: id, new_long_reads: records) }
 
     ch_mapped = ch_mapped
-                .map { rec -> tuple(rec.id, rec.read_id, rec.bam) }
-                .groupTuple()
-                .map { id, read_ids, bams -> 
-                    def new_long_read_bams = [read_ids, bams].collect { read_id, bam -> 
-                        record(id: read_id, bam: bam) 
-                    }
-                    record(id: id, new_long_read_bams: new_long_read_bams) 
-                }
+                .map { rec -> tuple(rec.id, rec.subMap(['read_id', 'bam'])) }
+                .groupBy()
+                .map { id, records -> record(id: id, new_long_read_bams: records) }
 
     emit:
     ch_reads.join( ch_mapped, by: 'id' )

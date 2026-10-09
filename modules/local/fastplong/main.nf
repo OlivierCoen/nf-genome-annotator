@@ -20,10 +20,11 @@ process FASTPLONG {
         record(
             id: id,
             read_id: read_id,
-            fastq: file("*.fq.gz")
+            fastq: file("*.fq.gz", optional: true)
         )
 
     topic:
+        tuple('fastplong', id, file('fastplong.log',  optional: true)) >> 'logs'
         tuple('fastplong', id, file('fastplong.html', optional: true)) >> 'additional_results'
         tuple('fastplong', id, file('fastplong.json', optional: true)) >> 'additional_results'
         tuple("${task.process}", 'fastplong', eval("fastplong --version | cut -d' ' -f2")) >> 'versions'
@@ -36,6 +37,14 @@ process FASTPLONG {
         $args \\
         --in $fastq \\
         --out ${prefix}.fq.gz \\
-        --thread ${task.cpus}
+        --thread ${task.cpus} \\
+        | tee fastplong.log
+        
+
+    # checking if filtered file is empty
+    if [ \$(wc -c < ${prefix}.fq.gz) -eq "0" ]; then 
+        echo "${prefix}.fq.gz is empty... Removing file to avoid downstream issues"
+        rm ${prefix}.fq.gz
+    fi
     """
 }

@@ -13,7 +13,7 @@ process MINIMAP2_ALIGN {
         record(
             id: String,
             read_id: String,
-            reads: Iterable<Path>,
+            fastq: Path,
             fasta: Path
         )
 
@@ -42,7 +42,7 @@ process MINIMAP2_ALIGN {
         -uf \\
         -t $task.cpus \\
         $fasta \\
-        $reads \\
+        $fastq \\
         $args \\
         | samtools view \\
             -bS \\

@@ -52,7 +52,6 @@ workflow DOWNLOAD_READS {
 
     ch_downloaded_reads = ch_downloaded_sra.mix( ch_downloaded_ena )
 
-    // if read_sampling_size equals 1, it means that we don't need to sample
     if ( read_sampling_size ) {
 
         ch_sampled_reads = SAMPLE_READS(
@@ -74,37 +73,24 @@ workflow DOWNLOAD_READS {
 
     // SHORT READS
     ch_downloaded_short_reads = ch_input
-                                    .flatMap{
+                                    .flatMap{ // getting all SRA Ids to prepare the join
                                         rec -> rec.short_read_sra_ids.collect{ value -> record(id: rec.id, sra_id: value) }
                                     }
                                     .join(ch_downloaded_reads, by: 'sra_id')
-                                    .map{ rec -> tuple(rec.id, [rec.sra_id, rec.reads]) }
-                                    .groupTuple()
-                                    .map{ id, tuples ->
-                                        record(
-                                            id: id,
-                                            downloaded_short_reads: tuples.collect{ tup ->
-                                                record(id: tup[0], reads: tup[1].flatten())
-                                            }
-                                        )
-                                    }
+                                    .map{ rec -> tuple(rec.id, record(id: rec.sra_id, reads: rec.reads)) }
+                                    .groupBy()
+                                    .map{ id, records ->  record(id: id, downloaded_short_reads: records) }
 
     // LONG READS
     ch_downloaded_long_reads = ch_input
-                                    .flatMap{
+                                    .flatMap{ // getting all SRA Ids to prepare the join
                                         rec -> rec.long_read_sra_ids.collect{ value -> record(id: rec.id, sra_id: value) }
                                     }
                                     .join(ch_downloaded_reads, by: 'sra_id')
-                                    .map{ rec -> tuple(rec.id, [rec.sra_id, rec.reads]) }
-                                    .groupTuple()
-                                    .map{ id, tuples ->
-                                        record(
-                                            id: id,
-                                            downloaded_long_reads: tuples.collect{ tup ->
-                                                record(id: tup[0], reads: tup[1].flatten())
-                                            }
-                                        )
-                                    }
+                                    .map{ rec -> tuple(rec.id, record(id: rec.sra_id, fastq: rec.reads[0])) } // changing key: 'reads' -> 'fastq'
+                                    .groupBy()
+                                    .map{ id, records ->  record(id: id, downloaded_long_reads: records) }
+                                    
 
     ch_input = ch_input
                 .join(ch_downloaded_short_reads, by: 'id', remainder: true)

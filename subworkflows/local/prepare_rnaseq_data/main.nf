@@ -71,7 +71,7 @@ workflow PREPARE_RNASEQ_DATA {
     }
     
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // DOWNLOAD READS FROM SRA / ENA
+    // MERGE USER SUPPLIED AND FETCHED SRA IDS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // merging supplied and fetched SRA IDs
@@ -83,6 +83,10 @@ workflow PREPARE_RNASEQ_DATA {
                     )
                 }
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // DOWNLOAD READS FROM SRA / ENA
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                
     ch_downloaded_reads = DOWNLOAD_READS( 
         ch_input,
         read_sampling_size
@@ -90,17 +94,20 @@ workflow PREPARE_RNASEQ_DATA {
     ch_input = ch_input.join( ch_downloaded_reads, by: 'id', remainder: true )
     
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // PREPARE RNASEQ DATA FOR STRUCTURAL ANNOTATION (CLEANING AND / OR MAPPING)
+    // MERGE USER SUPPLIED AND DOWNLOAD READS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_input = ch_input.map{ rec ->
-        def downloaded_short_reads = rec.downloaded_short_reads ?: []
-        def downloaded_long_reads = rec.downloaded_long_reads ?: []
+        // findAll removes nulls
         rec + record(
-            short_reads: rec.supplied_short_reads + downloaded_short_reads,
-            long_reads: rec.supplied_long_reads + downloaded_long_reads
+            short_reads: [rec.supplied_short_reads, rec.downloaded_short_reads].flatten().findAll(),
+            long_reads: [rec.supplied_long_reads, rec.downloaded_long_reads].flatten().findAll()
         )
     }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // PREPARE SHORT READS (CLEANING + MAPPING)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_short_reads_mapped = SHORT_READ_PREPARATION(
         ch_input.filter{ rec -> rec.short_reads.size() > 0 }, // pass only samples for which there are short reads
@@ -114,7 +121,10 @@ workflow PREPARE_RNASEQ_DATA {
     )
     ch_input = ch_input.join( ch_short_reads_mapped, by: 'id', remainder: true )
 
-    
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // PREPARE LONG READS (CLEANING + MAPPING)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     ch_long_reads_mapped = LONG_READ_PREPARATION(
         ch_input.filter{ rec -> rec.long_reads.size() > 0 }, // pass only samples for which there are long reads
         params.skip_fastqc,
@@ -126,31 +136,44 @@ workflow PREPARE_RNASEQ_DATA {
     ch_input_with_bams = ch_input.join( ch_long_reads_mapped, by: 'id', remainder: true )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // BAM QC
+    // MERGE USER SUPPLIED AND NEW MAPPINGS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_input_with_bams = ch_input_with_bams.map { rec ->
         def new_short_read_bams = rec.new_short_read_bams ?: []
         def new_long_read_bams  = rec.new_long_read_bams ?: []
-        def short_read_bams = rec.supplied_short_read_bams + new_short_read_bams
-        def long_read_bams = rec.supplied_long_read_bams + new_long_read_bams
-        rec + record(
-            short_read_bams: short_read_bams.collect { bam -> record(type: 'short_reads', bam: bam) },
-            long_read_bams: long_read_bams.collect { bam -> record(type: 'long_reads', bam: bam) }
+        def short_read_bams = rec.supplied_short_read_bams + new_short_read_bams // list of records 
+        def long_read_bams = rec.supplied_long_read_bams + new_long_read_bams // list of records 
+        // adding the provenance of reads (short or long)
+        // so that we can redispatch them again
+        rec + record( 
+            short_read_bams: short_read_bams.collect { subrec -> subrec + record(type: 'short_reads') },
+            long_read_bams: long_read_bams.collect { subrec -> subrec + record(type: 'long_reads') }
         )
     }
 
-    ch_input_has_bams = ch_input_with_bams.filter { rec -> rec.short_read_bams.size() > 0 || rec.long_read_bams.size() > 0 }
+    ch_input_has_bams = ch_input_with_bams
+                            .filter { rec -> rec.short_read_bams.size() > 0 || rec.long_read_bams.size() > 0 }
     
-    BAM_SORT_INDEX_STATS(
+    ch_sorted_indexed = BAM_SORT_INDEX_STATS(
         ch_input_has_bams.map{ rec -> record(
             id: rec.id, 
             fasta: rec.fasta,
-            bams: rec.short_read_bams + rec.long_read_bams
+            bams: rec.short_read_bams + rec.long_read_bams // putting short and long bams together
         ) }
     )
 
+    ch_input = ch_input.join( ch_sorted_indexed, by: 'id')
+
+    ch_input.map{ rec -> 
+        def short_read_mappings = rec.mappings.collect{ subrec -> subrec.type == 'short_reads' ? subrec.subMap(subrec.keySet() - ['type']) : null }.findAll()
+        def long_read_mappings = rec.mappings.collect{ subrec -> subrec.type == 'long_reads' ? subrec.subMap(subrec.keySet() - ['type']) : null }.findAll()
+            
+        }
+        
+    }
+
     emit:
-    ch_input
+    
 
 }

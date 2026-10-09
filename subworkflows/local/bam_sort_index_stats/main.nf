@@ -8,7 +8,8 @@ include { SAMTOOLS_STATS                           } from '../../../modules/loca
 include { SAMTOOLS_IDXSTATS                        } from '../../../modules/local/samtools/idxstats'
 include { SAMTOOLS_FLAGSTAT                        } from '../../../modules/local/samtools/flagstat'
 
-record Mapping {
+record Bam {
+    id: String
     type: String
     bam: Path
 }
@@ -16,7 +17,7 @@ record Mapping {
 record Input {
     id: String
     fasta: Path
-    mappings: Set<Mapping>
+    bams: Set<Bam>
 }
 
 workflow BAM_SORT_INDEX_STATS {
@@ -33,7 +34,6 @@ workflow BAM_SORT_INDEX_STATS {
     ch_fai = SAMTOOLS_FAIDX(
         ch_input.map { rec -> rec.subMap(['id', 'fasta']) }.unique()
     )
-    ch_input.view()
     ch_input = ch_input.join( ch_fai, by: 'id' )
 
     // ------------------------------------------------------------------------------------
@@ -41,10 +41,12 @@ workflow BAM_SORT_INDEX_STATS {
     // ------------------------------------------------------------------------------------
     
     ch_bam = ch_input.flatMap { rec ->
-        rec.short_read_bams.collect{ bam ->
+        rec.bams.collect{ subrec ->
             record(
                 id: rec.id,
-                bam: bam,
+                read_id: subrec.id,
+                bam: subrec.bam,
+                type: subrec.type,
                 fasta: rec.fasta,
                 fai: rec.fai
             ) }
@@ -66,9 +68,7 @@ workflow BAM_SORT_INDEX_STATS {
     
     ch_sorted_bam_bai = ch_index_out.mix( ch_sort_index_out )
 
-    ch_bam.view{ v-> "before $v"}
-    ch_bam_bai = ch_bam.join( ch_sorted_bam_bai, by: 'id' )
-    ch_bam_bai.view{ v-> "after $v"}
+    ch_bam_bai = ch_bam.join( ch_sorted_bam_bai, by: 'read_id' )
 
     // ------------------------------------------------------------------------------------
     // MAPPING STATS
@@ -85,12 +85,9 @@ workflow BAM_SORT_INDEX_STATS {
     // ------------------------------------------------------------------------------------
 
     ch_mappings = ch_bam_bai
-                    .map { rec -> tuple( rec.id, record(bam: rec.bam, bai: rec.bai) ) }
-                    .groupTuple()
-                    .map { id, bam_bai_list -> record(
-                        id: id, 
-                        short_read_mappings: bam_bai_list
-                    ) }
+                    .map { rec -> tuple( rec.id, record(bam: rec.bam, bai: rec.bai, type: rec.type) ) }
+                    .groupBy()
+                    .map { id, records -> record(id: id, mappings: records) }
 
     emit:
     ch_input.join( ch_mappings, by: 'id' )
