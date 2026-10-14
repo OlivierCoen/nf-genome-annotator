@@ -238,6 +238,13 @@
                     "help_text": "Use this to supply an URL / a path to a pre-downloaded OrthoDB protein fasta file. Essentially for dev purposes.",
                     "fa_icon": "fas fa-database"
                 },
+                "orthodb_version": {
+                    "type": "string",
+                    "pattern": "^odb[0-9]+v[0-9]+$",
+                    "description": "Version of OrthoDB to use",
+                    "help_text": "Version of OrthoDB to use. Example: odb13v0",
+                    "fa_icon": "fas fa-database"
+                },
                 "skip_mmseqs_db_download": {
                     "type": "boolean",
                     "description": "Skip download of MMseqs2 protein database.",

@@ -25,6 +25,7 @@ workflow ORTHODB_PREPARATION {
 
     take:
     ch_input: Channel<Input>
+    orthodb_version: String
   
 
     main:
@@ -33,7 +34,7 @@ workflow ORTHODB_PREPARATION {
     // FETCH LIST OF ORTHODB CLADES
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_available_orthodb_clades = ORTHODB_GET_AVAILABLE_CLADES([])
+    ch_available_orthodb_clades = ORTHODB_GET_AVAILABLE_CLADES( orthodb_version )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // SEARCH A MATCHING CLADE BETWEEN THE LIST OF AVAILABLE CLADES AND THE LINEAGE OF PARENT ORGANISMS
@@ -60,7 +61,8 @@ workflow ORTHODB_PREPARATION {
         }
 
     ch_orthodo_cladedb = ORTHODB_MAKECLADEDB( 
-        ch_input.filter { rec -> rec.orthodb_clade != null }
+        ch_input.filter { rec -> rec.orthodb_clade != null },
+        orthodb_version
     )
 
     ch_input = ch_input

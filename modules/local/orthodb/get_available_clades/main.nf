@@ -10,17 +10,20 @@ process ORTHODB_GET_AVAILABLE_CLADES {
         'community.wave.seqera.io/library/wget:1.25.0--817c089a96769e94' }"
 
     input:
-        _s: List // only used to enable caching
+        orthodb_version: String
         
     output:
-        clades: Path = file("odb12v2_levels.tab.gz")
+        clades: Path = file("${orthodb_version}_levels.tab.gz")
 
     topic:
         tuple( "${task.process}", 'wget', eval("wget -h 2>&1 | head -1 | cut -d' ' -f3 | sed 's/,//g'") ) >> 'versions'
 
     script:
+    def folder_name = orthodb_version.replaceFirst(/odb/, '').replaceFirst(/v\d+$/, '')
+    def folder_url = "https://data.orthodb.org/${folder_name}/download/odb_data_dump"
+    def filename = "${orthodb_version}_levels.tab.gz"
     """
-    wget --tries 10 https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz
+    wget --tries 10 ${folder_url}/${filename}
     """
 
 }

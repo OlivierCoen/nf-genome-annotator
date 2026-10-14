@@ -33,6 +33,7 @@ workflow TRAINING_PROTEIN_PREPARATION {
     take:
     ch_input: Channel<Input>
     skip_orthodb_download: Boolean
+    orthodb_version: String
     orthodb_local: Path?
     min_prot_db_seq_length: Integer
 
@@ -54,7 +55,8 @@ workflow TRAINING_PROTEIN_PREPARATION {
         if ( !skip_orthodb_download ) {
     
             ch_prepared_orthodb = ORTHODB_PREPARATION( 
-                ch_input.map { rec -> rec.subMap(['species', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }.unique()
+                ch_input.map { rec -> rec.subMap(['species', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }.unique(),
+                orthodb_version
             )
             ch_input = ch_input.join(ch_prepared_orthodb, by: 'species')
     

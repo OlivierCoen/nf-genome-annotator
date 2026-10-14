@@ -8,7 +8,7 @@ process ORTHODB_MAKECLADEDB {
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/1b/1b4860b3d61daf2a3c47bf82ff4fe5d69a058ffd25ed4212fb50c34c5baa1ddd/data':
-        'TODO' }"
+        'community.wave.seqera.io/library/aria2_pigz_python_seqkit:6a36793a14adf66e' }"
 
     input:
         record(
@@ -16,6 +16,7 @@ process ORTHODB_MAKECLADEDB {
             orthodb_excluded_clades: List<String>,
             orthodb_excluded_species: List<String>
         )
+        orthodb_version: String
 
     output:
         record(
@@ -33,14 +34,22 @@ process ORTHODB_MAKECLADEDB {
 
     script:
     def args = task.ext.args ?: ''
-    def odb_levels_species_urls = [
-        "https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_species.tab.gz",
-        "https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_level2species.tab.gz",
-        "https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_levels.tab.gz"
+    
+    def folder_name = orthodb_version.replaceFirst(/odb/, '').replaceFirst(/v\d+$/, '')
+    def folder_url = "https://data.orthodb.org/${folder_name}/download/odb_data_dump"
+    
+    def filenames = [
+        "${orthodb_version}_species.tab.gz",
+        "${orthodb_version}_level2species.tab.gz",
+        "${orthodb_version}_levels.tab.gz"
     ].join(' ').trim()
-    def odb_protein_fasta_url = "https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_aa_fasta.gz"
+    def odb_levels_species_urls = filenames.collect { filename -> folder_url + '/' + filename }
+    
+    def odb_protein_fasta_url = "${folder_url}/${orthodb_version}_aa_fasta.gz"
+    
     def excluded_clades_arg = orthodb_excluded_clades ? "--exclude ${orthodb_excluded_clades.join(',')}" : ""
     def excluded_species_arg = orthodb_excluded_species ? "--excludeSpecies ${orthodb_excluded_species.join(',')}" : ""
+    
     def nb_splits = Math.min(16, task.cpus.toInteger())
     def nb_max_connections = Math.min(16, task.cpus.toInteger())
     """
@@ -59,7 +68,7 @@ process ORTHODB_MAKECLADEDB {
         pigz -d \$outfile
     done
 
-    PROTEIN_FASTA_FILE=odb12v2.faa.gz
+    PROTEIN_FASTA_FILE=${orthodb_version}.faa.gz
     SPECIES_IDS_FILE=species_ids.txt
     
     echo "Downloading ${odb_protein_fasta_url}"
@@ -75,9 +84,9 @@ process ORTHODB_MAKECLADEDB {
     echo "Getting clade specific species ids"
     get_orthodb_clade_specific_species_ids.py \\
         --clade "$orthodb_clade" \\
-        --levels odb12v2_levels.tab \\
-        --levels2species odb12v2_level2species.tab \\
-        --species odb12v2_species.tab \\
+        --levels ${orthodb_version}_levels.tab \\
+        --levels2species ${orthodb_version}_level2species.tab \\
+        --species ${orthodb_version}_species.tab \\
         --outfile \$SPECIES_IDS_FILE \\
         $excluded_clades_arg \\
         $excluded_species_arg
@@ -86,7 +95,7 @@ process ORTHODB_MAKECLADEDB {
     seqkit grep -f \$SPECIES_IDS_FILE \$PROTEIN_FASTA_FILE | pigz > ${orthodb_clade}.orthodb_proteins.faa.gz
     
     echo "Removing intermediate files"
-    rm \$PROTEIN_FASTA_FILE odb12v2_levels.tab odb12v2_level2species.tab odb12v2_species.tab
+    rm \$PROTEIN_FASTA_FILE ${orthodb_version}_levels.tab ${orthodb_version}_level2species.tab ${orthodb_version}_species.tab
     """
 
 }
