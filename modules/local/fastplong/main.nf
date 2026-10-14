@@ -20,7 +20,7 @@ process FASTPLONG {
         record(
             id: id,
             read_id: read_id,
-            fastq: file("*.fq.gz", optional: true)
+            fastq: file("*.fq.gz")
         )
 
     topic:
@@ -45,6 +45,7 @@ process FASTPLONG {
     if [ \$(wc -c < ${prefix}.fq.gz) -eq "0" ]; then 
         echo "${prefix}.fq.gz is empty... Removing file to avoid downstream issues"
         rm ${prefix}.fq.gz
+        exit 100 # exiting but error is ignored
     fi
     """
 }
