@@ -205,15 +205,15 @@ def parseSamplesheet() {
                     supplied_short_read_sra_ids: meta.sra?.short ?: [],
                     supplied_long_read_sra_ids: meta.sra?.long ?: [],
 
-                    training_proteins: meta.training_proteins ?: [],
+                    supplied_training_proteins: meta.training_proteins ?: [],
 
                     orthodb_excluded_clades: meta.orthodb_excluded_clades ?: [],
                     orthodb_excluded_species: meta.orthodb_excluded_species ?: [],
 
                     mmseqs_db: meta.mmseqs_db,
 
-                    tsebra_gtfs: meta.tsebra_gtfs ?: [],
-                    tsebra_hintsfiles: meta.tsebra_hintsfiles ?: []
+                    supplied_tsebra_gtfs: meta.tsebra_gtfs ?: [],
+                    supplied_tsebra_hintsfiles: meta.tsebra_hintsfiles ?: []
                 )
             }
 }
@@ -225,6 +225,13 @@ def validateSamplesheet( ch_samplesheet ) {
             if (!rec.gff) {
                 error("GFF not found for sample ${rec.id}. When skipping structural annotation, a GFF must be provided for each sample in the samplesheet")
             }
+        }
+    }
+
+    // checking that supplied TSEBRA GTFs and TSEBRA hintfiles are in equal number whenever there are present
+    ch_samplesheet.map { rec ->
+        if (rec.supplied_tsebra_gtfs.size() != rec.supplied_tsebra_hintsfiles.size() ) {
+            error("Different number of GTFs and Hintfiles given to TSEBRA. For each tsebra GTF provided (issued from a previous BRAKER run), the associated hintsfile must be provided too.")
         }
     }
 }

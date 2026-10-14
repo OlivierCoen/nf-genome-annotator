@@ -9,6 +9,7 @@ nextflow.enable.types = true
 include { GENOME_PREPARATION                                            } from '../subworkflows/local/genome_preparation'
 include { GENOME_MASKING                                                } from '../subworkflows/local/genome_masking'
 include { PREPARE_RNASEQ_DATA                                           } from '../subworkflows/local/prepare_rnaseq_data'
+include { TRAINING_PROTEIN_PREPARATION                                  } from '../subworkflows/local/training_protein_preparation'
 include { STRUCTURAL_ANNOTATION                                         } from '../subworkflows/local/structural_annotation'
 include { POST_PROCESS_ANNOTATION                                       } from '../subworkflows/local/post_process_annotation'
 include { EXTRACT_SEQUENCES                                             } from '../subworkflows/local/extract_sequences'
@@ -48,6 +49,11 @@ workflow GENOMEANNOTATOR {
 
     main:
 
+    // only a subset of structural annotator can use RNAseq data 
+    def structural_annotator_needing_rnaseq = ['braker3']
+    // only a subset of structural annotator can use extrinsic protein data 
+    def structural_annotator_needing_proteins = ['braker3']
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // GENOME PREPARATION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,8 +78,6 @@ workflow GENOMEANNOTATOR {
     // PREPARATION (QC / CLEANING / MAPPING) OF RNASEQ DATA (SHORT / LONG READS)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // only a subset of structural annotator can use RNAseq data 
-    def structural_annotator_needing_rnaseq = ['braker3']
     if ( params.structural_annotator in structural_annotator_needing_rnaseq || params.force_prepare_rnaseq ){
 
         ch_prepared_rnaseq_data = PREPARE_RNASEQ_DATA( 
@@ -95,6 +99,23 @@ workflow GENOMEANNOTATOR {
         ch_main = ch_main.join( ch_prepared_rnaseq_data, by: 'id', remainder: true )
 
     }
+
+    // ----------------------------------------------------------
+    // PREPARE PROTEIN TRAINING SET (ONLY FOR SPECIFIC ANNOTATORS)
+    // ----------------------------------------------------------
+
+    if ( params.structural_annotator in structural_annotator_needing_proteins || params.force_prepare_proteins ){
+
+        ch_proteins = TRAINING_PROTEIN_PREPARATION(
+            ch_main,
+            params.skip_orthodb_download,
+            params.orthodb_version,
+            params.orthodb_local,
+            params.min_prot_db_seq_length
+        )
+        ch_main = ch_main.join( ch_proteins, by: 'id', remainder: true )
+
+    }
     
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // STRUCTURAL ANNOTATION
@@ -106,10 +127,7 @@ workflow GENOMEANNOTATOR {
             ch_main,
             params.structural_annotator,
             params.mmseqs_db,
-            params.skip_orthodb_download,
-            params.orthodb_local,
-            params.skip_mmseqs_db_download,
-            params.min_prot_db_seq_length
+            params.skip_mmseqs_db_download
         )
 
         // NOTE: in case the structural annotation is performed,

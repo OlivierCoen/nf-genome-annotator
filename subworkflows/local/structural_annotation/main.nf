@@ -1,6 +1,6 @@
 nextflow.enable.types = true
 
-include { BRAKER           } from '../braker'
+include { BRAKER3          } from '../braker3'
 include { HELIXER          } from '../helixer'
 include { METAEUK          } from '../metaeuk'
 
@@ -10,6 +10,11 @@ include { METAEUK          } from '../metaeuk'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+record Mapping {
+    bam: Path
+    bai: Path
+}
+
 record Input {
     id: String
     species: String
@@ -17,8 +22,9 @@ record Input {
     orthodb_excluded_clades: List<String>
     orthodb_excluded_species: List<String>
     mmseqs_db: String
-    training_proteins: Set<Path>
-
+    proteins_fasta: Path
+    short_read_mappings: List<Mapping>
+    long_read_mappings: List<Mapping>
     tsebra_gtfs: Set<Path>
     tsebra_hintsfiles: Set<Path>
 }
@@ -30,21 +36,13 @@ workflow STRUCTURAL_ANNOTATION {
     ch_input: Channel<Input>
     structural_annotator: String
     mmseqs_db: String
-    skip_orthodb_download: Boolean
-    orthodb_local: Path?
     skip_mmseqs_db_download: Boolean
-    min_prot_db_seq_length: Integer
 
     main:
 
     if ( structural_annotator == "braker3" ) {
 
-        ch_annotated = BRAKER(
-            ch_input,
-            skip_orthodb_download,
-            orthodb_local,
-            min_prot_db_seq_length
-        )
+        ch_annotated = BRAKER3( ch_input )
 
     } else if ( structural_annotator == "helixer" ) {
 
@@ -55,8 +53,7 @@ workflow STRUCTURAL_ANNOTATION {
         ch_annotated = METAEUK(
             ch_input,
             mmseqs_db,
-            skip_mmseqs_db_download,
-            min_prot_db_seq_length
+            skip_mmseqs_db_download
         )
         
     }

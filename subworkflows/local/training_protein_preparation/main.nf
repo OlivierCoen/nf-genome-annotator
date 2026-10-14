@@ -24,7 +24,7 @@ record Input {
     id: String
     orthodb_excluded_clades: List<String>
     orthodb_excluded_species: List<String>
-    training_proteins: Set<Path>
+    supplied_training_proteins: Set<Path>
 }
 
 
@@ -66,7 +66,7 @@ workflow TRAINING_PROTEIN_PREPARATION {
 
     ch_input = ch_input.map { rec ->
         def orthodb_proteins = rec.orthodb_proteins ? [rec.orthodb_proteins] : []
-        rec + record(all_training_proteins: rec.training_proteins + orthodb_proteins)
+        rec + record(all_training_proteins: rec.supplied_training_proteins + orthodb_proteins)
     }
 
     // ----------------------------------------------------------

@@ -8,9 +8,7 @@ process BRAKER3 {
     // Warning: installing GeneMark-ETP for BRAKER in conda environments has lead to multiple problems reported by users (Issues!).
     // We can not offer support for conda installations. Please use the singularity image instead.
     // Two different images for short read / long read RNA-seq evidence
-    container "${ long_read_rnaseq_bam ? 
-        'docker://teambraker/braker3:isoseq' : 
-        'docker.io/teambraker/braker3:v3.0.7.5' }"
+    container 'docker.io/teambraker/braker3:v3.0.7.5'
 
     input:
         record(

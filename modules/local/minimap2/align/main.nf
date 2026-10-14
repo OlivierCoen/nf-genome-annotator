@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process MINIMAP2_ALIGN {
-    tag "${read_id} on ${fasta.baseName}"
+    tag "$read_id"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -14,7 +14,7 @@ process MINIMAP2_ALIGN {
             id: String,
             read_id: String,
             fastq: Path,
-            fasta: Path
+            index: Path
         )
 
     output:
@@ -41,7 +41,7 @@ process MINIMAP2_ALIGN {
         -ax splice \\
         -uf \\
         -t $task.cpus \\
-        $fasta \\
+        $index \\
         $fastq \\
         $args \\
         | samtools view \\

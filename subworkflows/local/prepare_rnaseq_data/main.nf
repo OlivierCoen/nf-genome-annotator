@@ -154,6 +154,11 @@ workflow PREPARE_RNASEQ_DATA {
 
     ch_input_has_bams = ch_input_with_bams
                             .filter { rec -> rec.short_read_bams.size() > 0 || rec.long_read_bams.size() > 0 }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // PUT SHORT AND LONG READS TOGETHER
+    // SORT UNSORTED BAMS, MAKE INDEX AND COMPUTE STATS FOR MULTIQC
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     ch_sorted_indexed = BAM_SORT_INDEX_STATS(
         ch_input_has_bams.map{ rec -> record(
@@ -163,17 +168,25 @@ workflow PREPARE_RNASEQ_DATA {
         ) }
     )
 
-    ch_input = ch_input.join( ch_sorted_indexed, by: 'id')
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // SEPARATE SORTED SHORT AND LONG READS AGAIN
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    ch_input = ch_input
+                .join( ch_sorted_indexed, by: 'id')
+                .map{ rec -> 
+                    // separate rec.mappings in two parts and remove the 'type' entry
+                    def short_read_mappings = rec.mappings.collect{ subrec -> subrec.type == 'short_reads' ? subrec.subMap(subrec.keySet() - ['type']) : null }.findAll()
+                    def long_read_mappings = rec.mappings.collect{ subrec -> subrec.type == 'long_reads' ? subrec.subMap(subrec.keySet() - ['type']) : null }.findAll()
+                    // return record without mappings entry and add instead the two separated records
+                    rec.subMap(rec.keySet() - ['mappings']) + record(
+                        short_read_mappings: short_read_mappings, 
+                        long_read_mappings: long_read_mappings
+                        )
+                }
 
-    ch_input.map{ rec -> 
-        def short_read_mappings = rec.mappings.collect{ subrec -> subrec.type == 'short_reads' ? subrec.subMap(subrec.keySet() - ['type']) : null }.findAll()
-        def long_read_mappings = rec.mappings.collect{ subrec -> subrec.type == 'long_reads' ? subrec.subMap(subrec.keySet() - ['type']) : null }.findAll()
-            
-        }
-        
-    }
 
     emit:
+    ch_input
     
-
 }

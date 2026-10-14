@@ -23,7 +23,6 @@ workflow METAEUK {
     ch_input: Channel<Input>
     mmseqs_db: String
     skip_mmseqs_db_download: Boolean
-    min_prot_db_seq_length: Integer
 
     main:
 
@@ -34,8 +33,7 @@ workflow METAEUK {
     ch_mmseqs_db = MMSEQS_DB_PREPARATION(
         ch_input.map { rec -> rec.subMap(['id', 'training_proteins', 'mmseqs_db']) },
         mmseqs_db,
-        skip_mmseqs_db_download,
-        min_prot_db_seq_length
+        skip_mmseqs_db_download
     )
 
     ch_input = ch_input.join( ch_mmseqs_db, by: 'id' )

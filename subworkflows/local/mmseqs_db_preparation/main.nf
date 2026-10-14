@@ -31,7 +31,6 @@ workflow MMSEQS_DB_PREPARATION {
     ch_input: Channel<Input>
     mmseqs_db
     skip_mmseqs_db_download
-    min_prot_db_seq_length
 
     main:
 
