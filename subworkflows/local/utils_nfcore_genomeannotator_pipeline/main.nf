@@ -109,7 +109,7 @@ workflow PIPELINE_INITIALISATION {
     //validateSamplesheet( ch_samplesheet )
 
     emit:
-    samplesheet = ch_samplesheet
+    ch_samplesheet
 
 }
 

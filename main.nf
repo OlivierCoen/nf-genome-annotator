@@ -39,12 +39,12 @@ workflow NFCORE_GENOMEANNOTATOR {
     //
     // WORKFLOW: Run pipeline
     //
-    GENOMEANNOTATOR( samplesheet )
+    ch_pipeline_out = GENOMEANNOTATOR( samplesheet )
 
     emit:
-    results            = GENOMEANNOTATOR.out.results
-    additional_results = GENOMEANNOTATOR.out.additional_results
-    logs               = GENOMEANNOTATOR.out.logs
+    results            = ch_pipeline_out.results
+    additional_results = ch_pipeline_out.additional_results
+    logs               = ch_pipeline_out.logs
 }
 
 
@@ -60,7 +60,7 @@ workflow {
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    PIPELINE_INITIALISATION (
+    ch_samplesheet = PIPELINE_INITIALISATION (
         params.version,
         params.validate_params,
         params.monochrome_logs,
@@ -75,25 +75,25 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_GENOMEANNOTATOR (
-        PIPELINE_INITIALISATION.out.samplesheet
-    )
+    ch_pipeline_out = NFCORE_GENOMEANNOTATOR ( ch_samplesheet )
+    
     //
     // SUBWORKFLOW: Run completion tasks
     //
+    
     PIPELINE_COMPLETION (
         params.email,
         params.email_on_fail,
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        NFCORE_GENOMEANNOTATOR.out.results.map{ rec -> rec.multiqc_report }.toList()
+        ch_pipeline_out.results.map{ rec -> rec.multiqc_report }.toList()
     )
 
     publish:
-    results               = NFCORE_GENOMEANNOTATOR.out.results
-    additional_results    = NFCORE_GENOMEANNOTATOR.out.additional_results
-    logs                  = NFCORE_GENOMEANNOTATOR.out.logs
+    results               = ch_pipeline_out.results
+    additional_results    = ch_pipeline_out.additional_results
+    logs                  = ch_pipeline_out.logs
 }
 
 /*
@@ -101,6 +101,7 @@ workflow {
 OUTPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
 
 output {
 

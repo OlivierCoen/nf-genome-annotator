@@ -18,16 +18,16 @@ workflow DOWNLOAD_ENA {
     // FETCH ENA FASTQ URLS
     // ----------------------------------------
 
-    FETCH_ENA_FASTQ_URLS ( ch_ids )
+    ch_urls = FETCH_ENA_FASTQ_URLS ( ch_ids )
 
     // ---------------------------------------------------------------
     // DOWNLOAD ENA FASTQ FILES
     // ---------------------------------------------------------------
 
-    DOWNLOAD_ENA_FASTQ ( FETCH_ENA_FASTQ_URLS.out )
+    ch_ena_reads = DOWNLOAD_ENA_FASTQ ( ch_urls )
 
 
     emit:
-    reads = DOWNLOAD_ENA_FASTQ.out
+    reads = ch_ena_reads
 
 }

@@ -131,8 +131,8 @@ workflow REPORTING {
                             [meta, data_files, configs, logo, [], []] 
                         }
                         
-    MULTIQC ( ch_multiqc_input )
+    ch_multiqc_out = MULTIQC ( ch_multiqc_input )
     
     emit:
-    report = MULTIQC.out.report.map{ meta, report -> record(id: meta.id, multiqc_report: report) }
+    report = ch_multiqc_out.report.map{ meta, report -> record(id: meta.id, multiqc_report: report) }
 }

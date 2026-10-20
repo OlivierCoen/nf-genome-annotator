@@ -97,8 +97,8 @@ workflow SHORT_READ_PREPARATION {
     }
 
     if ( !skip_umi_extract ) {
-        UMITOOLS_EXTRACT( ch_reads )
-        ch_reads = UMITOOLS_EXTRACT.out
+        ch_umi_extracted = UMITOOLS_EXTRACT( ch_reads )
+        ch_reads = ch_reads.join(ch_umi_extracted, by: 'read_id')
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

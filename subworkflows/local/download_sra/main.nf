@@ -19,8 +19,8 @@ workflow DOWNLOAD_SRA {
     // DETECT EXISTING NCBI USER SETTINGS OR CREATE NEW ONES.
     // --------------------------------------------------------
 
-    CUSTOM_SRATOOLSNCBISETTINGS( [] )
-    ch_ncbi_settings = CUSTOM_SRATOOLSNCBISETTINGS.out.ncbi_settings
+    ch_sratools_ncbi_settings_out = CUSTOM_SRATOOLSNCBISETTINGS( [] )
+    ch_ncbi_settings = ch_sratools_ncbi_settings_out.ncbi_settings
 
     // ----------------------------------------
     // PREFETCH SEQUENCING READS IN SRA FORMAT.

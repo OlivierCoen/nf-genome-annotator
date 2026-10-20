@@ -45,11 +45,11 @@ workflow MMSEQS_DB_PREPARATION {
             rec + record(mmseqs_db_to_download: rec.mmseqs_db ?: mmseqs_db)
         }
 
-        MMSEQS_DATABASES(
+        ch_downloaded_mmseqs_db = MMSEQS_DATABASES(
             ch_input.map { rec -> rec.mmseqs_db_to_download }.unique()
         )
 
-        ch_downloaded_mmseqs_db = MMSEQS_DATABASES.out.map{ rec ->
+        ch_downloaded_mmseqs_db = ch_downloaded_mmseqs_db.map{ rec ->
             record(mmseqs_db_to_download: rec.id, public_mmseqs_db: rec.db)
         }
 
@@ -66,11 +66,11 @@ workflow MMSEQS_DB_PREPARATION {
     ch_mmseqs_db_to_create = ch_input.filter { rec -> rec.training_proteins.size() > 0 }
     ch_leave_me_alone      = ch_input.filter { rec -> rec.training_proteins.size() == 0 }
 
-    MMSEQS_CREATEDB(
+    ch_mmseqs_db = MMSEQS_CREATEDB(
         ch_mmseqs_db_to_create.map { rec -> record(id: rec.id, sequences: rec.training_proteins) }
     )
 
-    ch_mmseqs_db_created = ch_mmseqs_db_to_create.join( MMSEQS_CREATEDB.out, by: 'id')
+    ch_mmseqs_db_created = ch_mmseqs_db_to_create.join( ch_mmseqs_db, by: 'id')
     ch_leave_me_alone    = ch_leave_me_alone.map { rec -> rec + record(custom_mmseqs_db: null) }
 
     ch_input = ch_mmseqs_db_created.mix( ch_leave_me_alone )
@@ -87,9 +87,9 @@ workflow MMSEQS_DB_PREPARATION {
     ch_single_mmseqs_db     = ch_input.filter { rec -> rec.mmseqs_dbs.size() == 1 }
     ch_no_mmseqs_db         = ch_input.filter { rec -> rec.mmseqs_dbs.size() == 0 }
 
-    MMSEQS_CONCATDBS( ch_mmseqs_dbs_to_concat )
+    ch_mmseqs_concatenated_db = MMSEQS_CONCATDBS( ch_mmseqs_dbs_to_concat )
 
-    ch_concatenated_dbs = ch_mmseqs_dbs_to_concat.join( MMSEQS_CONCATDBS.out, by: 'id' )
+    ch_concatenated_dbs = ch_mmseqs_dbs_to_concat.join( ch_mmseqs_concatenated_db, by: 'id' )
     ch_single_mmseqs_db = ch_single_mmseqs_db.map { rec -> rec + record(mmseqs_db: rec.mmseqs_dbs[0]) }
 
     ch_no_mmseqs_db.map{ rec -> warnNoProteinsFound(rec) }
