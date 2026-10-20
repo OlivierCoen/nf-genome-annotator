@@ -5,3 +5,4 @@ channels:
   - bioconda
 dependencies:
   - bioconda::fastplong=0.7.0
+  - conda-forge::gzip=1.14

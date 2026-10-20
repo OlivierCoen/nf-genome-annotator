@@ -181,7 +181,7 @@ def organiseLongReadFastqFiles( fastqs: List<Path> ) {
 
 def organiseBamFiles( bams: List<Path>, id_pattern: String ) {
     return bams.withIndex().collect { bam, index -> 
-        record(id: "${id_pattern}_${index + 1}", bam: bam)
+        record(read_id: "${id_pattern}_${index + 1}", bam: bam)
     }
 }
 

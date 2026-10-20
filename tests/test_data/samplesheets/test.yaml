@@ -17,6 +17,6 @@
       short:
         - SRX10300987 # paired-end, Illumina
       long:
-        - SRS9797748 # Pac Bio
+        - SRS9797748 # Pac Bio; prefetch creates two different folders; very interesting as test because one of the 2 fastq files fails with fastplong
   training_proteins:
     - https://raw.githubusercontent.com/Gaius-Augustus/BRAKER/master/example/proteins.fa

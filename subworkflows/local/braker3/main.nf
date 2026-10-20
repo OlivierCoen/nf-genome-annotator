@@ -44,7 +44,7 @@ workflow BRAKER3 {
     // ----------------------------------------------------------
     // MERGE MULTIPLE SHORT READ BAM FILES INTO A SINGLE BAM WHEN NECESSARY
     // ----------------------------------------------------------
-
+//ch_input.view{v->"input $v"}
     ch_has_mappings   = ch_input.filter{ rec -> rec.short_read_mappings != null }
     ch_leave_me_alone = ch_input.filter{ rec -> rec.short_read_mappings == null }
     
@@ -138,17 +138,17 @@ workflow BRAKER3 {
                     .join(ch_isoseq_braker_out, by: 'id', remainder: true)
                     .filter{ rec -> rec.braker_gtf != null || rec.isoseq_braker_gtf != null } // keeping only ercords for which at least a braker gtf is present
                     .map { rec ->
-                        rec.subMap(rec.keySet() - ['braker_gtf', 'braker_hintsfile', 'isoseq_braker_gtf', 'isoseq_braker_hintsfile']) + record(
+                        def newrec = rec.subMap(rec.keySet() - ['braker_gtf', 'braker_hintsfile', 'isoseq_braker_gtf', 'isoseq_braker_hintsfile']) + record(
                             tsebra_gtfs: rec.supplied_tsebra_gtfs + [rec.braker_gtf, rec.isoseq_braker_gtf].findAll(),
                             tsebra_hintsfiles: rec.supplied_tsebra_hintsfiles + [rec.braker_hintsfile, rec.isoseq_braker_hintsfile].findAll()
                         )
-                    }
-                    .map { rec -> 
-                        if (rec.tsebra_gtfs.size() != rec.tsebra_hintsfiles.size() ) {
+                        // checking that GTFs and Hintfiles for TSEBRA are the same number
+                        if (newrec.tsebra_gtfs.size() != newrec.tsebra_hintsfiles.size() ) {
                             error("Different number of GTFs and Hintfiles given to TSEBRA. Please check the output of Braker runs.")
                         }
+                        newrec
                     }
-
+                   
     // ----------------------------------------------------------
     // MERGE ANNOTATIONS WHEN NECESSARY
     // ----------------------------------------------------------

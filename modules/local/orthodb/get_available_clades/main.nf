@@ -19,8 +19,8 @@ process ORTHODB_GET_AVAILABLE_CLADES {
         tuple( "${task.process}", 'wget', eval("wget -h 2>&1 | head -1 | cut -d' ' -f3 | sed 's/,//g'") ) >> 'versions'
 
     script:
-    def folder_name = orthodb_version.replaceFirst(/odb/, '').replaceFirst(/v\d+$/, '')
-    def folder_url = "https://data.orthodb.org/${folder_name}/download/odb_data_dump"
+    def folder_version = orthodb_version.replaceFirst(/odb/, '').replaceFirst(/v\d+$/, '')
+    def folder_url = "https://data.orthodb.org/v${folder_version}/download/odb_data_dump"
     def filename = "${orthodb_version}_levels.tab.gz"
     """
     wget --tries 10 ${folder_url}/${filename}

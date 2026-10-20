@@ -1,7 +1,7 @@
 nextflow.enable.types = true
 
 process SRATOOLS_FASTERQDUMP {
-    tag "$id"
+    tag "${sra.name}"
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
@@ -29,7 +29,7 @@ process SRATOOLS_FASTERQDUMP {
     script:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
-    def prefix = task.ext.prefix ?: "$id"
+    def prefix = task.ext.prefix ?: "${sra.name}" // not id because there may be multiple SRA folders for the same id
     """
     export NCBI_SETTINGS="\$PWD/${ncbi_settings}"
 

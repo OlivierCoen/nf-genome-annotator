@@ -14,14 +14,14 @@ include { DEINTERLEAVE                             } from '../deinterleave'
 include { FASTQ_ALIGN_HISAT2                       } from '../fastq_align_hisat2'
 include { FASTQ_ALIGN_STAR                         } from '../fastq_align_star'
 
-record Read {
+record ShortRead {
     id: String
     reads: List<Path>
 }
 
 record Input {
     id: String
-    short_reads: List<Read>
+    short_reads: List<ShortRead>
     fasta: Path
     reference_gff: Path
 }
@@ -108,7 +108,15 @@ workflow SHORT_READ_PREPARATION {
     if ( !skip_short_read_cleaning ) {
 
         ch_cleaned_reads = FASTP( ch_reads )
-        ch_reads = ch_reads.join( ch_cleaned_reads, by: 'read_id' )
+
+        ch_cleaned_reads = ch_cleaned_reads.filter { rec -> 
+            if ( rec.reads == null ) {
+                log.warn("No short read left after short read filtering for ${rec.read_id} (sample ${rec.id})")
+            }
+            rec.reads != null
+        }
+        
+        ch_reads = ch_reads.join(ch_cleaned_reads, by: 'read_id')
 
         if ( !skip_fastqc && !skip_fastqc_cleaned ) {
             FASTQC_CLEANED( ch_reads )
@@ -142,12 +150,12 @@ workflow SHORT_READ_PREPARATION {
     ch_reads = ch_reads
                 .map { rec -> tuple(rec.id, rec.subMap(['read_id', 'fastq'])) }
                 .groupBy()
-                .map { id, records -> record(id: id, new_short_reads: records) }
+                .map { id, records -> record(id: id, new_short_reads: records.toList()) }
 
     ch_mapped = ch_mapped
                 .map { rec -> tuple(rec.id, rec.subMap(['read_id', 'bam'])) }
                 .groupBy()
-                .map { id, records -> record(id: id, new_short_read_bams: records) }
+                .map { id, records -> record(id: id, new_short_read_bams: records.toList()) }
 
     emit:
     ch_reads.join( ch_mapped, by: 'id' )

@@ -10,11 +10,16 @@ process SAMTOOLS_SORT {
         : 'community.wave.seqera.io/library/htslib_samtools:1.23.1--5b6bb4ede7e612e5'}"
 
     input:
-        record(id: String, bam: Path)
+        record(
+            id: String, 
+            read_id: String,
+            bam: Path
+            )
 
     output:
         record(
             id: id,
+            read_id: read_id,
             bam: file("*.bam"),
             bai: file("*.bai")
         )

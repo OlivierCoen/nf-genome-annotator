@@ -35,14 +35,14 @@ process ORTHODB_MAKECLADEDB {
     script:
     def args = task.ext.args ?: ''
     
-    def folder_name = orthodb_version.replaceFirst(/odb/, '').replaceFirst(/v\d+$/, '')
-    def folder_url = "https://data.orthodb.org/${folder_name}/download/odb_data_dump"
+    def folder_version = orthodb_version.replaceFirst(/odb/, '').replaceFirst(/v\d+$/, '')
+    def folder_url = "https://data.orthodb.org/v${folder_version}/download/odb_data_dump"
     
     def filenames = [
         "${orthodb_version}_species.tab.gz",
         "${orthodb_version}_level2species.tab.gz",
         "${orthodb_version}_levels.tab.gz"
-    ].join(' ').trim()
+    ]
     def odb_levels_species_urls = filenames.collect { filename -> folder_url + '/' + filename }
     
     def odb_protein_fasta_url = "${folder_url}/${orthodb_version}_aa_fasta.gz"
@@ -53,7 +53,7 @@ process ORTHODB_MAKECLADEDB {
     def nb_splits = Math.min(16, task.cpus.toInteger())
     def nb_max_connections = Math.min(16, task.cpus.toInteger())
     """
-    for url in ${odb_levels_species_urls}
+    for url in ${odb_levels_species_urls.join(' ')}
     do
         outfile=\$(basename \$url)
 

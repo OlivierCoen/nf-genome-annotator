@@ -12,12 +12,14 @@ process SAMTOOLS_INDEX {
     input:
         record(
             id: String,
+            read_id: String,
             bam: Path
         )
 
     output:
         record(
             id: id,
+            read_id: read_id,
             bai: file("*.{bai,csi,crai}")
         )
 

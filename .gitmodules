@@ -1,3 +1,0 @@
-[submodule "subworkflows/submodules/pyvarus"]
-	path = subworkflows/submodules/pyvarus
-	url = https://github.com/Gaius-Augustus/pyVARUS.git

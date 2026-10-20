@@ -1,7 +1,6 @@
 nextflow.enable.types = true
 
 include { SAMTOOLS_FAIDX                           } from '../../../modules/local/samtools/faidx'
-include { SAMTOOLS_CHECK_SORTED_BY_COORDINATE      } from '../../../modules/local/samtools/check_sorted_by_coordinate'
 include { SAMTOOLS_INDEX                           } from '../../../modules/local/samtools/index'
 include { SAMTOOLS_SORT as SAMTOOLS_SORT_INDEX     } from '../../../modules/local/samtools/sort'
 include { SAMTOOLS_STATS                           } from '../../../modules/local/samtools/stats'
@@ -39,32 +38,31 @@ workflow BAM_SORT_INDEX_STATS {
     // ------------------------------------------------------------------------------------
     // CHECK IF BAMS ARE SORTED
     // ------------------------------------------------------------------------------------
-    
+   
     ch_bam = ch_input.flatMap { rec ->
         rec.bams.collect{ subrec ->
             record(
                 id: rec.id,
-                read_id: subrec.id,
+                read_id: subrec.read_id,
                 bam: subrec.bam,
+                bai: subrec.bai,
                 type: subrec.type,
                 fasta: rec.fasta,
-                fai: rec.fai
+                fai: rec.fai,
+                user_supplied: subrec.user_supplied
             ) }
     }
 
-    ch_sorted_status = SAMTOOLS_CHECK_SORTED_BY_COORDINATE( ch_bam )
-    ch_bam_with_status = ch_bam.join(ch_sorted_status, by: 'read_id')
-
     // ------------------------------------------------------------------------------------
     // SORT BAMS IF NEEDED + MAKE INDEX
+    // AT THIS POINT, ONLY USER SUPPLIED BAMS SHOULD NEED SORTING
     // ------------------------------------------------------------------------------------
 
-
-    ch_sorted_bam   = ch_bam_with_status.filter { rec -> rec.sorted == true }
-    ch_unsorted_bam = ch_bam_with_status.filter { rec -> rec.sorted == false }
-
-    ch_index_out      = SAMTOOLS_INDEX( ch_sorted_bam )
-    ch_sort_index_out = SAMTOOLS_SORT_INDEX( ch_unsorted_bam )
+    ch_user_supplied_bam = ch_bam.filter { rec -> rec.user_supplied == true }
+    ch_new_bam           = ch_bam.filter { rec -> rec.user_supplied != true }
+    
+    ch_index_out      = SAMTOOLS_INDEX( ch_new_bam )
+    ch_sort_index_out = SAMTOOLS_SORT_INDEX( ch_user_supplied_bam )
     
     ch_sorted_bam_bai = ch_index_out.mix( ch_sort_index_out )
 

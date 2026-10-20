@@ -119,7 +119,6 @@ workflow PREPARE_RNASEQ_DATA {
         params.short_read_mapper,
         params.ignore_existing_gff_for_mapping
     )
-    ch_input = ch_input.join( ch_short_reads_mapped, by: 'id', remainder: true )
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // PREPARE LONG READS (CLEANING + MAPPING)
@@ -133,22 +132,29 @@ workflow PREPARE_RNASEQ_DATA {
         params.skip_long_read_cleaning
     )
 
-    ch_input_with_bams = ch_input.join( ch_long_reads_mapped, by: 'id', remainder: true )
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // MERGE USER SUPPLIED AND NEW MAPPINGS
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ch_input_with_bams = ch_input_with_bams.map { rec ->
-        def new_short_read_bams = rec.new_short_read_bams ?: []
-        def new_long_read_bams  = rec.new_long_read_bams ?: []
-        def short_read_bams = rec.supplied_short_read_bams + new_short_read_bams // list of records 
-        def long_read_bams = rec.supplied_long_read_bams + new_long_read_bams // list of records 
+    ch_input_with_bams = ch_input
+                            .join( ch_short_reads_mapped, by: 'id', remainder: true )
+                            .join( ch_long_reads_mapped, by: 'id', remainder: true )
+                            .map { rec ->
+        // making lists for new bams if null
+        def new_short_read_bams = rec.new_short_read_bams ? rec.new_short_read_bams : []
+        def new_long_read_bams  = rec.new_long_read_bams ? rec.new_long_read_bams : []
+        // adding tag to user supplied bams
+        // only user supplied bams will be sorted (the others should be sorted at this point)
+        def supplied_short_read_bams = rec.supplied_short_read_bams.collect { subrec -> subrec + record(user_supplied: true) }
+        def supplied_long_read_bams = rec.supplied_long_read_bams.collect { subrec -> subrec + record(user_supplied: true) }
+        // merging all short read bams together and all long read bams together
+        def short_read_bams = supplied_short_read_bams + new_short_read_bams
+        def long_read_bams = supplied_long_read_bams + new_long_read_bams
         // adding the provenance of reads (short or long)
         // so that we can redispatch them again
         rec + record( 
             short_read_bams: short_read_bams.collect { subrec -> subrec + record(type: 'short_reads') },
-            long_read_bams: long_read_bams.collect { subrec -> subrec + record(type: 'long_reads') }
+            long_read_bams: long_read_bams.collect   { subrec -> subrec + record(type: 'long_reads') }
         )
     }
 

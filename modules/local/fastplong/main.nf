@@ -6,8 +6,8 @@ process FASTPLONG {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['apptainer', 'singularity'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/76/764f6aec76feeb8e34d30eda96d43f6925f66e0e76fca225bc2a49ec3f5416d0/data':
-        'community.wave.seqera.io/library/fastplong:0.7.0--737a477808c8442c' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/4b/4b4f7df1210b7d0545a6c62f3f914248aea0e5c5d2e18652af971adf21d0be17/data':
+        'community.wave.seqera.io/library/fastplong_gzip:6a68cfd1567defb8' }"
 
     input:
         record(
@@ -20,7 +20,7 @@ process FASTPLONG {
         record(
             id: id,
             read_id: read_id,
-            fastq: file("*.fq.gz")
+            fastq: file("*.fq.gz", optional: true)
         )
 
     topic:
@@ -31,7 +31,7 @@ process FASTPLONG {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "$read_id"
+    def prefix = task.ext.prefix ?: "${read_id}.fastplong"
     """
     fastplong \\
         $args \\
@@ -40,12 +40,10 @@ process FASTPLONG {
         --thread ${task.cpus} \\
         | tee fastplong.log
         
-
     # checking if filtered file is empty
-    if [ \$(wc -c < ${prefix}.fq.gz) -eq "0" ]; then 
+    if [ \$(zcat ${prefix}.fq.gz | head -c 1 | wc -c) -eq "0" ]; then 
         echo "${prefix}.fq.gz is empty... Removing file to avoid downstream issues"
         rm ${prefix}.fq.gz
-        exit 100 # exiting but error is ignored
     fi
     """
 }

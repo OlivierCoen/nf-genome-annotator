@@ -21,14 +21,13 @@ process FASTP {
         record(
             id: id,
             read_id: read_id,
-            reads: files('*.fastp.fastq.gz')
+            reads: files('*.fastp.fastq.gz', optional: true)
         )
 
     topic:
         tuple(id, file('*.json'))                                                              >> 'fastp_multiqc'
         tuple('fastp', id, file('*.fastp.log'))                                                >> 'logs'
         tuple("${task.process}", 'fastp', eval('fastp --version 2>&1 | sed -e "s/fastp //g"')) >> 'versions'
-
 
     script:
     def args = task.ext.args ?: ''
@@ -43,6 +42,12 @@ process FASTP {
             --html ${prefix}.fastp.html \\
             $args \\
             2>| >(tee ${prefix}.fastp.log >&2)
+
+        # checking if filtered file is empty
+        if [ \$(zcat ${prefix}.fastp.fastq.gz | head -c 1 | wc -c) -eq "0" ]; then 
+            echo "${prefix}.fastp.fastq.gz is empty... Removing file to avoid downstream issues"
+            rm ${prefix}.fastp.fastq.gz
+        fi
         """
     } else { // paired-end
         """
@@ -57,6 +62,12 @@ process FASTP {
             --detect_adapter_for_pe \\
             $args \\
             2>| >(tee ${prefix}.fastp.log >&2)
+
+        # checking if filtered file is empty
+        if [ \$(zcat ${prefix}_R1.fastp.fastq.gz | head -c 1 | wc -c) -eq "0" ]; then 
+            echo "${prefix}_R1.fastp.fastq.gz is empty... Removing files to avoid downstream issues"
+            rm ${prefix}_R1.fastp.fastq.gz ${prefix}_R2.fastp.fastq.gz
+        fi
         """
     }
 }

@@ -13,22 +13,22 @@ include { FASTQ_ALIGN_MINIMAP2                  } from '../fastq_align_minimap2'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-record Read {
+record LongRead {
     id: String
-    read_id: String
-    fastq: List<Path>
+    fastq: Path
 }
 
 record Input {
     id: String
-    long_reads: List<Read>
+    long_reads: List<LongRead>
+    fasta: Path
 }
 
 
 workflow LONG_READ_PREPARATION {
 
     take:
-    ch_input: Channel
+    ch_input: Channel<Input>
     skip_fastqc: Boolean
     skip_fastqc_raw: Boolean
     skip_fastqc_cleaned: Boolean
@@ -69,13 +69,21 @@ workflow LONG_READ_PREPARATION {
     if ( !skip_long_read_cleaning ) {
 
         ch_cleaned_reads = FASTPLONG( ch_reads )
-        ch_reads = ch_reads.join( ch_cleaned_reads, by: 'read_id' )
-    
-            if ( !skip_fastqc && !skip_fastqc_cleaned ) {
-                FASTQC_CLEANED ( 
-                    ch_reads.map { rec -> record(id: rec.id, read_id: rec.read_id, reads: [rec.fastq]) }
-                )
+        
+        ch_cleaned_reads = ch_cleaned_reads.filter { rec -> 
+            if ( rec.fastq == null ) {
+                log.warn("No long read left after short read filtering for ${rec.read_id} (sample ${rec.id})")
             }
+            rec.fastq != null
+        }
+        
+        ch_reads = ch_reads.join(ch_cleaned_reads, by: 'read_id')
+    
+        if ( !skip_fastqc && !skip_fastqc_cleaned ) {
+            FASTQC_CLEANED ( 
+                ch_reads.map { rec -> record(id: rec.id, read_id: rec.read_id, reads: [rec.fastq]) }
+            )
+        }
 
     }
 
@@ -92,12 +100,12 @@ workflow LONG_READ_PREPARATION {
     ch_reads = ch_reads
                 .map { rec -> tuple(rec.id, rec.subMap(['read_id', 'fastq'])) }
                 .groupBy()
-                .map { id, records -> record(id: id, new_long_reads: records) }
+                .map { id, records -> record(id: id, new_long_reads: records.toList()) }
 
     ch_mapped = ch_mapped
                 .map { rec -> tuple(rec.id, rec.subMap(['read_id', 'bam'])) }
                 .groupBy()
-                .map { id, records -> record(id: id, new_long_read_bams: records) }
+                .map { id, records -> record(id: id, new_long_read_bams: records.toList()) }
 
     emit:
     ch_reads.join( ch_mapped, by: 'id' )
