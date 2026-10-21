@@ -76,13 +76,21 @@ workflow BUSCO {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     ch_busco_proteome_input = ch_busco_input.flatMap { rec -> 
-        def all_proteomes = [rec.proteome] + rec.other_proteomes
-        all_proteomes.collect { proteome -> record( 
+        def main_proteome = record(
+            id: rec.id, 
+            fasta: rec.proteome, 
+            lineage: rec.busco_lineage, 
+            download_path: rec.busco_download_path,
+            reference: true
+        )
+        def other_proteomes = rec.other_proteomes.collect { proteome -> record( 
             id: rec.id, 
             fasta: proteome, 
             lineage: rec.busco_lineage, 
-            download_path: rec.busco_download_path
+            download_path: rec.busco_download_path,
+            reference: false
         ) }
+        [ main_proteome ] + other_proteomes
         
     }
 

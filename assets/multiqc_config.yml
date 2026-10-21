@@ -9,24 +9,112 @@ report_section_order:
   "genome_annotator-summary":
     order: -1002
 
-export_plots: true
+export_plots: false
 
 disable_version_detection: true
 
 run_modules:
-  - hisat2
-  - star
-  - busco
   - custom_content
+  - busco
+  - hisat2
+  - star 
+  - samtools
+  - fastp
+  - fastqc
+  - seqkit
 
 module_order:
   - busco:
-      pconfig:
-        cpswitch: true # show the 'Counts / Percentages' switch
-        cpswitch_c_active: false # show pct per default
+      anchor: "busco_proteome"
+      name: "BUSCO on final proteome"
+      path_filters:
+        - "*.reference.proteins.busco.txt"
+
+  - busco:
+      anchor: "busco_other_proteomes"
+      name: "BUSCO on intermediate / alternative proteomes"
+      generalstats: false
+      path_filters:
+        - "*.other.proteins.busco.txt"
+
+  - busco:
+      anchor: "busco_genome"
+      name: "BUSCO on the genome"
+      generalstats: false
+      path_filters:
+        - "*.genome.busco.txt" 
+  
   - custom_content
+  - hisat2:
+      generalstats: false
+  - star:
+      generalstats: false
+  - samtools:
+      generalstats: false
+  - fastp:
+      generalstats: false
+  - umitools/extract:
+      generalstats: false
+      
+  - fastqc:
+      name: "FastQC [ Raw short reads ]"
+      generalstats: false
+      info: "This section of the report shows FastQC results for short reads before filtering / trimming."
+      path_filters:
+        - "*.short_reads.raw.fastqc.zip"
+  - fastqc:
+      anchor: "fastqc_short_reads_cleaned"
+      name: "FastQC [ Filtered / trimmed short reads ]"
+      generalstats: false
+      info: "This section of the report shows FastQC results for short reads after filtering / trimming."
+      path_filters:
+        - "*.short_reads.cleaned.fastqc.zip"
+  - fastqc:
+      anchor: "fastqc_long_reads_raw"
+      name: "FastQC [ Raw long reads ]"
+      generalstats: false
+      info: "This section of the report shows FastQC results for long reads before filtering / trimming."
+      path_filters:
+        - "*.long_reads.raw.fastqc.zip"
+  - fastqc:
+      anchor: "fastqc_long_reads_cleaned"
+      name: "FastQC [ Filtered / trimmed long reads ]"
+      generalstats: false
+      info: "This section of the report shows FastQC results for long reads after filtering / trimming."
+      path_filters:
+        - "*.long_reads.cleaned.fastqc.zip"
+         
+  - seqkit
+
+
+custom_plot_config:
+  busco:
+    cpswitch: true
+    cpswitch_c_active: true
+   
+
+section_comments:
+  general_stats: "Main quality controls at a glance"
+  busco: "BUSCO results of the final proteome and intermediate / alternative proteomes, compared to the genome"
+  samtools: "Mapping statistics for short / long reads mapped to the genome"
+    
+
+remove_sections:
+  - fastp-insert-size
+  - fastp-seq-quality
+  - fastp-seq-content-gc
+  - fastp-seq-content-n 
+
+
+sample_names_replace_regex: True
+sample_names_replace:
+  "(.*)\\.reference.proteins.busco": "\\1" 
+  "(.*)\\.other.proteins.busco": "\\1" 
+  "(.*)\\.genome.busco": "\\1" 
+
 
 custom_data:
+
   with_isoforms_mrna_gff_stats:
     parent_id: gff_stats
     parent_name: "GFF statistics"
@@ -81,13 +169,29 @@ custom_data:
     no_violin: true
     plot_type: "table"
 
-sample_names_replace_regex: True
-sample_names_replace:
-  "(.*)\\.busco": "\\1"
 
 sp:
   busco:
-    fn: "*busco.txt"
+    fn: "*.busco.txt"
+  samtools/idxstats:
+    fn: '*.idxstats'
+  samtools/flagstat:
+    fn: '*.flagstat'
+  samtools/stats:
+    fn: '*.stats'
+  hisat2:
+    fn: '*.hisat2.summary.log'
+  star:
+    fn: '*Log.final.out'
+  fastp:
+    fn: '*.fastp.json'
+  umitools/extract:
+    fn: '*.umi_extract.log'
+  fastqc/zip:
+    fn: "*.fastqc.zip"
+  seqkit/stats:
+    fn: '*.seqkit_stats.tsv'
+    
   with_isoforms_mrna_gff_stats:
     fn: "*_with_isoforms_mrna_gff_stats.csv"
   without_isoforms_mrna_gff_stats:
@@ -100,3 +204,7 @@ sp:
     fn: "*_with_isoforms_transcript_gff_stats.csv"
   without_isoforms_transcript_gff_stats:
     fn: "*_without_isoforms_transcript_gff_stats.csv"
+  func_stats_nb_holding:
+    fn: "*.agat_func_stats.n_holding.csv"
+  func_stats_nb_holded:
+    fn: "*.agat_func_stats.n_holded.csv"

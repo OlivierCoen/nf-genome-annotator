@@ -27,8 +27,8 @@ process AGAT_SPEXTRACTSEQUENCES {
             extracted_fasta: file("*.{faa,fna}")
         )
 
-    //topic:
-    //    tuple("${task.process}", 'agat', eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
+    topic:
+        tuple("${task.process}", 'agat', eval("agat_sp_extract_sequences.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:
     def args        = task.ext.args   ?: ''

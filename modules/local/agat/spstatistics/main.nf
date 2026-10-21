@@ -17,7 +17,7 @@ process AGAT_SPSTATISTICS {
         )
 
     topic:
-        tuple(id, files("*_gff_stats.csv")) >> 'agat_structural_annotation_stats_multiqc'
+        tuple(id, files("*_gff_stats.csv")) >> 'agat_stats_multiqc'
         tuple("${task.process}", 'agat', eval("agat_sp_statistics.pl -h | sed -n 's/.*(AGAT) - Version: \\(.*\\) .*/\\1/p'")) >> 'versions'
 
     script:

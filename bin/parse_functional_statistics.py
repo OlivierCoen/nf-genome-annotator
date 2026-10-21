@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 AGAT_STAT_OUTFILENAME = "table_per_feature_type.txt"
 
-NB_HOLDED_BY_FEATURE_OUTFILE_SUFFIX = "nb_holded_by_features.csv"
-ATTRIBUTE_STAT_OUTFILE_SUFFIX = "stats.csv"
+ATTRIBUTE_STAT_OUTFILE_SUFFIX = "agat_func_stats.n_holding.csv"
+NB_HOLDED_BY_FEATURE_OUTFILE_SUFFIX = "agat_func_stats.n_holded.csv"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FUNCTIONS
@@ -54,7 +54,10 @@ def parse_table(fin: TextIOWrapper) -> dict:
     # such a line is like like:
     # |                         |      Nb holded by       |    Nb three_prime_utr   |
     components = [s for s in line.strip().split(' ') if s not in ['', '|']] 
-    feature = components[-1]
+    # components is like:
+    # ['Nb', 'holded', 'by', 'Nb', 'gene']
+    # ['Nb', 'holded', 'by', 'Nb', 'transcript', 'Nb', 'gene', 'with']
+    feature = components[4]
     parsed_dict = {'feature': feature}
     # going over the second line of the header
     line = next(fin)
@@ -64,7 +67,7 @@ def parse_table(fin: TextIOWrapper) -> dict:
         line = next(fin)
         components = [s for s in line.strip().split(' ') if s not in ['', '|']] 
         attribute = components[0]
-        parsed_dict[f"nb_{attribute}_holded"] = components[1]
+        parsed_dict[attribute] = components[1]
         # the last attribute in such tables is 'dbxref'
         if attribute == "dbxref":
             # going over the last dash line
@@ -125,6 +128,37 @@ def parse_stat_file(stat_file: Path):
     return attribute_dicts, nb_holded_by_feature_dicts
 
 
+def write_attribute_dicts(attribute_dicts: list[dict], prefix: str, suffix: str):
+    found_attributes = list(set([d['attribute'] for d in attribute_dicts]))
+    for attribute in found_attributes:
+        
+        attr_dicts = [d for d in attribute_dicts if d['attribute'] == attribute]
+
+        outfile = f"{prefix}.{attribute}.{suffix}"
+        with open(outfile, 'w') as fout:
+            for i, d in enumerate(attr_dicts):
+                # writing header
+                if i == 0:
+                    header = ','.join([k for k in d.keys() if k != 'attribute'])
+                    fout.write(header + "\n")
+                line = ','.join([v for k, v in d.items() if k != 'attribute'])
+                fout.write(line + "\n")
+
+
+def write_nb_holded_attributes_dicts(nb_holded_by_feature_dicts: list[dict], prefix: str, suffix: str):
+    found_features = list(set([d['feature'] for d in nb_holded_by_feature_dicts]))
+    for feature in found_features:
+        outfile = f"{prefix}.{feature}.{suffix}"
+        with open(outfile, 'w') as fout:
+            for i, d in enumerate(nb_holded_by_feature_dicts):
+                # writing header
+                if i == 0:
+                    header = ','.join(list(d.keys()))
+                    fout.write(header + "\n")
+                line = ','.join(list(d.values()))
+                fout.write(line + "\n")
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CLASS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,21 +167,23 @@ class StatParser:
 
     folder: Path
     stat_files: dict
+    parsed_results: dict
 
     def __init__(self, folder: Path):
         self.folder = folder
         self.stat_files = self.get_stat_files()
+        self.parsed_results = {}
+
 
     def parse(self):
-        results = {}
         for level1, folder_dict in self.stat_files.items():
-            results[level1] = {}
+            self.parsed_results[level1] = {}
             for level2, file in folder_dict.items():
-                results[level1][level2] = {}
+                self.parsed_results[level1][level2] = {}
                 attribute_dicts, nb_holded_by_feature_dicts = parse_stat_file(file)
-                results[level1][level2]['attributes'] = attribute_dicts
-                results[level1][level2]['nb_holded_by_feature'] = nb_holded_by_feature_dicts
-        return results
+                self.parsed_results[level1][level2]['attributes'] = attribute_dicts
+                self.parsed_results[level1][level2]['nb_holded_by_feature'] = nb_holded_by_feature_dicts
+
 
     def get_stat_files(self) -> dict:
         # getting all subfolders like 'gene@mrna' or 'gene@transcript'
@@ -163,6 +199,19 @@ class StatParser:
         return stat_subfolders
 
 
+    def export_stats(self, prefix: str):
+        # looping through first level features (typically, 'gene')
+        for level1 in self.parsed_results:
+            # looping through second level features (typically, 'transcript' or 'mrna')
+            for level2 in self.parsed_results[level1]:
+                
+                attribute_dicts = self.parsed_results[level1][level2]['attributes']
+                write_attribute_dicts(attribute_dicts, prefix, ATTRIBUTE_STAT_OUTFILE_SUFFIX)
+                
+                nb_holded_by_feature_dicts = self.parsed_results[level1][level2]['nb_holded_by_feature']
+                write_nb_holded_attributes_dicts(nb_holded_by_feature_dicts, prefix, NB_HOLDED_BY_FEATURE_OUTFILE_SUFFIX)      
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MAIN
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -176,40 +225,13 @@ def main():
     #####################################################
 
     stat_parser = StatParser(args.result_folder)
-    results = stat_parser.parse()
-    print(results)
+    stat_parser.parse()
 
-
-    """
     #####################################################
     # WRITING PARSED STATS
     #####################################################
-    
-    found_attributes = list(set([d['attribute'] for d in attribute_dicts]))
-    for attribute in found_attributes:
-        
-        attr_dicts = [d for d in attribute_dicts if d['attribute'] == attribute]
-        attribute_stat_outfile = f"{args.prefix}.{attribute}.{ATTRIBUTE_STAT_OUTFILE_SUFFIX}"
-        
-        with open(attribute_stat_outfile, 'w') as fout:
-            for i, d in enumerate(attr_dicts):
-                # writing header
-                if i == 0:
-                    header = ','.join([k for k in d.keys() if k != 'attribute'])
-                    fout.write(header + "\n")
-                line = ','.join([v for k, v in d.items() if k != 'attribute'])
-                fout.write(line + "\n")
-                
-    nb_holded_by_feature_outfile = f"{args.prefix}.{NB_HOLDED_BY_FEATURE_OUTFILE_SUFFIX}"
-    with open(nb_holded_by_feature_outfile, 'w') as fout:
-        for i, d in enumerate(nb_holded_by_feature_dicts):
-            # writing header
-            if i == 0:
-                header = ','.join(list(d.keys()))
-                fout.write(header + "\n")
-            line = ','.join(list(d.values()))
-            fout.write(line + "\n")
-    """
+
+    stat_parser.export_stats(args.prefix)
 
     logger.info("Done")
 

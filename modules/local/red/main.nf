@@ -23,6 +23,7 @@ process RED {
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${id}"
     def is_compressed      = fasta.getExtension() == "gz"    ? true : false
+    def fasta_stem = fasta.name.replaceFirst(/\.(f(ast|s|n)?a|fa)(\.gz)?$/i, '')
     """
     # adapted from https://github.com/Gaius-Augustus/BRAKER4/blob/main/rules/preprocessing/run_red_masking.smk
     # credits: KatharinaHoff
@@ -59,7 +60,7 @@ process RED {
         exit 1
     fi
 
-    softmasked_genome=${fasta.baseName}.softmasked.fa
+    softmasked_genome=${fasta_stem}.softmasked.fa
     mv masked/genome.msk \$softmasked_genome
 
     # Count masked bases for the log

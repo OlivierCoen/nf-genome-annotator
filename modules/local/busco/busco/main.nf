@@ -1,8 +1,5 @@
 nextflow.enable.types = true
 
-// Note: merge with other processes when bug is fixed:
-// https://github.com/nextflow-io/nextflow/issues/7573 
-
 process BUSCO_BUSCO {
     
     label 'process_medium'
@@ -19,22 +16,27 @@ process BUSCO_BUSCO {
             id: String,
             fasta: Path,
             lineage: String,
-            download_path: Path
+            download_path: Path,
+            reference: Boolean?
         )
         mode: String
 
     stage:
         stageAs fasta, 'tmp_input/*'
 
-    //topic:
-    //    tuple(id, files("short_summaries/*.txt"))                                      >> 'busco_multiqc'
-    //    tuple('busco', id, file("*-busco.batch_summary.txt"))                          >> 'additional_results'
-    //    tuple('busco', id, file('*-busco.log'))                                        >> 'logs'
-    //    tuple("${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"')) >> 'versions'
+    topic:
+        tuple(id, files("short_summaries/*.busco.txt"))                                >> 'busco_multiqc'
+        tuple('busco', id, file("*-busco.batch_summary.txt"))                          >> 'additional_results'
+        tuple('busco', id, file('*-busco.log'))                                        >> 'logs'
+        tuple("${task.process}", 'busco', eval('busco --version | sed "s/^BUSCO //"')) >> 'versions'
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${id}.${mode}"
+    def reference_suffix = ''
+    if ( mode == 'proteins' ) {
+        reference_suffix = reference ? '.reference' : '.other'
+    }
+    def prefix = "${fasta.baseName}${reference_suffix}"
     def intermediate_files = [
         './*-busco/*/auto_lineage',
         './*-busco/*/**/{miniprot,hmmer,.bbtools}_output',

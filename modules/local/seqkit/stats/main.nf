@@ -16,11 +16,12 @@ process SEQKIT_STATS {
          record(id: id, stats: file("*.tsv"))
 
     topic:
+         tuple(id, files("*.tsv"))                                                     >> 'seqkit_multiqc'
          tuple( "${task.process}", 'seqkit', eval("seqkit version | sed 's/^.*v//'") ) >> 'versions'
 
     script:
     def args = task.ext.args ?: '--all'
-    def prefix = task.ext.prefix ?: "${id}.genome_stats"
+    def prefix = task.ext.prefix ?: "${id}.seqkit_stats"
     """
     seqkit stats \\
         --tabular \\

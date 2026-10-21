@@ -90,15 +90,17 @@ workflow REPORTING {
     // ------------------------------------------------------------------------------------
 
     ch_multiqc_files = channel.empty()
+                        .mix( channel.topic('seqkit_multiqc') )
                         .mix( channel.topic('fastqc_multiqc') )
+                        .mix( channel.topic('umitools_extract_multiqc') )
                         .mix( channel.topic('fastp_multiqc') )
                         .mix( channel.topic('hisat2_multiqc') )
                         .mix( channel.topic('star_multiqc') )
                         .mix( channel.topic('samtools_stat_multiqc') )
                         .mix( channel.topic('samtools_idxstat_multiqc') )
                         .mix( channel.topic('samtools_flagstat_multiqc') )
-                        .mix( channel.topic('agat_structural_annotation_stats_multiqc') )
-                        .mix( channel.topic('agat_functional_annotation_stats_multiqc').flatMap{ id, files -> files.collect{ file -> [id, file] } } )
+                        .mix( channel.topic('agat_stats_multiqc') )
+                        .mix( channel.topic('agat_functs_tats_multiqc').flatMap{ id, files -> files.collect{ file -> [id, file] } } )
                         .mix( channel.topic('busco_multiqc') )
 
     ch_multiqc_file_list = ch_multiqc_files

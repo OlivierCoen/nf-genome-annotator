@@ -22,7 +22,8 @@ process UMITOOLS_EXTRACT {
 
 
     topic:
-        tuple('umitools_extract', id, file('*.log'))                                                     >> 'logs'
+        tuple(id, files("*.umi_extract.log"))                                                            >> 'umitools_extract_multiqc'
+        tuple('umitools_extract', id, file('*.umi_extract.log'))                                         >> 'logs'
         tuple("${task.process}", 'umitools', eval("umi_tools --version | sed -n '/version:/s/.*: //p'")) >> 'versions'
 
     script:
