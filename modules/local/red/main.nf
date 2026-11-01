@@ -13,7 +13,7 @@ process RED {
         record(id: String, fasta: Path)
 
     output:
-        record(id: id, softmasked: file("${fasta.baseName}.softmasked.fa.gz"))
+        record(id: id, softmasked: file("*.softmasked.fa.gz"))
 
     topic:
         tuple('red', id, files("repeats/*.rpt", optional: true)) >> 'additional_results'
@@ -23,7 +23,7 @@ process RED {
     def args    = task.ext.args ?: ''
     def prefix  = task.ext.prefix ?: "${id}"
     def is_compressed      = fasta.getExtension() == "gz"    ? true : false
-    def fasta_stem = fasta.name.replaceFirst(/\.(f(ast|s|n)?a|fa)(\.gz)?$/i, '')
+    def fasta_stem = fasta.name.replaceFirst(/\.(f(ast|s|n)?a|fa)(\.gz)?$/, '')
     """
     # adapted from https://github.com/Gaius-Augustus/BRAKER4/blob/main/rules/preprocessing/run_red_masking.smk
     # credits: KatharinaHoff

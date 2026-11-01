@@ -27,6 +27,10 @@ process FASTQC {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix
+    // Make list of old name and new name pairs to use for renaming in the bash while loop
+    def old_new_pairs = reads.size() == 1 ? [[reads[0], "${prefix}.${reads[0].extension}"]] : reads.withIndex().collect { entry, index -> [entry, "${prefix}_${index + 1}.${entry.extension}"] }
+    def rename_to = old_new_pairs*.join(' ').join(' ')
+    def renamed_files = old_new_pairs.collect { _old_name, new_name -> new_name }.join(' ')
 
     // The total amount of allocated RAM by FastQC is equal to the number of threads defined (--threads) time the amount of RAM defined (--memory)
     // https://github.com/s-andrews/FastQC/blob/1faeea0412093224d7f6a07f777fad60a5650795/fastqc#L211-L222
@@ -36,13 +40,18 @@ process FASTQC {
         : null
     // FastQC memory value allowed range (100 - 10000)
     def fastqc_memory = memory_in_mb > 10000 ? 10000 : (memory_in_mb < 100 ? 100 : memory_in_mb)
+    def fastqc_memory_arg = fastqc_memory ? "--memory ${fastqc_memory}" : ''
     """
+    printf "%s %s\\n" ${rename_to} | while read old_name new_name; do
+        [ -f "\${new_name}" ] || ln -s \$old_name \$new_name
+    done
+        
     fastqc \\
         ${args} \\
         --threads ${task.cpus} \\
-        --memory ${fastqc_memory} \\
+        ${fastqc_memory_arg} \\
         --quiet \\
-        ${reads.join(' ')}
+        ${renamed_files}
 
     # changing name of output zip files so that they can be recognised by multiqc
     for zipfile in *_fastqc.zip
