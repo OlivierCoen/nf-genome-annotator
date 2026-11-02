@@ -80,8 +80,11 @@ workflow INFER_STRANDEDNESS {
     ch_xs_strandedness = INFER_STRAND_FROM_XS( ch_input_no_gtf )
 
     ch_input_no_gtf = ch_input_no_gtf.join(ch_xs_strandedness, by: 'read_id')
+
+    ch_strandedness = ch_input_has_gtf.mix(ch_input_no_gtf)
+                        .map { rec -> rec.subMap(['read_id', 'strandedness'])}
     
     emit:
-    ch_input_has_gtf.mix(ch_input_no_gtf)
+    ch_strandedness
 
 }
