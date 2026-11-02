@@ -56,6 +56,9 @@ process HISAT2_ALIGN {
         # find is not included in the Docker image, so use ls instead
         INDEX=\$(ls -1 hisat2/*.1.ht2 | sed 's/\\.1.ht2.*\$//')
 
+        TMPDIR=tmp
+        mkdir \$TMPDIR
+        
         hisat2 \\
             -x \$INDEX \\
             -U ${reads[0]} \\
@@ -63,6 +66,7 @@ process HISAT2_ALIGN {
             --summary-file ${prefix}.hisat2.summary.log \\
             --threads $task.cpus \\
             --dta \\
+            --temp-directory \$TMPDIR \\
             $rg \\
             $args \\
             | samtools view \\
@@ -77,6 +81,9 @@ process HISAT2_ALIGN {
         # find is not included in the Docker image, so use ls instead
         INDEX=\$(ls -1 hisat2/*.1.ht2 | sed 's/\\.1.ht2.*\$//')
 
+        TMPDIR=tmp
+        mkdir \$TMPDIR
+        
         hisat2 \\
             -x \$INDEX \\
             -1 ${reads[0]} \\
@@ -85,6 +92,7 @@ process HISAT2_ALIGN {
             --summary-file ${prefix}.hisat2.summary.log \\
             --threads $task.cpus \\
             --dta \\
+            --temp-directory \$TMPDIR \\
             $rg \\
             --no-mixed \\
             --no-discordant \\
