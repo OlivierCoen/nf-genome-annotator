@@ -141,31 +141,6 @@
                 },
                 "meta": ["training_proteins"]
             },
-            "orthodb": {
-                "type": "object",
-                "properties": {
-                    "excluded_clades": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "description": "Sub-clades to exclude.",
-                            "fa_icon": "fas fa-database",
-                            "help_text": "The list of recognised clades can be found at https://data.orthodb.org/current/download/odb_data_dump/odb12v2_levels.tab.gz"
-                        },
-                        "meta": ["orthodb_excluded_clades"]
-                    },
-                    "excluded_species": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "description": "List of species to exclude.",
-                            "fa_icon": "fas fa-database",
-                            "help_text": "A comma separated set of species names to exclude. The list of recognised species can be found at https://data.orthodb.org/v12/download/odb_data_dump/odb12v2_species.tab.gz"
-                        },
-                        "meta": ["orthodb_excluded_species"]
-                    }
-                }
-            },
             "mmseqs": {
                 "type": "object",
                 "properties": {

@@ -2,8 +2,8 @@ nextflow.enable.types = true
 
 include { SEQKIT_CONCAT                                         } from '../../../modules/local/seqkit/concat'
 include { CHECK_PROTEIN_FASTA                                   } from '../../../modules/local/check/protein_fasta'
+include { GET_ORTHODB_CLADE_PROTEINS                            } from '../../../modules/local/get_orthodb_clade_proteins'
 
-include { ORTHODB_PREPARATION                                   } from '../orthodb_preparation'
 
 
 /*
@@ -22,8 +22,6 @@ def warnNoProteinsFound(rec: Record){
 
 record Input {
     id: String
-    orthodb_excluded_clades: List<String>
-    orthodb_excluded_species: List<String>
     supplied_training_proteins: Set<Path>
 }
 
@@ -54,9 +52,8 @@ workflow TRAINING_PROTEIN_PREPARATION {
             
         if ( !skip_orthodb_download ) {
     
-            ch_prepared_orthodb = ORTHODB_PREPARATION( 
-                ch_input.map { rec -> rec.subMap(['species', 'orthodb_excluded_clades', 'orthodb_excluded_species']) }.unique(),
-                orthodb_version
+            ch_prepared_orthodb = GET_ORTHODB_CLADE_PROTEINS( 
+                ch_input.map { rec -> rec.subMap(['species', 'taxid_lineage']) }.unique()
             )
             ch_input = ch_input.join(ch_prepared_orthodb, by: 'species')
     

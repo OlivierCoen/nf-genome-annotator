@@ -34,8 +34,6 @@ record Samplesheet {
     supplied_short_read_sra_ids: List<String>
     supplied_long_read_sra_ids: List<String>
     training_proteins: Set<Path>
-    orthodb_excluded_clades: List<String>
-    orthodb_excluded_species: List<String>
     mmseqs_db: String
     tsebra_gtfs: Set<Path>
     tsebra_hintsfiles: Set<Path>

@@ -207,9 +207,6 @@ def parseSamplesheet() {
 
                     supplied_training_proteins: meta.training_proteins ?: [],
 
-                    orthodb_excluded_clades: meta.orthodb_excluded_clades ?: [],
-                    orthodb_excluded_species: meta.orthodb_excluded_species ?: [],
-
                     mmseqs_db: meta.mmseqs_db,
 
                     supplied_tsebra_gtfs: meta.tsebra_gtfs ?: [],
