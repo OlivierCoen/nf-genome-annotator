@@ -64,6 +64,7 @@ process HISAT2_ALIGN {
             -U ${reads[0]} \\
             $strandedness_arg \\
             --summary-file ${prefix}.hisat2.summary.log \\
+            --new-summary \\
             --threads $task.cpus \\
             --dta \\
             --temp-directory \$TMPDIR \\
@@ -90,6 +91,7 @@ process HISAT2_ALIGN {
             -2 ${reads[1]} \\
             $strandedness_arg \\
             --summary-file ${prefix}.hisat2.summary.log \\
+            --new-summary \\
             --threads $task.cpus \\
             --dta \\
             --temp-directory \$TMPDIR \\

@@ -45,11 +45,11 @@ module_order:
         - "*.genome.busco.txt" 
   
   - custom_content
+  - samtools:
+      generalstats: false
   - hisat2:
       generalstats: false
   - star:
-      generalstats: false
-  - samtools:
       generalstats: false
   - fastp:
       generalstats: false
