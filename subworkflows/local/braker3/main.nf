@@ -63,7 +63,7 @@ workflow BRAKER3 {
     ch_braker_input = ch_no_short_read_mappings
                         .mix( ch_not_no_merge )
                         .mix( ch_merge_me )
-
+ch_braker_input.view()
     // ----------------------------------------------------------
     // RUN BRAKER3
     // ----------------------------------------------------------
