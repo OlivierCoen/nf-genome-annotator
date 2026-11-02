@@ -5,9 +5,9 @@ process HISAT2_ALIGN {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-            'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ca/ca541d2e69c03b3cb2a10da5dc6fbe21d4548f90bbdc08d5e4f8e13f0fea9a75/data' :
-            'community.wave.seqera.io/library/hisat2_samtools:add4b555d95c067d' }"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+            ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/92/92f546b522b78597047a54609eefcf35a014de082df0e500bc2adf64d2733669/data'
+            : 'community.wave.seqera.io/library/hisat2_samtools:a0c9b8ccf8116a89'}"
 
     input:
         record(
