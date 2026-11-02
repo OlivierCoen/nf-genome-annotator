@@ -44,7 +44,7 @@ workflow BRAKER3 {
     // ----------------------------------------------------------
     // MERGE MULTIPLE SHORT READ BAM FILES INTO A SINGLE BAM WHEN NECESSARY
     // ----------------------------------------------------------
-//ch_input.view{v->"input $v"}
+ch_input.view()
     ch_has_mappings   = ch_input.filter{ rec -> rec.short_read_mappings != null }
     ch_leave_me_alone = ch_input.filter{ rec -> rec.short_read_mappings == null }
     
