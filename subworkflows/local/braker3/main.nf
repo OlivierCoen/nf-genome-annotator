@@ -44,12 +44,10 @@ workflow BRAKER3 {
     // ----------------------------------------------------------
     // MERGE MULTIPLE SHORT READ BAM FILES INTO A SINGLE BAM WHEN NECESSARY
     // ----------------------------------------------------------
-ch_input.view()
-    ch_has_mappings   = ch_input.filter{ rec -> rec.short_read_mappings != null }
-    ch_leave_me_alone = ch_input.filter{ rec -> rec.short_read_mappings == null }
-    
-    ch_merge_me       = ch_has_mappings.filter{ rec -> rec.short_read_mappings.size() > 1 }
-    ch_not_no_merge   = ch_has_mappings.filter{ rec -> rec.short_read_mappings.size() <= 1 }
+
+    ch_merge_me               = ch_input.filter{ rec -> rec.short_read_mappings.size() > 1 }
+    ch_not_no_merge           = ch_input.filter{ rec -> rec.short_read_mappings.size() == 1 }
+    ch_no_short_read_mappings = ch_input.filter{ rec -> rec.short_read_mappings.size() == 0 }
 
     ch_samtools_merge_input = ch_merge_me.map{ rec ->
         def bams = rec.short_read_mappings.collect { r -> r.bam }
@@ -59,10 +57,10 @@ ch_input.view()
 
     ch_merged = MERGE_BAMS( ch_samtools_merge_input )
 
-    ch_merge_me      = ch_merge_me.join( ch_merged, by: 'id' )
+    ch_merge_me = ch_merge_me.join( ch_merged, by: 'id' )
     ch_not_no_merge  = ch_not_no_merge.map { rec -> rec + record(bam: rec.short_read_mappings[0].bam) }
 
-    ch_braker_input = ch_leave_me_alone
+    ch_braker_input = ch_no_short_read_mappings
                         .mix( ch_not_no_merge )
                         .mix( ch_merge_me )
 
@@ -80,7 +78,7 @@ ch_input.view()
                 rec.braker_gtf != null
             }
 
-    
+
     // ----------------------------------------------------------
     // LONG READ BAMS
     // ----------------------------------------------------------
@@ -89,10 +87,9 @@ ch_input.view()
     // MERGE MULTIPLE BAM FILES INTO A SINGLE BAM WHEN NECESSARY
     // ----------------------------------------------------------
 
-    ch_has_isoseq_mappings   = ch_input.filter{ rec -> rec.long_read_mappings != null }
-    
-    ch_isoseq_merge_me       = ch_has_isoseq_mappings.filter{ rec -> rec.long_read_mappings.size() > 1 }
-    ch_isoseq_not_no_merge   = ch_has_isoseq_mappings.filter{ rec -> rec.long_read_mappings.size() <= 1 }
+    ch_isoseq_merge_me       = ch_input.filter{ rec -> rec.long_read_mappings.size() > 1 }
+    ch_isoseq_not_no_merge   = ch_input.filter{ rec -> rec.long_read_mappings.size() == 1 }
+    ch_no_long_read_mappings = ch_input.filter{ rec -> rec.long_read_mappings.size() == 0 }
 
     ch_isoseq_samtools_merge_input = ch_isoseq_merge_me.map{ rec ->
         def bams = rec.long_read_mappings.collect { r -> r.bam }
