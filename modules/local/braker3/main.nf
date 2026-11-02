@@ -16,15 +16,12 @@ process BRAKER3 {
             species: String,
             fasta: Path,
             proteins_fasta: Path?,
-            short_read_rnaseq_bam: Path?,
-            long_read_rnaseq_bam: Path?
+            bam: Path?
         )
 
     stage:
         stageAs fasta, fasta.getExtension() == "gz" ? 'genome.fa.gz' : 'genome.fa'
         stageAs proteins_fasta, proteins_fasta.getExtension() == "gz" ? 'proteins.fa.gz' : 'proteins.fa'
-        stageAs short_read_rnaseq_bam, 'short_read.rnaseq.bam'
-        stageAs long_read_rnaseq_bam, 'long_read.rnaseq.bam'
 
     output:
         record(
@@ -56,15 +53,7 @@ process BRAKER3 {
     def prot_fasta_name    = proteins_fasta ? ( prot_is_compressed ? proteins_fasta.getBaseName() : proteins_fasta.name ) : null
     def prot_arg           = proteins_fasta ? "--prot_seq=$prot_fasta_name": ""
     // BAM
-    // checking that either short read bam or isoseq bam was provided (or none), but not both
-    def bam_arg = ''
-    if ( short_read_rnaseq_bam && long_read_rnaseq_bam ) {
-        error('Both short read and isoseq BAM files cannot be provided together')
-    } else if (short_read_rnaseq_bam) {
-        bam_arg = "--bam=$short_read_rnaseq_bam"
-    } else if (long_read_rnaseq_bam) {
-        bam_arg = "--bam=$long_read_rnaseq_bam"
-    }
+    def bam_arg = bam ? "--bam=$bam": ''
     """
     if [ "${is_compressed}" == "true" ]; then
         gzip -c -d ${fasta} > ${fasta_name}
