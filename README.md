@@ -15,13 +15,16 @@
 
 **nf-core/genomeannotation** is a bioinformatics pipeline that performs end-to-end genome annotation (structural + functional) for **eukaryotic organisms**. After sequencing and assembling a genome, annotation is essential to identify gene locations and their functions. However, the annotation process can be complex, time-consuming, and challenging for less experienced users. The **nf-core/genomeannotation** pipeline aims to simplify this process, offering users a seamless and intuitive experience while ensuring high-quality annotations.
 
+<p align="center">
+    <img title="Workflow" src="docs/images/metromap/nf_genome_annotator.drawio.svg" width=100%>
+</p>
+
+
 It takes as input a samplesheet in `yaml` / `json` format, with the mandatory fields :
 
 - the sequence of the genome in `fasta` format (compressed or not)
 - a NCBI Taxon ID (or a species name recognised by **NCBI Taxonomy**)
 - a genome ID is used for naming files, particularly the final annotation output
-
-<!-- TODO nf-core: send link to usage for the whole list of accepted parameters -->
 
 
 ## Pipeline overview
