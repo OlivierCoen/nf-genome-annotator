@@ -3,6 +3,8 @@ nextflow.enable.types = true
 include { EGGNOGMAPPER_DOWNLOADDB                      } from '../../../modules/local/eggnogmapper/download_db'
 include { EGGNOGMAPPER_EMAPPER                         } from '../../../modules/local/eggnogmapper/emapper'
 
+include { INTERPROSCAN6                                } from '../../../modules/local/interproscan6'
+
 include { INTERPROSCAN5_DOWNLOADDB                     } from '../../../modules/local/interproscan5/download_db'
 include { INTERPROSCAN5_INTERPROSCAN as INTERPROSCAN5  } from '../../../modules/local/interproscan5/interproscan'
 
@@ -31,6 +33,10 @@ workflow FUNCTIONAL_ANNOTATION {
 
     main:
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // EGGNOG MAPPER
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     if ( "eggnogmapper" in functional_annotators ) {
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,38 +60,61 @@ workflow FUNCTIONAL_ANNOTATION {
         // NOTE: the 'gff' key now holds the gff decorated by eggnog mapper
     }
 
-    if ( "interproscan5" in functional_annotators ) {
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // INTERPROSCAN
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    if ( "interproscan6" in functional_annotators || "interproscan5" in functional_annotators ) {
+    
+        if ( "interproscan6" in functional_annotators ) {
+    
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // RUNNING INTERPROSCAN 6
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // IF INTERPROSCAN DB WAS NOT PROVIDED, DOWNLOADING IT
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            ch_interproscan_out = INTERPROSCAN6( 
+                ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome) }
+            )  
         
-        if ( interproscan5_db ) {
-            interproscan_db = channel.fromPath( interproscan5_db, checkExists: true )
-        } else {
-            interproscan_db = INTERPROSCAN5_DOWNLOADDB( channel.value( interproscan5_db_url ) )
+    
+        } else { // interproscan5
+    
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // IF INTERPROSCAN DB WAS NOT PROVIDED, DOWNLOADING IT
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            
+            if ( interproscan5_db ) {
+                interproscan_db = channel.fromPath( interproscan5_db, checkExists: true )
+            } else {
+                interproscan_db = INTERPROSCAN5_DOWNLOADDB( channel.value( interproscan5_db_url ) )
+            }
+    
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // RUN INTERPROSCAN 5
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+            ch_interproscan_out = INTERPROSCAN5( 
+                ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome) }, 
+                interproscan_db
+            )  
+
         }
 
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // RUNNING INTERPROSCAN 5
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if ( functional_annotators.size() > 1 ) {
 
-        ch_interproscan_out = INTERPROSCAN5( 
-            ch_input.map { rec -> record(id: rec.id, fasta: rec.proteome) }, 
-            interproscan_db
-        )  
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // COMPLEMENT EXISTING GFF WITH OUTPUT FROM INTERPROSCAN
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+            ch_input = ch_input.join( 
+                ch_interproscan_out.map { rec -> record(id: rec.id, interproscan_gff: rec.gff) }, 
+                by: 'id' 
+            )
+            
+            ch_complemented = COMPLEMENT_GFF_WITH_INTERPROSCAN_GFF( ch_input )
+            ch_input = ch_input.join( ch_complemented, by: 'id' )
 
-        ch_input = ch_input.join( 
-            ch_interproscan_out.map { rec -> record(id: rec.id, interproscan_gff: rec.gff) }, 
-            by: 'id' 
-        )
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // COMPLEMENT EXISTING GFF WITH OUTPUT FROM INTERPROSCAN
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        ch_complemented = COMPLEMENT_GFF_WITH_INTERPROSCAN_GFF( ch_input )
-        ch_input = ch_input.join( ch_complemented, by: 'id' )
+        }
     }
 
 

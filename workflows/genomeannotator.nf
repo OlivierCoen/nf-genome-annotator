@@ -102,7 +102,7 @@ workflow GENOMEANNOTATOR {
     // PREPARE PROTEIN TRAINING SET (ONLY FOR SPECIFIC ANNOTATORS)
     // ----------------------------------------------------------
 
-    if ( params.structural_annotator in structural_annotator_needing_proteins || params.force_prepare_proteins ){
+    if ( (!params.skip_structural_annotation && params.structural_annotator in structural_annotator_needing_proteins) || params.force_prepare_proteins ){
 
         ch_proteins = TRAINING_PROTEIN_PREPARATION(
             ch_main,

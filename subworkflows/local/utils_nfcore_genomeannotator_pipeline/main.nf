@@ -99,6 +99,8 @@ workflow PIPELINE_INITIALISATION {
         nextflow_cli_args
     )
 
+    validateInputParameters(params)
+
     //
     // Create channel from input file provided through params.input
     //
@@ -106,7 +108,7 @@ workflow PIPELINE_INITIALISATION {
     ch_samplesheet = parseSamplesheet()
 
     // validate samplesheet
-    //validateSamplesheet( ch_samplesheet )
+    validateSamplesheet( ch_samplesheet )
 
     emit:
     ch_samplesheet
@@ -165,6 +167,15 @@ workflow PIPELINE_COMPLETION {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+def validateInputParameters(params) {
+
+    // checking that a species has been provided
+    if ( "interproscan6" in params.functional_annotators && "interproscan5" in params.functional_annotators ) {
+        error("The options 'interproscan6' and 'interproscan5' are mutually exclusive. Choose either one. 'interproscan6' is preferred, except in cases where bugs are encountered with 'interproscan5'.")
+    }
+
+}
+
 // turning the map of fastq files into a list (all modules work with lists)
 def organiseShortReadFastqFiles( fastqs_list: List<Map<String, Path>>) {
     return fastqs_list.withIndex().collect { fastq_map, index -> 
@@ -219,7 +230,7 @@ def validateSamplesheet( ch_samplesheet ) {
     // if structural annotation is skipped, a gff must be provided for each sample in the samplesheet
     if (params.skip_structural_annotation) {
         ch_samplesheet.map { rec -> 
-            if (!rec.gff) {
+            if (!rec.reference_gff) {
                 error("GFF not found for sample ${rec.id}. When skipping structural annotation, a GFF must be provided for each sample in the samplesheet")
             }
         }
@@ -303,9 +314,77 @@ def methodsDescriptionText(mqc_methods_yaml) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def rename(rec: Record, renamingMap: Map<String, String>) {
-    def unchanged = rec.subMap(rec.keySet() - renamingMap.keySet())
-    def changed = record()
-    renamingMap.each { key, value -> changed = changed + record(value)}
-    return unchanged + changed
+def removeKeyValueArgs(Map opts){
+    // Clean a string of space-separated arguments (or a list) by dropping
+    // excluded flags, their values, and their key=value forms.
+    def args_list = opts.args instanceof List ? opts.args : opts.args.tokenize()
+    def excluded_args = opts.excluded_args as List
+
+    args_list.withIndex().findResults { arg, i ->
+        // key=value form (--input=/path)
+        if (excluded_args.any { excluded_arg -> arg.startsWith(excluded_arg + '=') }) {
+            log.warn "Ignoring argument '$arg' from the command line"
+            return null
+        }
+        // excluded flag key (--input)
+        if (arg in excluded_args) {
+            log.warn "Ignoring argument '$arg' from the command line"
+            return null
+        }
+        // value following an excluded flag (--input /path)
+        if (i > 0 && args_list[i - 1] in excluded_args) {
+            log.warn "Ignoring argument value '$arg' from the command line"
+            return null
+        }
+        return arg
+    }
 }
+
+def sha256(Map map) {
+    // Normalize values to scalars: nested maps are hashed recursively,
+    // everything else is stringified. This keeps the hash deterministic
+    // and prevents JsonOutput from recursing into complex object graphs.
+    def canonical = map
+        .sort { a, b -> a.key <=> b.key }
+        .collectEntries { k, v ->
+            def value = (v instanceof Path) ? v.toUriString() : v?.toString()
+            [k, value]
+        }
+    def json = groovy.json.JsonOutput.toJson(canonical)
+    def md = java.security.MessageDigest.getInstance('MD5')
+    return md.digest(json.getBytes('UTF-8'))
+            .collect { String.format('%02x', it) }
+            .join()
+}
+
+def buildCacheDirURI(process_name: String, args: Map){ 
+    def workdir_name = "${process_name.tokenize(':')[-1].toLowerCase()}/${sha256(args)}"
+    return workflow.workDir.resolve(workdir_name).toUriString()
+}
+
+def getWorkflowConfigPaths(configKey: String){
+    // configKey is either '-c' or '-C'
+    def tokens = workflow.commandLine.tokenize(' ')
+    def config_paths_list = tokens.withIndex().findResults { token, i ->
+        if (token == configKey && i + 1 < tokens.size()) {
+            return tokens[i + 1]
+        }
+        return null   // findResults drops it
+    }
+    
+    if (config_paths_list.size() == 0) {
+        return null
+    } else {
+        def config_abs_paths = config_paths_list.collect { config_paths -> 
+            config_paths.tokenize(',').collect{ config_path ->
+                workflow.launchDir.resolve(config_path).toUriString() 
+            }
+        }.flatten()
+        return config_abs_paths.join(',') // comma separated config files
+    }
+}
+
+def workflowHasResumeFlag() {
+    return workflow.commandLine.tokenize(' ').contains('-resume')
+}
+
