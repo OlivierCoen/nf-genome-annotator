@@ -179,7 +179,7 @@ workflow GENOMEANNOTATOR {
     if ( !params.skip_functional_annotation ) {
 
         // storing the final structural annotation
-        ch_main = ch_main.map { rec -> rec + record(final_structural_annotation: rec.gff) }
+        ch_main = ch_main.map { rec -> rec + record(structural_annotation: rec.gff) }
 
         ch_functional_annotation = FUNCTIONAL_ANNOTATION (
             ch_main.filter { rec -> rec.proteome != null },
@@ -221,6 +221,9 @@ workflow GENOMEANNOTATOR {
     )
 
     ch_main = ch_main.join( ch_reporting, by: 'id' )
+
+    // setting the final gff as the final annotation
+    ch_main = ch_main.map { rec -> rec + record(final_annotation: rec.gff) }
 
     emit:
     results            = ch_main
