@@ -50,8 +50,8 @@ workflow BRAKER3 {
     ch_no_short_read_mappings = ch_input.filter{ rec -> rec.short_read_mappings.size() == 0 }
 
     ch_samtools_merge_input = ch_merge_me.map{ rec ->
-        def bams = rec.short_read_mappings.collect { r -> r.bam }
-        def bais = rec.short_read_mappings.collect { r -> r.bai }
+        def bams = rec.short_read_mappings.collect { r -> r.bam }.toSorted()
+        def bais = rec.short_read_mappings.collect { r -> r.bai }.toSorted()
         record(id: rec.id, bams: bams, bais: bais)
     }
 
@@ -91,8 +91,8 @@ workflow BRAKER3 {
     ch_no_long_read_mappings = ch_input.filter{ rec -> rec.long_read_mappings.size() == 0 }
 
     ch_isoseq_samtools_merge_input = ch_isoseq_merge_me.map{ rec ->
-        def bams = rec.long_read_mappings.collect { r -> r.bam }
-        def bais = rec.long_read_mappings.collect { r -> r.bai }
+        def bams = rec.long_read_mappings.collect { r -> r.bam }.toSorted()
+        def bais = rec.long_read_mappings.collect { r -> r.bai }.toSorted()
         record(id: rec.id, bams: bams, bais: bais)
     }
 
